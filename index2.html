@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>가공 생산일보 Local Rev.1</title>
+<title>가공 생산일보 Local Rev.1.1</title>
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{color-scheme:light}
@@ -68,21 +68,53 @@
   .history-num{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}.history-num div{text-align:center;background:#f8fafc;border-radius:7px;padding:6px}.history-num b{display:block;font-family:ui-monospace,monospace;font-size:13px}.history-num span{font-size:9px;color:#64748b}
   dialog{border:0;border-radius:14px;padding:0;max-width:430px;width:calc(100% - 28px);box-shadow:0 14px 40px rgba(15,23,42,.28)}dialog::backdrop{background:rgba(15,23,42,.55)}
   .dlg{padding:15px}.dlg h2{font-size:15px;margin:0 0 10px;color:#1a3a6c}.dlg-actions{display:flex;gap:8px;margin-top:12px}.dlg-actions .btn{flex:1}
+  /* 좌측 햄버거 드로어 - ESP32 생산일보 스타일 */
+  .top{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
+  .ham-btn{position:relative;width:42px;height:42px;flex-shrink:0;border:1.5px solid #cbd5e1;border-radius:10px;background:#fff;font-size:20px;color:#334155;cursor:pointer}
+  .ham-btn:active{transform:scale(.94);background:#eff6ff}
+  .top h1{font-size:16px;margin:0;color:#1a3a6c;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cur-menu{color:#64748b;font-size:13px;font-weight:700}
+  .rev-tag{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:6px;background:#e2e8f0;color:#475569;font-size:9px;font-weight:800;vertical-align:2px;letter-spacing:.2px}
+  .drawer-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:300}
+  .drawer-bg.show{display:block}
+  .drawer{position:fixed;top:0;left:0;bottom:0;width:264px;max-width:82vw;background:#fff;z-index:301;box-shadow:4px 0 20px rgba(15,23,42,.2);transform:translateX(-105%);transition:transform .22s ease;display:flex;flex-direction:column;padding:12px 10px;overflow-y:auto}
+  .drawer.open{transform:translateX(0)}
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:800;color:#1a3a6c;padding:4px 6px 12px;border-bottom:1px solid #e2e8f0;margin-bottom:8px}
+  .drawer-head small{display:block;color:#94a3b8;font-weight:600;font-size:10px;margin-top:2px}
+  .drawer-x{width:30px;height:30px;border-radius:50%;border:none;background:#f1f5f9;color:#475569;font-size:13px;font-weight:800;cursor:pointer}
+  .drawer-sep{font-size:10px;font-weight:800;color:#94a3b8;padding:12px 8px 4px;letter-spacing:.5px}
+  .drawer-foot{margin-top:auto;padding:12px 8px 4px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;line-height:1.5}
+  .tab-btn{width:100%;padding:12px;border:none;background:transparent;border-radius:10px;font-size:14px;font-weight:800;color:#475569;cursor:pointer;display:flex;align-items:center;gap:10px;position:relative;text-align:left;margin-bottom:2px}
+  .tab-btn .tab-ico{font-size:18px;width:24px;text-align:center}
+  .tab-btn:active{background:#f1f5f9}
+  .tab-btn.active{background:#1d4ed8;color:#fff}
+  .drawer-status{display:flex;align-items:center;gap:6px;margin:8px 6px 2px;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;font-size:11px;color:#64748b}
+  .drawer-status .dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
   @media(max-width:420px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.tabs{grid-template-columns:repeat(4,1fr)}.tab{font-size:10px}.circle{width:96px;height:96px;font-size:17px}.metricgrid{grid-template-columns:repeat(3,1fr)}.summary{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <div class="top">
-  <h1>⚙️ 가공 생산일보 <span style="font-size:10px;color:#94a3b8">Local Rev.1</span></h1>
+  <button class="ham-btn" type="button" onclick="openDrawer()" aria-label="메뉴 열기">☰</button>
+  <h1>⚙️ 가공 생산일보 <span class="cur-menu" id="curMenuName">작업입력</span><span class="rev-tag">Local Rev.1.1</span></h1>
   <span class="badge wait" id="topStatus">로컬 저장</span>
 </div>
 
-<div class="tabs">
-  <button class="tab active" data-tab="work" onclick="switchTab('work',this)">▶ 작업입력</button>
-  <button class="tab" data-tab="report" onclick="switchTab('report',this)">📝 일보/이력</button>
-  <button class="tab" data-tab="master" onclick="switchTab('master',this)">🧰 기준정보</button>
-  <button class="tab" data-tab="setting" onclick="switchTab('setting',this)">⚙ 설정</button>
-</div>
+<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
+<nav class="drawer" id="drawer" aria-label="가공 생산일보 메뉴">
+  <div class="drawer-head">
+    <div>⚙️ 가공 생산일보<small>LOCAL DAILY REPORT</small></div>
+    <button class="drawer-x" type="button" onclick="closeDrawer()" aria-label="메뉴 닫기">✕</button>
+  </div>
+  <div class="drawer-status"><span class="dot"></span><span>이 기기에 자동 저장됩니다.</span></div>
+  <div class="drawer-sep">작업</div>
+  <button class="tab-btn active" data-tab="work" onclick="switchTab('work',this)"><span class="tab-ico">▶</span><span>작업입력</span></button>
+  <button class="tab-btn" data-tab="report" onclick="switchTab('report',this)"><span class="tab-ico">📝</span><span>일보 / 이력</span></button>
+  <div class="drawer-sep">관리</div>
+  <button class="tab-btn" data-tab="master" onclick="switchTab('master',this)"><span class="tab-ico">🧰</span><span>기준정보</span></button>
+  <button class="tab-btn" data-tab="setting" onclick="switchTab('setting',this)"><span class="tab-ico">⚙</span><span>설정 / 백업</span></button>
+  <div class="drawer-foot">브라우저 LocalStorage 저장<br>가공 생산일보 Local Rev.1.1</div>
+</nav>
 
 <section class="panel active" id="work">
   <div class="card run">
@@ -236,7 +268,10 @@ function nowIso(){return new Date().toISOString()}
 function fmtClock(ms){ms=Math.max(0,Math.floor(ms||0));const sec=Math.floor(ms/1000),h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return [h,m,s].map(v=>String(v).padStart(2,'0')).join(':')}
 function fmtTime(iso){if(!iso)return '-';return new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso))}
 function flashSaved(){const el=$('topStatus');el.textContent='✓ 로컬 저장';el.className='badge';clearTimeout(flashSaved.t);flashSaved.t=setTimeout(()=>{el.textContent=active?(active.status==='stopped'?'정지중':'가동중'):'로컬 저장';el.className='badge '+(active?(active.status==='stopped'?'stop':''):'wait')},900)}
-function switchTab(id,btn){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');btn.classList.add('active');if(id==='report')renderHistory();if(id==='master')renderMaster()}
+function openDrawer(){$('drawerBg').classList.add('show');$('drawer').classList.add('open');document.body.style.overflow='hidden'}
+function closeDrawer(){$('drawerBg').classList.remove('show');$('drawer').classList.remove('open');document.body.style.overflow=''}
+function switchTab(id,btn){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');if(btn)btn.classList.add('active');const names={work:'작업입력',report:'일보/이력',master:'기준정보',setting:'설정'};$('curMenuName').textContent=names[id]||'';closeDrawer();window.scrollTo({top:0,behavior:'smooth'});if(id==='report')renderHistory();if(id==='master')renderMaster()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
 
 const entryIds=['workDate','shift','worker','machine','orderNo','itemNo','itemName','process','planQty','stdCt','materialLot','drawingRev','goodQty','badQty','remark'];
 function getEntry(){const o={};entryIds.forEach(id=>o[id]=$(id).value);return o}
