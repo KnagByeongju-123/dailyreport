@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.21</title>
+<title>ESP32 생산일보 Rev.7.22</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -662,7 +662,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">설비가동</span><span class="rev-tag">Rev.7.21</span></h1>
+  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">설비가동</span><span class="rev-tag">Rev.7.22</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -681,7 +681,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.21</small></span>
+    <span>📡 ESP32 생산일보 <small>Rev.7.22</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <button class="tab-btn active" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="tab-ico">⚙️</span>작업입력<span class="tab-dot"></span></button>
@@ -1287,12 +1287,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 <script>
 /* ============================================================
-   ESP32 생산일보 Rev.7.11 — 비상용 독립 시스템
-   마스터 DB : jgvikmakenpllwxwdugk (pd_machine / pd_mold / pd_work_log)
-   카운팅 DB : 설정 탭에서 변경 가능 (기본 omngtyewdaqpphnzeate.shot_count)
+   ESP32 생산일보 Rev.7.22 — 비상용 독립 시스템
+   통합 DB : pllwltojbofjaftcemvn
+     - 마스터 : pd_machine / pd_mold / pd_work_log / pd_lot
+     - 카운팅 : shot_count (설정 탭에서 변경 가능)
+     - 소재   : inspection_certs / iqc_inspections
    ============================================================ */
-const PD_URL = 'https://jgvikmakenpllwxwdugk.supabase.co';
-const PD_KEY = 'sb_publishable_sKp-6nz2PQ9LxQ5pF-nYkg_YwoEJN6S';
+const PD_URL = 'https://pllwltojbofjaftcemvn.supabase.co';
+const PD_KEY = 'sb_publishable_9dYJzdz472b888EcqdBBaA_Ncwk0yvT';
 const T_MACHINE = 'pd_machine';
 const T_MOLD    = 'pd_mold';
 const T_LOG     = 'pd_work_log';
@@ -1302,12 +1304,12 @@ const PD_H = { 'apikey': PD_KEY, 'Authorization': 'Bearer ' + PD_KEY, 'Content-T
 
 // 카운팅 소스 (설정 탭에서 변경)
 // Rev.7.5: Supabase 부하 절감을 위해 기본 300초 / 최소 60초로 제한합니다.
-const LS_CNT_CFG = 'pdCountCfg_v1';
+const LS_CNT_CFG = 'pdCountCfg_v2';
 const CNT_DEFAULT_POLL_SEC = 300;
 const CNT_MIN_POLL_SEC = 60;
 let cntCfg = {
-  url: 'https://omngtyewdaqpphnzeate.supabase.co',
-  key: 'sb_publishable_9j2YkkL-7ul1TrhH-NjVdQ_vWDG2-1D',
+  url: PD_URL,
+  key: PD_KEY,
   table: 'shot_count',
   suffix: '',
   pollSec: CNT_DEFAULT_POLL_SEC
@@ -1461,8 +1463,8 @@ function switchTab(id, btn) {
 
 /* ===== 🧾 소재 업무 흐름 / 발주관리 (Rev.7.21) ===== */
 const LS_MAT_ORDERS = 'pdMaterialOrders_v1';
-const MATERIAL_SB_URL = 'https://omngtyewdaqpphnzeate.supabase.co';
-const MATERIAL_SB_KEY = 'sb_publishable_9j2YkkL-7ul1TrhH-NjVdQ_vWDG2-1D';
+const MATERIAL_SB_URL = PD_URL;
+const MATERIAL_SB_KEY = PD_KEY;
 let materialOrders = loadMaterialOrders();
 let materialFlowCache = { certs: [], insps: [], at: 0 };
 
