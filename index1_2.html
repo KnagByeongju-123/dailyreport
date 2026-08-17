@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.25</title>
+<title>ESP32 생산일보 Rev.7.26</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -594,35 +594,28 @@
   .mold-pick button span { display: block; font-size: 11px; color: #64748b; margin-top: 3px; }
 
 
-  /* ===== 소재 업무 흐름 상단탭 (Rev.7.21) ===== */
-  .mat-flow-bar {
-    position: sticky; top: 0; z-index: 120;
-    display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 6px;
-    margin: -2px 0 12px; padding: 7px;
-    background: rgba(241,245,249,.96); border: 1px solid #cbd5e1; border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(15,23,42,.08); backdrop-filter: blur(8px);
+  /* ===== 드로어 : 소재 업무 절차 스텝 (Rev.7.26) ===== */
+  .drawer-steps { position: relative; padding-left: 6px; }
+  .drawer-steps::before {
+    content: ''; position: absolute; left: 21px; top: 14px; bottom: 14px;
+    width: 2px; background: #e2e8f0; border-radius: 1px;
   }
-  .flow-tab {
-    min-width: 0; padding: 9px 8px; border: 1.5px solid #cbd5e1; border-radius: 9px;
-    background: #fff; color: #475569; font-family: inherit; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    font-size: 12px; font-weight: 800; white-space: nowrap;
+  .tab-btn.step { position: relative; padding-left: 6px; }
+  .tab-btn.step .step-no {
+    width: 21px; height: 21px; border-radius: 50%; flex-shrink: 0; z-index: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #fff; border: 2px solid #cbd5e1; color: #64748b; font-size: 10px; font-weight: 800;
   }
-  .flow-tab .step-no {
-    width: 19px; height: 19px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-    background: #e2e8f0; color: #475569; font-size: 10px; flex-shrink: 0;
+  .tab-btn.step .flow-badge {
+    margin-left: auto; min-width: 20px; text-align: center;
+    padding: 1px 6px; border-radius: 9px; background: #f1f5f9; color: #64748b;
+    font-size: 10px; font-weight: 800;
   }
-  .flow-tab .flow-badge {
-    min-width: 18px; padding: 1px 5px; border-radius: 9px; background: #f1f5f9; color: #64748b;
-    font-size: 9px; font-weight: 800;
-  }
-  .flow-tab.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; box-shadow: 0 2px 7px rgba(29,78,216,.22); }
-  .flow-tab.active .step-no { background: rgba(255,255,255,.2); color: #fff; }
-  .flow-tab.active .flow-badge { background: rgba(255,255,255,.2); color: #fff; }
-  .flow-tab.dispatch { border-color:#93c5fd; }
-  .flow-tab.iqc { border-color:#86efac; }
-  .flow-tab.report { border-color:#c4b5fd; }
-  .flow-tab:active { transform: scale(.98); }
+  .tab-btn.step .step-sub { font-size: 9px; color: #94a3b8; font-weight: 700; margin-left: 2px; }
+  .tab-btn.step.active { background: #1d4ed8; color: #fff; }
+  .tab-btn.step.active .step-no { background: #fff; border-color: #fff; color: #1d4ed8; }
+  .tab-btn.step.active .flow-badge { background: rgba(255,255,255,.22); color: #fff; }
+  .tab-btn.step.active .step-sub { color: #bfdbfe; }
 
   .flow-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
   .flow-kpi { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px; text-align:center; }
@@ -650,8 +643,6 @@
   .btn-link-mini { padding:5px 7px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:10px; font-weight:800; cursor:pointer; font-family:inherit; }
 
   @media (max-width:700px) {
-    .mat-flow-bar { display:flex; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:9px; padding:6px; gap:5px; }
-    .flow-tab { flex:0 0 auto; min-width:112px; padding:8px 7px; font-size:11px; }
     .flow-kpis { grid-template-columns:repeat(2,1fr); }
     .embed-frame { height:calc(100vh - 140px); min-height:560px; }
   }
@@ -662,34 +653,29 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">설비가동</span><span class="rev-tag">Rev.7.25</span></h1>
+  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">설비가동</span><span class="rev-tag">Rev.7.26</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
   </div>
 </div>
 
-<!-- ===== 소재 업무 흐름 상단탭 ===== -->
-<div class="mat-flow-bar" id="matFlowBar">
-  <button class="flow-tab" data-flow-target="t-mat-order" onclick="switchWorkTab('t-mat-order')"><span class="step-no">1</span>🧾 소재발주 <span class="flow-badge" id="flowOrderBadge">0</span></button>
-  <button class="flow-tab dispatch" data-flow-target="t-mat-dispatch" onclick="switchWorkTab('t-mat-dispatch')"><span class="step-no">2</span>📤 소재발송 <span class="flow-badge" id="flowDispatchBadge">-</span></button>
-  <button class="flow-tab iqc" data-flow-target="t-iqc" onclick="switchWorkTab('t-iqc')"><span class="step-no">3</span>🔎 수입검사 <span class="flow-badge" id="flowIqcBadge">-</span></button>
-  <button class="flow-tab report" data-flow-target="t-report" onclick="switchWorkTab('t-report')"><span class="step-no">4</span>📝 생산일보</button>
-</div>
-
 <!-- 좌측 드로어 메뉴 -->
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.25</small></span>
+    <span>📡 ESP32 생산일보 <small>Rev.7.26</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <button class="tab-btn active" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="tab-ico">⚙️</span>작업입력<span class="tab-dot"></span></button>
-  <button class="tab-btn" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="tab-ico">📝</span>생산일보</button>
+  <div class="drawer-sep">소재 업무 절차</div>
+  <div class="drawer-steps">
+    <button class="tab-btn step" data-tab="t-mat-order" onclick="switchTab('t-mat-order', this)"><span class="step-no">1</span><span class="tab-ico">🧾</span>소재발주<span class="flow-badge" id="flowOrderBadge">0</span></button>
+    <button class="tab-btn step" data-tab="t-mat-dispatch" onclick="switchTab('t-mat-dispatch', this)"><span class="step-no">2</span><span class="tab-ico">📤</span>소재발송<span class="step-sub">업체등록</span><span class="flow-badge" id="flowDispatchBadge">-</span></button>
+    <button class="tab-btn step" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="step-no">3</span><span class="tab-ico">🔎</span>수입검사<span class="flow-badge" id="flowIqcBadge">-</span></button>
+    <button class="tab-btn step last" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">4</span><span class="tab-ico">📝</span>생산일보</button>
+  </div>
   <div class="drawer-sep">소재관리</div>
-  <button class="tab-btn" data-tab="t-mat-order" onclick="switchTab('t-mat-order', this)"><span class="tab-ico">🧾</span>소재발주</button>
-  <button class="tab-btn" data-tab="t-mat-dispatch" onclick="switchTab('t-mat-dispatch', this)"><span class="tab-ico">📤</span>소재발송 <span style="font-size:9px;color:#94a3b8;margin-left:auto">업체등록</span></button>
-  <button class="tab-btn" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="tab-ico">🔎</span>수입검사</button>
   <button class="tab-btn" data-tab="t-material" onclick="switchTab('t-material', this)"><span class="tab-ico">📦</span>생산용 소재 LOT</button>
   <div class="drawer-sep">마스터</div>
   <button class="tab-btn" data-tab="t-master" onclick="switchTab('t-master', this)"><span class="tab-ico">🏭</span>호기설정</button>
@@ -1456,9 +1442,6 @@ function switchTab(id, btn) {
   document.querySelectorAll('.drawer .tab-btn').forEach(function(b) { b.classList.remove('active'); });
   const drawerBtn = document.querySelector('.drawer .tab-btn[data-tab="' + id + '"]');
   if (drawerBtn) drawerBtn.classList.add('active');
-  document.querySelectorAll('.flow-tab').forEach(function(b) {
-    b.classList.toggle('active', b.getAttribute('data-flow-target') === id);
-  });
   const cm = document.getElementById('curMenuName');
   if (cm) cm.textContent = MENU_NAMES[id] || '';
   closeDrawer();
