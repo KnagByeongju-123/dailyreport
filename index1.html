@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.19</title>
+<title>ESP32 생산일보 Rev.7.20</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -609,10 +609,10 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.19</small></span>
+    <span>📡 ESP32 생산일보 <small>Rev.7.20</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
-  <button class="tab-btn active" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="tab-ico">⚙️</span>설비가동<span class="tab-dot"></span></button>
+  <button class="tab-btn active" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="tab-ico">⚙️</span>작업입력<span class="tab-dot"></span></button>
   <button class="tab-btn" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="tab-ico">📝</span>생산일보</button>
   <button class="tab-btn" data-tab="t-material" onclick="switchTab('t-material', this)"><span class="tab-ico">📦</span>소재입고</button>
   <div class="drawer-sep">마스터</div>
@@ -1250,7 +1250,7 @@ function setSyncStatus(level, text) {
   b.className = 'sync-badge ' + level;
   b.textContent = text;
 }
-const MENU_NAMES = { 't-prod': '설비가동', 't-report': '생산일보', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
+const MENU_NAMES = { 't-prod': '작업입력', 't-report': '생산일보', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerBg').classList.add('show');
