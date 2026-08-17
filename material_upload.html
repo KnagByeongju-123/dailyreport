@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>소재입고 등록 (Rev5.7)</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Noto Sans KR',sans-serif;background:#f0f2f5;color:#212121;min-height:100vh}
+    .hdr{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:14px 16px;text-align:center}
+    .hdr h1{font-size:17px;font-weight:700}.hdr p{font-size:10px;opacity:.7;margin-top:2px}
+    .wrap{max-width:540px;margin:0 auto;padding:12px 12px 80px}
+    .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    .card-tit{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .fg{margin-bottom:12px}
+    .fg label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:4px}
+    .fg select,.fg input{width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
+    .btn{padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
+    .btn:active{transform:scale(.97)}
+    .btn-green{background:linear-gradient(135deg,#00c853,#00e676);color:#000}
+    .btn-blue{background:linear-gradient(135deg,#1565c0,#42a5f5);color:#fff}
+    .btn-gray{background:#f5f5f5;color:#555;border:1px solid #ddd}
+    .btn-sm{padding:8px 14px;font-size:12px;width:auto;border-radius:8px}
+    .btn-row{display:flex;gap:8px;margin-bottom:12px}
+    .step{display:flex;gap:0;margin-bottom:14px;border-radius:10px;overflow:hidden;border:2px solid #e0e0e0}
+    .step-item{flex:1;padding:10px 6px;text-align:center;font-size:12px;font-weight:700;color:#aaa;background:#f5f5f5;transition:all .2s}
+    .step-item.active{background:#1a237e;color:#fff}
+    .step-item.done{background:#e8f5e9;color:#2e7d32}
+    .info-box{padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.7;margin-bottom:10px}
+    .info-box.blue{background:#e3f2fd;border:1px solid #bbdefb;color:#1565c0}
+    .info-box.green{background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32}
+    .info-box.orange{background:#fff3e0;border:1px solid #ffe0b2;color:#e65100}
+    .preview-tbl{width:100%;border-collapse:collapse;font-size:10px;margin-top:8px}
+    .preview-tbl th{padding:5px 6px;background:#e8eaf6;border:1px solid #c5cae9;white-space:nowrap;color:#1a237e;font-weight:700}
+    .preview-tbl td{padding:4px 6px;border:1px solid #eee;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:18px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
+    .back-link{display:inline-block;padding:10px 0;font-size:12px;color:#888;text-decoration:none}
+    .back-link:hover{color:#1a237e}
+    .tabs{display:flex;background:#fff;border-bottom:2px solid #e0e0e0;position:sticky;top:0;z-index:50}
+    .tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#888}
+    .tab.on{color:#1a237e;border-bottom-color:#1a237e}
+    .main-pnl{display:none}.main-pnl.on{display:block}
+    .file-drop{border:2.5px dashed #c5cae9;border-radius:12px;padding:30px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
+    .file-drop:hover,.file-drop.dragover{border-color:#1a237e;background:#e8eaf6}
+    .file-drop .fd-icon{font-size:36px;margin-bottom:6px}
+    .file-drop .fd-text{font-size:13px;font-weight:600;color:#555}
+    .file-drop .fd-sub{font-size:11px;color:#999;margin-top:4px}
+    .stat-row{display:flex;gap:8px;margin-bottom:8px}
+    .stat-card{flex:1;padding:10px;border-radius:8px;text-align:center}
+    .stat-card .sv{font-size:20px;font-weight:700}.stat-card .sl{font-size:10px;color:#888;margin-top:2px}
+
+    /* ===== 검사성적서 모달 - 정보 박스 그리드 (모바일 자동 1컬럼) ===== */
+    .cert-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}
+    .cert-info-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+    .cert-info-row .ci-label{color:#64748b;font-weight:600;min-width:62px;white-space:nowrap;flex-shrink:0}
+    .cert-info-row .ci-value{font-weight:700;color:#0f172a;word-break:break-all;overflow-wrap:anywhere;flex:1;min-width:0}
+
+    /* ===== 검사성적서 측정값 표 - 가로 스크롤 wrapper ===== */
+    .cert-table-wrap{
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      margin-bottom:18px;
+    }
+    .cert-table-wrap #certMeasTable{
+      min-width:520px;
+      margin-bottom:0 !important;
+    }
+
+    /* ===== 모바일(≤640px) 분기 ===== */
+    @media (max-width:640px){
+      .cert-info-grid{grid-template-columns:1fr;gap:6px}
+      .cert-info-row{padding:4px 0;border-bottom:1px solid #e0e7ff}
+      .cert-info-row:last-child{border-bottom:none}
+      .cert-info-row .ci-label{min-width:80px;font-size:13px}
+      .cert-info-row .ci-value{font-size:14px}
+      /* 모달 본문 패딩 축소 */
+      #certModal > div > div{padding:14px 16px !important}
+      /* 측정값 표 - 모바일에서 더 컴팩트 (격자 유지) */
+      .cert-table-wrap #certMeasTable{min-width:480px}
+      #certMeasTable th{padding:6px 3px !important;font-size:12px !important}
+      #certMeasTable td{font-size:12px !important;height:32px !important}
+      #certMeasTable td:first-child{font-size:12px !important;padding:4px 6px !important}
+      #certMeasTable input[type="text"],
+      #certMeasTable input[type="number"]{
+        padding:5px 3px !important;font-size:12px !important;min-width:50px;
+      }
+      #certMeasTable input.spec-input{font-size:11px !important;padding:5px 6px !important}
+      #certMeasTable label{font-size:11px !important;padding:2px 2px !important;margin:0 1px !important}
+      #certMeasTable input[type="radio"]{width:12px !important;height:12px !important}
+      /* 정보 박스 자체 패딩 축소 */
+      #certInfoBox{padding:12px 14px !important;font-size:13px !important;line-height:1.6 !important}
+      /* 담당자/판정 그리드도 1컬럼으로 */
+      .cert-charge-grid{grid-template-columns:1fr !important;gap:8px !important}
+      #certCharge,#certSign,#certFinalJ{font-size:14px}
+    }
+  </style>
+</head>
+<body>
+<div class="hdr">
+  <h1>📤 소재입고 등록 (Rev5.7)</h1>
+  <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서, 밀시트 첨부 가능</span></p>
+</div>
+<div class="tabs">
+  <div class="tab on" onclick="swMainTab(0)">📤 등록</div>
+  <div class="tab" onclick="swMainTab(1)">⚙ 설정</div>
+</div>
+
+<div class="main-pnl on" id="mainPnl0">
+<div class="wrap">
+  <a href="index.html" class="back-link" style="display:none">← 메인으로 돌아가기</a>
+  <div class="step">
+    <div class="step-item active" id="st1">① 설정</div>
+    <div class="step-item" id="st2">② 업로드</div>
+    <div class="step-item" id="st3">③ 확인</div>
+    <div class="step-item" id="st4">④ 완료</div>
+  </div>
+  <div id="pnlStep1">
+    <div class="card">
+      <div class="card-tit">⚙ 기본 설정</div>
+      <div class="info-box blue">출발지, 도착지, 담당자는 여기서 설정하면<br>업로드한 모든 데이터에 자동 적용됩니다.</div>
+      <div class="fg"><label>출발지 (소재업체)</label><select id="cfgFrom" onchange="onVendorChange()"><option value="">로딩 중...</option></select><input type="hidden" id="cfgVendorCode"></div>
+      <div class="fg"><label>도착지</label><input type="text" id="cfgTo" value="태진다이텍" placeholder="도착지 입력" list="toList"><datalist id="toList"><option value="태진다이텍"><option value="보관장"><option value="생산라인"><option value="본사 창고"></datalist></div>
+      <div class="fg"><label>담당자명</label><input type="text" id="cfgWorker" placeholder="담당자명 입력"></div>
+      <button class="btn btn-blue" onclick="goStep(2)">다음 → 파일 업로드</button>
+    </div>
+    <div class="card">
+      <div class="card-tit">📋 템플릿 다운로드</div>
+      <div class="info-box orange">📥 <b>템플릿을 다운받아서 등록해주세요.</b><br>업체는 <b>재질, 두께, 폭, 로트, 소재중량</b>만 기입합니다.<br>피치·비고는 비워두어도 됩니다 (사내 기입).<br>⚠️ <b>코일별로 입력 요망</b> (로트-1, 로트-2, 로트-3...)</div>
+      <button class="btn btn-sm btn-gray" onclick="downloadTemplate()" style="width:100%">📥 소재입고 템플릿 다운로드</button>
+    </div>
+  </div>
+  <div id="pnlStep2" style="display:none">
+    <div class="card">
+      <div class="card-tit">📤 파일 업로드</div>
+      <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()">
+        <div class="fd-icon">📁</div>
+        <div class="fd-text">템플릿 파일을 선택하세요</div>
+        <div class="fd-sub">.xlsx, .xls 파일 지원</div>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this)">
+      <div id="fileInfo" style="display:none;margin-top:10px"><div class="info-box green" id="fileInfoText"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-gray btn-sm" onclick="goStep(1)" style="flex:0 0 auto;width:auto">← 이전</button>
+      <button class="btn btn-blue" onclick="goStep(3)" id="btnToStep3" disabled style="flex:1">다음 → 미리보기</button>
+    </div>
+  </div>
+  <div id="pnlStep3" style="display:none">
+    <div class="card">
+      <div class="card-tit">🔍 데이터 미리보기</div>
+      <div class="stat-row">
+        <div class="stat-card" style="background:#e3f2fd"><div class="sv" id="pvTotal">0</div><div class="sl">총 건수</div></div>
+        <div class="stat-card" style="background:#e8f5e9"><div class="sv" id="pvCompany">-</div><div class="sl">업체명</div></div>
+        <div class="stat-card" style="background:#fff3e0"><div class="sv" id="pvDate">-</div><div class="sl">입고일자</div></div>
+      </div>
+      <div id="pvSettings" class="info-box blue" style="font-size:11px"></div>
+      <div style="overflow-x:auto"><table class="preview-tbl" id="pvTable"></table></div>
+      <div id="pvMore" style="text-align:center;padding:6px;color:#888;font-size:10px"></div>
+    </div>
+    <!-- 성적서 작성 카드 (MES 등록 전 작성 가능) -->
+    <div class="card" style="background:#fff3e0;border:2px solid #fb8c00">
+      <div style="font-size:14px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 (선택)</div>
+      <div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:10px">
+        등록 전에 성적서를 작성하실 수 있습니다.<br>
+        <b>재질 · 두께 · 폭 · LOT</b>가 같으면 1건으로 자동 묶이며 (코일수·합계 중량으로 합산),<br>
+        측정값과 밀시트 사진만 입력하시면 됩니다.
+      </div>
+      <button class="btn btn-orange" style="width:100%;font-size:15px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistrationFromStep3()">📝 성적서 작성하기 (<span id="certCntBadgeStep3">0</span>건)</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-gray btn-sm" onclick="goStep(2)" style="flex:0 0 auto;width:auto">← 수정</button>
+      <button class="btn btn-green" onclick="doRegister()" id="btnRegister" style="flex:1;font-size:16px">✅ <span id="pvRegCnt">0</span>건 최종등록</button>
+    </div>
+    <div id="regStatus" style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;text-align:center"></div>
+  </div>
+  <div id="pnlStep4" style="display:none">
+    <div class="card" style="text-align:center;padding:30px 16px">
+      <div style="font-size:48px;margin-bottom:10px">✅</div>
+      <div style="font-size:18px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="doneTitle">완료</div>
+      <div style="font-size:13px;color:#555" id="doneSummary"></div>
+      <div id="autoReturnMsg" style="margin-top:20px;padding:10px;background:#e3f2fd;border-radius:8px;font-size:12px;color:#1565c0;font-weight:600"><span id="autoReturnSec">10</span>초 후 등록 화면으로 돌아갑니다</div>
+    </div>
+    <!-- 성적서 등록 안내 -->
+    <div class="card" style="background:#fff3e0;border:2px solid #fb8c00;margin-top:8px">
+      <div style="font-size:14px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 등록</div>
+      <div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:10px">
+        등록한 소재별로 검사 성적서를 작성하고 밀시트를 첨부할 수 있습니다.<br>
+        <b>재질 · 두께 · 폭</b>이 자동으로 채워지며 측정값과 밀시트만 입력하시면 됩니다.
+      </div>
+      <button class="btn btn-orange" style="width:100%;font-size:15px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistration()">📝 성적서 작성하기 (<span id="certCntBadge">0</span>건)</button>
+    </div>
+    <div class="btn-row"><button class="btn btn-blue" onclick="resetAll()">🔄 지금 새 등록하기</button></div>
+  </div>
+</div>
+</div>
+
+<div class="main-pnl" id="mainPnl1">
+<div class="wrap">
+  <div id="settingsUserBar" style="display:none;padding:8px 12px;background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:12px;text-align:center">
+    🔓 <span id="settingsUserName"></span> 님 접속중 · <span style="opacity:.8;font-size:11px">10분 후 자동 잠금</span>
+  </div>
+  <div class="card">
+    <div class="card-tit">📊 이력 관리</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div class="fg" style="flex:1;margin-bottom:0"><label>시작일</label><input type="date" id="histStart"></div>
+      <div class="fg" style="flex:1;margin-bottom:0"><label>종료일</label><input type="date" id="histEnd"></div>
+    </div>
+    <div class="fg"><label>업체</label><input type="text" id="histCompany" placeholder="전체 (비우면 전체)"></div>
+    <div class="btn-row">
+      <button class="btn btn-sm btn-blue" onclick="histQuery()">🔍 조회</button>
+      <button class="btn btn-sm btn-green" onclick="histExcel()">📥 엑셀</button>
+    </div>
+    <button class="btn btn-sm" onclick="histDelete()" style="width:100%;background:#fff3e0;color:#e65100;border:1.5px solid #ffe0b2">🗑 선택범위 삭제</button>
+    <div id="histStatus" style="font-size:11px;margin-top:6px;color:#888"></div>
+    <div id="histArea" style="margin-top:10px;max-height:300px;overflow-y:auto"></div>
+  </div>
+  <div class="card">
+    <div class="card-tit" style="display:flex;align-items:center;gap:8px">
+      <span>🏢 출발지 (소재업체) 관리</span>
+      <span id="vendorCountBadge" style="background:#1a237e;color:#fff;font-size:11px;padding:2px 10px;border-radius:10px;font-weight:600">0</span>
+    </div>
+    <div class="info-box blue" style="font-size:10px">💡 등록한 업체는 <b>등록 탭의 출발지 드롭다운</b>에 표시됩니다.<br>업체코드는 MES <b>VENDOR_SITE_ID</b>에 해당합니다 (예: TG, JM).<br>순서는 ▲▼ 버튼으로 변경 가능합니다.</div>
+    <div style="font-size:12px;font-weight:700;color:#1a237e;margin:8px 0 6px 2px;padding-left:6px;border-left:3px solid #1a237e">📋 등록된 업체 목록</div>
+    <div id="vendorList" style="margin-bottom:10px;max-height:420px;overflow-y:auto;padding:4px;background:#fafafa;border-radius:8px;border:1px solid #eee"></div>
+    <div style="border-top:2px solid #e0e0e0;padding-top:14px;margin-top:12px">
+      <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="fg" style="margin-bottom:0"><label style="font-size:11px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: 태경스틸" style="font-size:14px;padding:10px 12px"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:11px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="TG" maxlength="10" style="font-size:14px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
+      </div>
+      <input type="hidden" id="vendorEditId">
+      <div class="btn-row" style="margin-bottom:0">
+        <button class="btn btn-sm btn-blue" onclick="saveVendor()" id="vendorSaveBtn" style="flex:1">💾 등록</button>
+        <button class="btn btn-sm btn-gray" onclick="cancelVendorEdit()" id="vendorCancelBtn" style="display:none">취소</button>
+      </div>
+      <div id="vendorStatus" style="font-size:11px;margin-top:6px;color:#888"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-tit">📢 공지사항 (접속 시 팝업)</div>
+    <div class="info-box blue" style="font-size:10px">💡 입력한 공지가 페이지 접속 시 자동 팝업됩니다.<br>비워두고 저장하면 팝업이 표시되지 않습니다. 사용자가 "오늘 하루 보지 않기" 선택 가능.</div>
+    <div class="fg">
+      <label>제목</label>
+      <input type="text" id="noticeTitle" placeholder="예: 추석 연휴 입고 일정 안내" style="padding:10px 12px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box">
+    </div>
+    <div class="fg">
+      <label>내용 (줄바꿈 가능)</label>
+      <textarea id="noticeBody" rows="5" placeholder="예: 9/15(월) ~ 9/17(수) 입고 불가&#10;9/18(목)부터 정상 운영" style="padding:10px 12px;font-size:13px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm btn-blue" onclick="saveNotice()" style="flex:1">💾 공지 저장</button>
+      <button class="btn btn-sm btn-gray" onclick="clearNotice()" style="flex:0 0 auto">🗑 삭제</button>
+      <button class="btn btn-sm" onclick="previewNotice()" style="background:#10b981;color:#fff;flex:0 0 auto">👁 미리보기</button>
+    </div>
+    <div id="noticeStatus" style="font-size:11px;margin-top:6px;color:#888"></div>
+  </div>
+  <div class="card">
+    <div class="card-tit">🔔 ntfy 알림</div>
+    <div class="info-box blue" style="font-size:10px">💡 <b>소재업체에서 파일 업로드 완료 시</b> 등록된 ntfy 방으로 자동 발송됩니다.</div>
+    <div id="ntfyRuleList"></div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <input type="text" id="ntfyNewTopic" placeholder="방이름 (예: tj-mat)" style="flex:1;padding:8px;font-size:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
+      <button class="btn btn-sm btn-blue" onclick="addNtfyRule()" style="flex-shrink:0">+</button>
+    </div>
+    <div class="btn-row" style="margin-top:8px">
+      <input type="text" id="ntfyTestMsg" value="ntfy 테스트" style="flex:1;padding:8px;font-size:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
+      <button class="btn btn-sm" onclick="testNtfyAll()" style="background:#ef4444;color:#fff;flex-shrink:0">🔔 테스트</button>
+    </div>
+    <div id="ntfyStatus" style="font-size:11px;margin-top:4px;color:#888"></div>
+  </div>
+  <div class="card">
+    <div class="card-tit">📧 메일 알림 설정</div>
+    <div class="info-box blue" style="font-size:10px">GAS 웹앱 URL은 Supabase common_code 테이블에 저장됩니다 (code_group: mail_gas)<br>수신자는 code_group: mat_mail에 저장됩니다.</div>
+    <div class="fg"><label>GAS 메일 웹앱 URL</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••••••••••••</div></div>
+    <div class="btn-row"><button class="btn btn-sm btn-gray" onclick="testMailGas()">🔌 연결 테스트</button></div>
+    <div id="mailGasStatus" style="font-size:11px;color:#888;margin-top:4px"></div>
+    <hr style="border:none;border-top:1px solid #eee;margin:12px 0">
+    <div class="fg"><label>📬 메일 수신자</label>
+      <div id="mailRecipList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="email" id="mailNewAddr" placeholder="example@company.com" style="flex:1;padding:8px;font-size:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
+        <button class="btn btn-sm btn-blue" onclick="addMailRecip()" style="flex-shrink:0">+</button>
+      </div>
+    </div>
+    <div id="mailRecipStatus" style="font-size:11px;color:#888;margin-top:4px"></div>
+  </div>
+  <div class="card">
+    <div class="card-tit">🔧 Supabase 설정</div>
+    <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
+    <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
+  </div>
+  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;font-size:10px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS move_history_tj (
+  id bigint generated always as identity primary key,
+  move_date date, move_time text, process text,
+  departure text, destination text,
+  barcode_raw text, base_part text, lot text,
+  qty integer, note text, format text,
+  worker text, equipment text, weight numeric,
+  incoming_date text, parent_part text,
+  child_type text, model_type text,
+  general_model text, material_info text,
+  created_at timestamptz default now()
+);
+ALTER TABLE move_history_tj ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "anon_all" ON move_history_tj;
+CREATE POLICY "anon_all" ON move_history_tj FOR ALL TO anon USING (true) WITH CHECK (true);</pre></details>
+  <button class="btn btn-blue" onclick="saveAllSettings()" style="margin-bottom:8px">💾 모든 설정 서버에 저장</button>
+  <div style="text-align:center"><span id="stgSaveStatus" style="font-size:11px;color:#888"></span></div>
+  <div class="card" style="margin-top:8px"><div class="card-tit">ℹ️ 연결 상태</div><div id="connStatusInfo" style="font-size:12px;color:#555;line-height:1.8"></div></div>
+</div>
+</div>
+
+<!-- 공지사항 팝업 모달 -->
+<div id="noticeModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px;box-sizing:border-box">
+  <div style="background:#fff;max-width:520px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);max-height:90vh;display:flex;flex-direction:column">
+    <div style="background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;padding:16px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px">
+      <span>📢</span><span id="noticeModalTitle">공지사항</span>
+    </div>
+    <div id="noticeModalBody" style="padding:20px 22px;font-size:14px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;overflow-y:auto;flex:1;max-height:60vh"></div>
+    <div style="padding:12px 20px;background:#f7f8fc;border-top:1px solid #e0e0e0;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+      <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="noticeHideToday" style="width:16px;height:16px;cursor:pointer">
+        오늘 하루 보지 않기
+      </label>
+      <button onclick="closeNoticeModal()" style="background:#1a237e;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer">확인</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- PIN 키패드 모달 -->
+<div id="pinLock" style="display:none;position:fixed;inset:0;background:linear-gradient(180deg,#181b26,#0f1117);z-index:99999;flex-direction:column;align-items:center;justify-content:center;padding:20px">
+  <div style="font-size:22px;font-weight:800;color:#e2b04a;margin-bottom:6px;text-align:center">🔒 설정 메뉴 접속</div>
+  <div style="font-size:12px;color:#8b8fa3;margin-bottom:32px">본인의 PIN을 입력하세요</div>
+  <div id="pinDots" style="display:flex;gap:12px;margin-bottom:24px">
+    <div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div>
+  </div>
+  <div id="pinLockoutMsg" style="display:none;color:#ef4444;font-size:13px;font-weight:600;text-align:center;margin-bottom:16px"></div>
+  <div id="pinKeypad" style="display:grid;grid-template-columns:repeat(3,72px);gap:14px;justify-content:center"></div>
+  <div style="margin-top:28px"><button onclick="closePinLock()" style="background:transparent;border:none;color:#8b8fa3;font-size:12px;padding:8px 16px;cursor:pointer;font-family:inherit">✕ 취소</button></div>
+</div>
+<style>
+#pinLock .pd{width:12px;height:12px;border-radius:50%;background:#2a2e3d;border:2px solid #2a2e3d;transition:all .15s}
+#pinLock .pd.filled{background:#e2b04a;border-color:#e2b04a;box-shadow:0 0 10px rgba(226,176,74,.4)}
+#pinLock .pd.err{background:#ef4444;border-color:#ef4444;animation:pinshake .4s}
+@keyframes pinshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#pinLock .pk{width:72px;height:72px;border-radius:50%;background:#1a1d27;border:1.5px solid #2a2e3d;color:#e8eaf0;font-size:26px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+#pinLock .pk:active{background:#2a2e3d;transform:scale(.92)}
+#pinLock .pk.fn{background:transparent;border:none;font-size:18px;color:#8b8fa3}
+</style>
+
+<script>
+function getKST(d){const utc=d.getTime()+d.getTimezoneOffset()*60000;return new Date(utc+9*3600000)}
+function kstDateStr(d){const k=getKST(d||new Date());return k.getFullYear()+'-'+String(k.getMonth()+1).padStart(2,'0')+'-'+String(k.getDate()).padStart(2,'0')}
+// 엑셀 SheetJS의 Date 객체 → YYYY-MM-DD (KST 기준)
+// 엑셀에 시간 정보가 포함되어 있어도 한국 시간대의 "날짜" 부분만 추출
+function excelDateToYMD(d){
+  if(!d) return '';
+  if(typeof d==='string') return d.trim();
+  if(typeof d==='number'){
+    // 엑셀 시리얼 번호 → 1899-12-30 기준 일수 (시간이 없으면 정확히 자정)
+    const epoch=Date.UTC(1899,11,30);
+    const ms=epoch+d*86400000;
+    const dt=new Date(ms);
+    return dt.getUTCFullYear()+'-'+String(dt.getUTCMonth()+1).padStart(2,'0')+'-'+String(dt.getUTCDate()).padStart(2,'0');
+  }
+  if(d instanceof Date){
+    // 시간 포함 Date → KST 기준 날짜 추출
+    // (KST 자정 기준으로 같은 날인지 판단 - 한국에서 엑셀 입력했다면 KST 기준이 맞음)
+    const kstMs=d.getTime()+9*3600000;
+    const kstDate=new Date(kstMs);
+    return kstDate.getUTCFullYear()+'-'+String(kstDate.getUTCMonth()+1).padStart(2,'0')+'-'+String(kstDate.getUTCDate()).padStart(2,'0');
+  }
+  return String(d).trim();
+}
+function kstTimeStr(d){const k=getKST(d||new Date());return String(k.getHours()).padStart(2,'0')+':'+String(k.getMinutes()).padStart(2,'0')+':'+String(k.getSeconds()).padStart(2,'0')}
+function kstISOString(d){
+  const dt=d||new Date();
+  const utc=dt.getTime()+dt.getTimezoneOffset()*60000;
+  const k=new Date(utc+9*3600000);
+  const y=k.getFullYear();
+  const mo=String(k.getMonth()+1).padStart(2,'0');
+  const da=String(k.getDate()).padStart(2,'0');
+  const h=String(k.getHours()).padStart(2,'0');
+  const mi=String(k.getMinutes()).padStart(2,'0');
+  const s=String(k.getSeconds()).padStart(2,'0');
+  const ms=String(k.getMilliseconds()).padStart(3,'0');
+  return y+'-'+mo+'-'+da+'T'+h+':'+mi+':'+s+'.'+ms+'+09:00';
+}
+
+const SB_LS_KEY='MATERIAL_SB_CFG';
+/* Rev5.7 : 통합 DB 이전 (omngtyewdaqpphnzeate -> pllwltojbofjaftcemvn) */
+const SB_DEFAULT_URL='https://pllwltojbofjaftcemvn.supabase.co';
+const SB_DEFAULT_KEY='sb_publishable_9dYJzdz472b888EcqdBBaA_Ncwk0yvT';
+/* 이 목록에 있는 옛 주소가 localStorage 에 남아 있으면 자동으로 새 기본값으로 덮어씁니다. */
+const SB_LEGACY_URLS=['omngtyewdaqpphnzeate.supabase.co','jgvikmakenpllwxwdugk.supabase.co'];
+(function migrateSbCfg(){
+  try{
+    const c=JSON.parse(localStorage.getItem(SB_LS_KEY)||'{}');
+    const u=(c.url||'').trim();
+    if(!u){return}
+    if(SB_LEGACY_URLS.some(function(l){return u.indexOf(l)>=0})){
+      c.url=SB_DEFAULT_URL; c.key=SB_DEFAULT_KEY;
+      localStorage.setItem(SB_LS_KEY,JSON.stringify(c));
+      console.log('[Rev5.7] Supabase 설정을 통합 DB로 자동 전환했습니다.');
+    }
+  }catch(e){}
+})();
+
+function getSbCfg(){try{return JSON.parse(localStorage.getItem(SB_LS_KEY)||'{}')}catch(e){return{}}}
+function getSbUrl(){return(getSbCfg().url||SB_DEFAULT_URL).replace(/\/$/,'')}
+function getSbKey(){return getSbCfg().key||SB_DEFAULT_KEY}
+
+let _settingsUnlocked=false;
+let _settingsUnlockedBy='';
+let _pinCur='';
+let _pinBusy=false;
+let _pinLockTimer=null;
+const _PIN_MAX_FAIL=5;
+const _PIN_LOCKOUT_SEC=60;
+const _PIN_LK_FAIL='material_pin_fail';
+
+async function _sha256hex(s){
+  const b=new TextEncoder().encode(s);
+  const h=await crypto.subtle.digest('SHA-256',b);
+  return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+function _getPinFail(){try{return JSON.parse(localStorage.getItem(_PIN_LK_FAIL)||'{"count":0,"until":0}')}catch(e){return{count:0,until:0}}}
+function _setPinFail(f){localStorage.setItem(_PIN_LK_FAIL,JSON.stringify(f))}
+function _clearPinFail(){localStorage.removeItem(_PIN_LK_FAIL)}
+
+function _renderPinKeypad(){
+  const kp=document.getElementById('pinKeypad');
+  if(!kp)return;
+  kp.innerHTML='';
+  ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k=>{
+    const b=document.createElement('button');
+    if(k===''){b.className='pk fn';b.style.visibility='hidden'}
+    else if(k==='⌫'){b.className='pk fn';b.textContent=k;b.onclick=()=>_pinDel()}
+    else{b.className='pk';b.textContent=k;b.onclick=()=>_pinPress(k)}
+    kp.appendChild(b);
+  });
+}
+function _updatePinDots(){
+  document.querySelectorAll('#pinDots .pd').forEach((d,i)=>{
+    d.classList.remove('err');
+    if(i<_pinCur.length)d.classList.add('filled');
+    else d.classList.remove('filled');
+  });
+}
+function _shakePinDots(){
+  document.querySelectorAll('#pinDots .pd').forEach(d=>d.classList.add('err'));
+  setTimeout(()=>{_pinCur='';_updatePinDots()},400);
+}
+function _checkPinLockout(){
+  const f=_getPinFail(),msg=document.getElementById('pinLockoutMsg');
+  if(!msg)return;
+  const remain=f.until-Date.now();
+  if(remain>0){
+    msg.style.display='block';
+    const upd=()=>{
+      const r=Math.ceil((f.until-Date.now())/1000);
+      if(r<=0){msg.style.display='none';_clearPinFail();clearInterval(_pinLockTimer);return}
+      msg.textContent='🔒 잠금: '+r+'초 후 재시도';
+    };
+    upd();
+    clearInterval(_pinLockTimer);
+    _pinLockTimer=setInterval(upd,1000);
+  }else msg.style.display='none';
+}
+function _pinPress(n){
+  if(_pinBusy)return;
+  if(_pinCur.length>=4)return;
+  const f=_getPinFail();
+  if(f.until>Date.now())return;
+  _pinCur+=n;_updatePinDots();
+  if(_pinCur.length===4)setTimeout(_pinComplete,150);
+}
+function _pinDel(){
+  if(_pinBusy)return;
+  if(!_pinCur)return;
+  _pinCur=_pinCur.slice(0,-1);_updatePinDots();
+}
+async function _pinComplete(){
+  _pinBusy=true;
+  try{
+    if(_pinCur==='2480'){
+      _clearPinFail();
+      _settingsUnlocked=true;
+      _settingsUnlockedBy='관리자';
+      setTimeout(()=>{_settingsUnlocked=false;_settingsUnlockedBy=''},600000);
+      closePinLock();
+      showToast('✅ 관리자 인증 완료');
+      document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===1));
+      document.querySelectorAll('.main-pnl').forEach((p,i)=>p.classList.toggle('on',i===1));
+      loadSettingsUI();
+      return;
+    }
+    const hash=await _sha256hex(_pinCur);
+    const SB_URL=getSbUrl(),SB_KEY=getSbKey();
+    const res=await fetch(SB_URL+'/rest/v1/user_pin?select=name&pin_hash=eq.'+hash,{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    });
+    if(!res.ok)throw new Error(res.status);
+    const data=await res.json();
+    if(data&&data.length>0){
+      const name=data[0].name;
+      _clearPinFail();
+      _settingsUnlocked=true;
+      _settingsUnlockedBy=name;
+      setTimeout(()=>{_settingsUnlocked=false;_settingsUnlockedBy=''},600000);
+      closePinLock();
+      showToast('✅ '+name+' 님 인증 완료');
+      document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===1));
+      document.querySelectorAll('.main-pnl').forEach((p,i)=>p.classList.toggle('on',i===1));
+      loadSettingsUI();
+    }else{
+      const f=_getPinFail();
+      f.count=(f.count||0)+1;
+      if(f.count>=_PIN_MAX_FAIL){
+        f.until=Date.now()+_PIN_LOCKOUT_SEC*1000;
+        f.count=0;
+        _setPinFail(f);
+        _checkPinLockout();
+      }else{
+        _setPinFail(f);
+      }
+      _shakePinDots();
+    }
+  }catch(e){
+    _shakePinDots();
+  }finally{
+    _pinBusy=false;
+  }
+}
+function closePinLock(){
+  _pinCur='';
+  _updatePinDots();
+  document.getElementById('pinLock').style.display='none';
+}
+function openPinLock(){
+  _pinCur='';
+  _renderPinKeypad();
+  _updatePinDots();
+  _checkPinLockout();
+  const el=document.getElementById('pinLock');
+  el.style.display='flex';
+}
+
+function swMainTab(n){
+  if(n===1&&!_settingsUnlocked){
+    openPinLock();
+    return;
+  }
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===n));
+  document.querySelectorAll('.main-pnl').forEach((p,i)=>p.classList.toggle('on',i===n));
+  if(n===1)loadSettingsUI();
+}
+
+async function sbSelect(table,filters,selectCols){const SB_URL=getSbUrl(),SB_KEY=getSbKey();let url=SB_URL+'/rest/v1/'+table+'?select='+(selectCols||'*')+'&';Object.entries(filters).forEach(([k,v])=>{url+=k+'='+encodeURIComponent(v)+'&'});const res=await fetch(url,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});if(!res.ok)return[];return await res.json()}
+
+loadMailRecipients();
+
+let _mailRecipients=[];
+async function loadMailRecipients(){try{const data=await sbSelect('common_code',{code_group:'eq.mat_mail',order:'sort_order.asc'},'id,code_value,sort_order');if(data&&data.length){_mailRecipCache=data.map(r=>({id:r.id,email:String(r.code_value||'').trim(),sort:r.sort_order||0}));_mailRecipients=_mailRecipCache.map(r=>r.email).filter(v=>v&&v.includes('@'))}}catch(e){console.log('메일 수신자 로드 실패:',e)}renderMailRecipList()}
+let _mailRecipCache=[];
+function renderMailRecipList(){const c=document.getElementById('mailRecipList');if(!c)return;if(!_mailRecipCache.length){c.innerHTML='<div style="font-size:11px;color:#999;padding:8px 0;text-align:center">등록된 수신자 없음</div>';return}c.innerHTML=_mailRecipCache.map((r,i)=>'<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f5f5f5;border-radius:8px;margin-bottom:4px;font-size:12px"><span style="color:#888;min-width:20px">'+(i+1)+'</span><span style="flex:1;font-weight:500">'+r.email+'</span><button onclick="delMailRecip('+i+')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700">✕</button></div>').join('')}
+async function addMailRecip(){const inp=document.getElementById('mailNewAddr');const email=inp.value.trim();const st=document.getElementById('mailRecipStatus');if(!email||!email.includes('@')){st.textContent='⚠ 올바른 이메일 입력';st.style.color='#e65100';return}if(_mailRecipCache.find(r=>r.email===email)){st.textContent='⚠ 이미 존재';st.style.color='#e65100';return}const ns=_mailRecipCache.length?Math.max(..._mailRecipCache.map(r=>r.sort))+1:1;try{const SB_URL=getSbUrl(),SB_KEY=getSbKey();const res=await fetch(SB_URL+'/rest/v1/common_code',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},body:JSON.stringify({code_group:'mat_mail',code_value:email,sort_order:ns})});if(res.ok){const saved=await res.json();if(saved&&saved.length)_mailRecipCache.push({id:saved[0].id,email,sort:ns})}_mailRecipients=_mailRecipCache.map(r=>r.email);inp.value='';renderMailRecipList();st.textContent='✅ '+email;st.style.color='#2e7d32'}catch(e){st.textContent='❌ '+e.message;st.style.color='#c62828'}}
+async function delMailRecip(idx){const r=_mailRecipCache[idx];if(!r)return;if(!confirm(r.email+' 삭제?'))return;if(r.id){try{await fetch(getSbUrl()+'/rest/v1/common_code?id=eq.'+r.id,{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}catch(e){}}_mailRecipCache.splice(idx,1);_mailRecipients=_mailRecipCache.map(r=>r.email);renderMailRecipList()}
+
+async function sendEmail(info){
+  const gasUrl=_mailGasUrl||localStorage.getItem('MATERIAL_MAIL_GAS_URL')||'';
+  if(!gasUrl)return;
+  if(!_mailRecipients.length)await loadMailRecipients();
+  if(_mailRecipients.length)info.recipients=_mailRecipients;
+
+  const matRows=info.rows.map(r=>{
+    const m=r.material_info||'-';
+    const w=r.weight?r.weight+'kg':'';
+    const l=r.lot||'';
+    return '<tr><td style="padding:6px 10px;border:1px solid #e0e0e0">'+m+'</td>'
+      +'<td style="padding:6px 10px;border:1px solid #e0e0e0">'+l+'</td>'
+      +'<td style="padding:6px 10px;border:1px solid #e0e0e0;text-align:right">'+w+'</td></tr>';
+  }).join('');
+
+  /* [Rev4.9] 성적서 상세 + 밀시트 첨부 모으기 (모든 _certBatch 카드 전체 표시) */
+  const attachments=[];
+  let certSummaryHtml='';
+  if(typeof _certBatch!=='undefined' && Array.isArray(_certBatch) && _certBatch.length){
+    const cards=[];
+    _certBatch.forEach((c, idx)=>{
+      const ms=_certMillsheets&&_certMillsheets[idx];
+      const cd=c.certData||{};
+      const finalJ=cd.finalJ||'-';
+      const judgeColor=finalJ==='NG'?'#c62828':(finalJ==='OK'?'#2e7d32':'#888');
+      const headerBg=finalJ==='NG'?'#ffebee':(finalJ==='OK'?'#e8f5e9':'#f5f5f5');
+      const headerColor=finalJ==='NG'?'#c62828':(finalJ==='OK'?'#1b5e20':'#555');
+      const msTag=ms?'<span style="background:#0ea5e9;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:700">📎 밀시트</span>':'';
+      const charge=cd.charge||'-';
+      const sign=cd.sign||'-';
+      
+      // 측정 행 4개 (r1=결함/r2=재질/r3=폭/r4=두께)
+      const rowDef=[
+        {k:'r1', label:'표면'},
+        {k:'r2', label:'재질'},
+        {k:'r3', label:'폭(W)'},
+        {k:'r4', label:'두께(T)'}
+      ];
+      const measRows=rowDef.map(rd=>{
+        const r=cd[rd.k]||{};
+        const spec=r.spec||'-';
+        const x1=(r.x1!==undefined&&r.x1!=='')?r.x1:'-';
+        const x2=(r.x2!==undefined&&r.x2!=='')?r.x2:'-';
+        const x3=(r.x3!==undefined&&r.x3!=='')?r.x3:'-';
+        const j=r.j||'-';
+        const jColor=j==='NG'?'#c62828':(j==='OK'?'#2e7d32':'#888');
+        return '<tr>'+
+          '<td style="padding:4px 6px;border:1px solid #e0e0e0;background:#f9fafb;font-weight:700">'+rd.label+'</td>'+
+          '<td style="padding:4px 6px;border:1px solid #e0e0e0">'+spec+'</td>'+
+          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center">'+x1+'</td>'+
+          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center">'+x2+'</td>'+
+          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center">'+x3+'</td>'+
+          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center;font-weight:700;color:'+jColor+'">'+j+'</td>'+
+        '</tr>';
+      }).join('');
+      
+      const totalWeight=c.weight?(Math.round(c.weight*100)/100).toLocaleString():'-';
+      const coilLine=(c.coil_count&&c.coil_count>1)?(' / 코일 '+c.coil_count+'개'):'';
+      const lotsLine=(c.lots_all&&c.lots_all.length>1)?
+        ('<div style="font-size:10px;color:#1565c0;margin-top:3px">개별 LOT: '+c.lots_all.join(', ')+'</div>'):'';
+      
+      cards.push(
+        '<div style="border:1px solid #cbd5e1;border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff">'+
+          '<div style="background:'+headerBg+';padding:8px 12px;border-bottom:1px solid #cbd5e1;display:flex;justify-content:space-between;align-items:center">'+
+            '<div style="font-weight:700;color:'+headerColor+';font-size:12px">'+
+              '#'+(idx+1)+'. '+(c.supplier||'-')+' / '+(c.material_type||'-')+' '+(c.thickness||'')+'t × '+(c.width||'')+'mm'+
+              msTag+
+            '</div>'+
+            '<div style="font-weight:700;font-size:12px;color:'+judgeColor+'">최종판정 '+finalJ+'</div>'+
+          '</div>'+
+          '<div style="padding:8px 12px">'+
+            '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:6px">'+
+              '<tr><td style="padding:2px 6px;color:#888;width:60px">LOT</td><td style="font-weight:700">'+(c.lot||'-')+'</td>'+
+                  '<td style="padding:2px 6px;color:#888;width:60px">HEAT</td><td style="font-weight:700">'+(c.heat_no||'-')+'</td></tr>'+
+              '<tr><td style="padding:2px 6px;color:#888">중량</td><td><b>'+totalWeight+' KG</b>'+coilLine+'</td>'+
+                  '<td style="padding:2px 6px;color:#888">입고일</td><td>'+(c.receipt_date||'-')+'</td></tr>'+
+            '</table>'+
+            lotsLine+
+            '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:6px">'+
+              '<thead><tr style="background:#fff3e0">'+
+                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:left;width:60px">항목</th>'+
+                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:left">규격</th>'+
+                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:50px">X1</th>'+
+                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:50px">X2</th>'+
+                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:50px">X3</th>'+
+                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:45px">판정</th>'+
+              '</tr></thead>'+
+              '<tbody>'+measRows+'</tbody>'+
+            '</table>'+
+          '</div>'+
+        '</div>'
+      );
+
+      /* 밀시트가 있으면 첨부 추가 */
+      if(ms){
+        const dataUrl=(typeof ms==='string')?ms:ms.dataUrl;
+        const mimeType=(typeof ms==='string')?(dataUrl.match(/data:([^;]+)/)?.[1]||'image/jpeg'):(ms.mimeType||'application/octet-stream');
+        const orig=(typeof ms==='string')?('millsheet'+(mimeType==='application/pdf'?'.pdf':'.jpg')):(ms.originalName||'millsheet');
+        const m=orig.match(/^(.+?)(\.[^.]+)?$/);
+        const baseName=(m&&m[1])||orig;
+        const ext=(m&&m[2])||(mimeType==='application/pdf'?'.pdf':(mimeType==='image/png'?'.png':'.jpg'));
+        const meta=((c.supplier||'')+'_'+(c.material_type||'')+'_'+(c.thickness||'')+'t'+(c.width||'')+'_LOT'+(c.lot||'')+'_'+(c.heat_no||''))
+          .replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_').slice(0,80);
+        const filename=('밀시트_'+meta+'_'+baseName+ext).replace(/[\\/:*?"<>|]/g,'_');
+        const base64Data=(dataUrl||'').split(',')[1]||dataUrl||'';
+        if(base64Data){
+          attachments.push({name:filename, base64:base64Data, mimeType:mimeType});
+        }
+      }
+    });
+    if(cards.length){
+      certSummaryHtml=
+        '<div style="font-size:13px;font-weight:700;color:#555;margin:18px 0 8px">📋 성적서 상세 ('+cards.length+'건 전체 / 밀시트 첨부 '+attachments.length+'개)</div>'+
+        cards.join('');
+    }
+  }
+
+  const html='<div style="font-family:sans-serif;max-width:600px">'
+    +'<div style="background:#1a237e;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0">'
+    +'<h2 style="margin:0;font-size:18px">📤 소재입고 등록 완료</h2></div>'
+    +'<div style="padding:20px;background:#f8f9fa;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px">'
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px">'
+    +'<tr><td style="padding:6px 0;color:#888;width:90px">업체</td><td style="font-weight:700">'+info.company+'</td></tr>'
+    +'<tr><td style="padding:6px 0;color:#888">입고일</td><td style="font-weight:700">'+info.date+'</td></tr>'
+    +'<tr><td style="padding:6px 0;color:#888">등록건수</td><td style="font-weight:700;color:#1a237e">'+info.count+'건</td></tr>'
+    +'<tr><td style="padding:6px 0;color:#888">출발지</td><td>'+info.from+'</td></tr>'
+    +'<tr><td style="padding:6px 0;color:#888">도착지</td><td>'+info.to+'</td></tr>'
+    +(info.worker?'<tr><td style="padding:6px 0;color:#888">담당자</td><td>'+info.worker+'</td></tr>':'')
+    +'</table>'
+    +'<div style="font-size:13px;font-weight:700;color:#555;margin-bottom:6px">📋 소재정보 ('+info.rows.length+'건)</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:12px;background:#fff">'
+    +'<tr style="background:#e8eaf6"><th style="padding:6px 10px;border:1px solid #c5cae9;text-align:left">소재</th>'
+    +'<th style="padding:6px 10px;border:1px solid #c5cae9;text-align:left">로트</th>'
+    +'<th style="padding:6px 10px;border:1px solid #c5cae9;text-align:right">중량</th></tr>'
+    +matRows
+    +'</table>'
+    +certSummaryHtml
+    +'<div style="margin-top:16px;font-size:11px;color:#aaa;text-align:center">Smart Factory Platform · 소재입고 자동알림 (밀시트 통합)</div>'
+    +'</div></div>';
+
+  const subjectSuffix=attachments.length?(' / 밀시트 '+attachments.length+'개 첨부'):'';
+  const subject='📤 소재입고 '+info.count+'건 — '+info.company+' ('+info.date+')'+subjectSuffix;
+
+  try{
+    await fetch(gasUrl,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'sendMail',subject:subject,html:html,text:subject,recipients:info.recipients||[],attachments:attachments})
+    });
+  }catch(e){console.log('메일 발송 실패:',e)}
+}
+
+const COL_MAP={'재질':'_material_type','material_type':'_material_type','두께':'_thickness','thickness':'_thickness','폭':'_width','width_mm':'_width','피치':'_pitch','pitch':'_pitch','로트':'lot','lot':'lot','로트번호':'lot','소재중량':'weight','중량':'weight','weight':'weight','입고일자':'incoming_date','소재입고일자':'incoming_date','incoming_date':'incoming_date','비고':'note','note':'note','메모':'note','업체명':'_customer','고객사':'_customer','customer':'_customer'};
+
+let _batchData=[];let _batchCompany='';let _batchDate='';
+
+function goStep(n){if(n===2){if(!document.getElementById('cfgFrom').value.trim()){showToast('출발지(소재업체)를 선택하세요');return}if(!document.getElementById('cfgTo').value.trim()){showToast('도착지를 입력하세요');return}}if(n===3){if(!_batchData.length){showToast('파일을 먼저 업로드하세요');return}renderPreview()}for(let i=1;i<=4;i++){document.getElementById('pnlStep'+i).style.display=i===n?'block':'none';const st=document.getElementById('st'+i);st.className='step-item'+(i===n?' active':i<n?' done':'')}window.scrollTo(0,0)}
+function onVendorChange(){const v=document.getElementById('cfgFrom').value;const parts=v.split('|');document.getElementById('cfgVendorCode').value=parts[1]||''}
+function getVendorInfo(){const v=document.getElementById('cfgFrom').value;const parts=v.split('|');return{name:parts[0]||'',code:parts[1]||''}}
+
+function downloadTemplate(){const wb=XLSX.utils.book_new();const today=kstDateStr();const rows=[['업체명','','','입고일자',today,'',''],[], ['재질','두께','폭','로트','소재중량','피치','비고'],['SPCC','0.6','33','LOT-250615','120','',''],['SUS304','0.5','64','LOT-250615','85','',''],['SUS430','0.6','90','LOT-250616','60','',''],['S55C','0.8','70','LOT-250616','95','','']];for(let i=0;i<43;i++)rows.push(new Array(7).fill(''));const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:12},{wch:8},{wch:8},{wch:16},{wch:12},{wch:8},{wch:20}];ws['!merges']=[{s:{r:0,c:1},e:{r:0,c:2}},{s:{r:0,c:4},e:{r:0,c:6}}];XLSX.utils.book_append_sheet(wb,ws,'입고등록');const guide=[['[ 소재입고 템플릿 작성 안내 ]'],[''],['■ 작성 방법'],['  1. 상단에 업체명과 입고일자를 기입하세요'],['  2. 3행부터 소재 정보를 입력하세요'],['  3. 헤더(3행)는 수정하지 마세요'],['  4. 샘플 데이터(4~7행)는 삭제 후 작성하세요'],[''],['■ 소재업체 기입 항목'],['  재질','SPCC, SUS304, SUS430, S55C, S70C, C55E, C67S 등'],['  두께','mm 단위 (예: 0.6, 0.8, 1.2)'],['  폭','mm 단위 (예: 33, 64, 90)'],['  로트','로트번호 (예: LOT-250615, 250615-A)'],['  소재중량','kg 단위 (예: 120, 85.5)'],[''],['■ 입력하지 않아도 되는 항목'],['  피치','사내에서 필요 시 기입'],['  비고','참고사항 자유 입력']];const ws2=XLSX.utils.aoa_to_sheet(guide);ws2['!cols']=[{wch:40},{wch:50}];XLSX.utils.book_append_sheet(wb,ws2,'안내');const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});const blob=new Blob([wbout],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='소재입고_템플릿.xlsx';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('📋 템플릿 다운로드 완료')}
+
+document.addEventListener('DOMContentLoaded',()=>{const drop=document.getElementById('fileDrop');if(!drop)return;['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('dragover')}));['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('dragover')}));drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)parseFile(f)})});
+
+function handleFile(input){const f=input.files[0];if(f)parseFile(f);input.value=''}
+
+function parseFile(file){const reader=new FileReader();reader.onload=function(e){try{
+  // cellDates:false로 raw 시리얼 번호 받기 (SheetJS의 timezone 변환 우회)
+  const wb=XLSX.read(e.target.result,{type:'array',cellDates:false});
+  const sheetName=wb.SheetNames.find(n=>n==='입고등록')||wb.SheetNames[0];
+  const ws=wb.Sheets[sheetName];
+  const allRows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
+  _batchCompany='';_batchDate='';
+  if(allRows.length>=1){
+    const r1=allRows[0];
+    if(r1[1])_batchCompany=String(r1[1]).trim();
+    let dv=r1[4];
+    console.log('[DEBUG] E1:',dv,'type:',typeof dv);
+    _batchDate=excelDateToYMD(dv);
+    console.log('[DEBUG] _batchDate result:',_batchDate);
+  }
+  let raw=XLSX.utils.sheet_to_json(ws,{range:2,defval:'',raw:true});
+  raw=raw.filter(r=>Object.values(r).some(v=>v!==''));
+  raw.forEach(r=>{
+    if(_batchCompany&&!r['업체명'])r['업체명']=_batchCompany;
+    if(_batchDate&&!r['입고일자'])r['입고일자']=_batchDate;
+  });
+  if(!raw.length){showToast('데이터가 없습니다');return}
+  _batchData=raw;
+const longLots=[];raw.forEach((r,i)=>{const lot=String(r['로트']||r['lot']||r['로트번호']||'').trim();const lotClean=lot.replace(/^LOT[-_\s]*/i,'');if(lotClean.length>20)longLots.push({row:i+4,lot:lotClean,len:lotClean.length})});if(longLots.length){const list=longLots.slice(0,5).map(x=>`  • ${x.row}행: ${x.lot} (${x.len}자)`).join('\n');alert('⚠️ LOT 길이 초과 경고\n\nOracle MES의 HEAT_NO 컬럼은 최대 20자까지만 저장됩니다.\n다음 '+longLots.length+'건이 20자를 초과합니다:\n\n'+list+(longLots.length>5?`\n  ... 외 ${longLots.length-5}건`:'')+'\n\n→ 그대로 등록 시 MES 동기화에서 ORA-12899 오류가 발생합니다.\n→ LOT를 수정한 후 다시 업로드하세요.')}
+document.getElementById('fileInfo').style.display='block';document.getElementById('fileInfoText').innerHTML='✅ <b>'+file.name+'</b> 읽기 완료<br>업체: <b>'+(_batchCompany||'미기입')+'</b> · 입고일: <b>'+(_batchDate||'미기입')+'</b> · <b>'+raw.length+'건</b>'+(longLots.length?'<br><span style="color:#c62828;font-weight:700">⚠️ LOT 20자 초과 '+longLots.length+'건 — 수정 권장</span>':'');document.getElementById('btnToStep3').disabled=false;showToast('✅ '+raw.length+'건 읽기 완료'+(longLots.length?' (LOT 초과 '+longLots.length+'건)':''))}catch(err){showToast('파일 읽기 오류: '+err.message)}};reader.readAsArrayBuffer(file)}
+
+function renderPreview(){const vi=getVendorInfo();const cfg={from:vi.name,fromCode:vi.code,to:document.getElementById('cfgTo').value.trim(),worker:document.getElementById('cfgWorker').value.trim()};document.getElementById('pvTotal').textContent=_batchData.length;document.getElementById('pvCompany').textContent=_batchCompany||vi.name||'-';document.getElementById('pvDate').textContent=_batchDate||'-';document.getElementById('pvRegCnt').textContent=_batchData.length;document.getElementById('pvSettings').innerHTML='출발지: <b>'+cfg.from+' ('+cfg.fromCode+')</b> → 도착지: <b>'+cfg.to+'</b>'+(cfg.worker?' · 담당자: <b>'+cfg.worker+'</b>':'')+'<br><span style="color:#2e7d32;font-weight:700">→ MES 등록: VENDOR_SITE_ID=<b>'+cfg.fromCode+'</b> (5분 주기 자동)</span>';const cols=Object.keys(_batchData[0]);const showRows=_batchData.slice(0,15);let html='<thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';showRows.forEach(row=>{html+='<tr>'+cols.map(c=>{let v=row[c];if(v instanceof Date)v=excelDateToYMD(v);return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'});html+='</tbody>';document.getElementById('pvTable').innerHTML=html;document.getElementById('pvMore').textContent=_batchData.length>15?'... 외 '+(_batchData.length-15)+'건':''}
+
+async function doRegister(){
+  if(!_batchData.length){showToast('데이터 없음');return}
+  const vi=getVendorInfo();
+  if(!vi.code){showToast('⚠ 출발지(소재업체)를 선택해주세요');return}
+
+  const longLots=[];
+  _batchData.forEach((r,i)=>{
+    const lot=String(r['로트']||r['lot']||r['로트번호']||'').trim();
+    const lotClean=lot.replace(/^LOT[-_\s]*/i,'');
+    if(lotClean.length>20)longLots.push({row:i+4,lot:lotClean,len:lotClean.length});
+  });
+  if(longLots.length){
+    const list=longLots.slice(0,10).map(x=>`  • ${x.row}행: ${x.lot} (${x.len}자)`).join('\n');
+    alert('🚫 등록 차단 — LOT 길이 초과\n\nOracle MES의 HEAT_NO 컬럼 최대 길이는 20자입니다.\n다음 '+longLots.length+'건의 LOT가 20자를 초과하여 등록할 수 없습니다:\n\n'+list+(longLots.length>10?`\n  ... 외 ${longLots.length-10}건`:'')+'\n\n→ 엑셀 파일에서 LOT를 20자 이내로 수정한 후 다시 업로드하세요.\n→ 또는 DBA에게 HEAT_NO 컬럼 확장(VARCHAR2(50))을 요청하세요.');
+    return;
+  }
+
+  if(!confirm(_batchData.length+'건을 Supabase에 저장하고 MES에 자동 등록됩니다.\n(5분 이내 자동 처리)\n\n계속하시겠습니까?'))return;
+
+  const st=document.getElementById('regStatus');
+  st.style.display='block';st.style.background='#e3f2fd';st.style.color='#1565c0';
+  st.textContent='Supabase 저장 중...';
+  document.getElementById('btnRegister').disabled=true;
+
+  const cfg={from:vi.name,fromCode:vi.code,to:document.getElementById('cfgTo').value.trim(),worker:document.getElementById('cfgWorker').value.trim()};
+  const now=new Date();const todayStr=kstDateStr(now);const timeStr=kstTimeStr(now);
+  const nowKstIso=kstISOString(now);
+
+  const rows=[];
+  const dbRows=[];
+  const srcCols=Object.keys(_batchData[0]);
+  const colMap={};
+  srcCols.forEach(sc=>{const key=sc.trim().toLowerCase().replace(/\s+/g,'');if(COL_MAP[key])colMap[sc]=COL_MAP[key]});
+
+  _batchData.forEach(raw=>{
+    const row={move_date:todayStr,move_time:timeStr,process:'소재입고',departure:cfg.from,destination:cfg.to,barcode_raw:'',base_part:'',lot:'',qty:null,note:'',format:'엑셀일괄',worker:cfg.worker,equipment:'',weight:null,incoming_date:null,parent_part:null,child_type:null,model_type:'raceway',general_model:null,material_info:null};
+    let _mType='',_mThick='',_mWidth='',_mPitch='';
+    srcCols.forEach(sc=>{const target=colMap[sc];if(!target)return;let v=raw[sc];if(v instanceof Date)v=excelDateToYMD(v);v=String(v||'').trim();if(!v)return;if(target==='_material_type')_mType=v;else if(target==='_thickness')_mThick=v;else if(target==='_width')_mWidth=v;else if(target==='_pitch')_mPitch=v;else if(target.startsWith('_'))return;else if(target==='weight')row.weight=parseFloat(v)||null;else if(target==='qty')row.qty=parseInt(v)||null;else row[target]=v});
+    const matParts=[_mType,_mThick,_mWidth,_mPitch].filter(Boolean);
+    if(matParts.length)row.material_info=matParts.join(' // ');
+    rows.push(row);
+
+    if(_mType&&_mThick&&_mWidth&&row.lot&&row.weight){
+      const lotClean=(row.lot||'').replace(/^LOT[-_\s]*/i,'');
+      const itemCode=_mType+'_'+_mThick+'X'+_mWidth;
+      dbRows.push({
+        item_code: itemCode,
+        material_type: _mType,
+        thickness: parseFloat(_mThick)||null,
+        width_mm: parseFloat(_mWidth)||null,
+        vendor_site_id: cfg.fromCode,
+        vendor_name: cfg.from,
+        receipt_date: _batchDate||row.incoming_date||todayStr,
+        net_weight: row.weight,
+        heat_no: lotClean,
+        charger: cfg.worker||'',
+        note: row.note||'',
+        status: 'pending',
+        uploaded_by: cfg.worker||'',
+        uploaded_at: nowKstIso
+      });
+    }
+  });
+
+  const ok=rows.length;
+
+  document.getElementById('doneTitle').textContent='✅ '+ok+'건 처리 시작';
+  let summary='업체: <b>'+(_batchCompany||cfg.from||'-')+' ('+cfg.fromCode+')</b> · 입고일: <b>'+(_batchDate||todayStr)+'</b><br>출발지: '+cfg.from+' → 도착지: '+cfg.to+(cfg.worker?' · 담당자: '+cfg.worker:'');
+  summary+='<br><br><span id="sbStatusLive" style="color:#1565c0;font-weight:700">💾 Supabase 저장 중... (백그라운드)</span>';
+  summary+='<br><span id="ntfyStatusLive" style="color:#888;font-size:11px">📧 알림 발송 대기중</span>';
+  document.getElementById('doneSummary').innerHTML=summary;
+  document.getElementById('btnRegister').disabled=false;
+  /* [Rev5.5] _certBatch 스냅샷 - goStep(4)의 500ms prepareCertBatch 재빌드/자동복귀 초기화와 무관하게 보존 */
+  const _certSnapshot=(_certBatch&&_certBatch.length)?_certBatch.filter(c=>!c.done).map(c=>({...c})):[];
+  goStep(4);
+  /* [Rev5.5] 자동복귀는 Supabase 저장(입고+성적서) 완료 후 시작 - 저장 전 화면 이탈로 인한 수입검사 누락 방지 */
+
+  const matSummary=rows.map(r=>r.material_info||'-').join('\n  '); /* [Rev5.6] 전체 소재정보 출력 (5건 요약 제거) */
+  (async()=>{
+    const SB_URL=getSbUrl(),SB_KEY=getSbKey();
+
+    /* [Rev5.5] ① 입고 저장 - 별도 async 함수로 분리 */
+    let sbOk=0,sbFail=0;
+    const postReceipts=async()=>{
+      if(!dbRows.length)return;
+      try{
+        for(let i=0;i<dbRows.length;i+=100){
+          const batch=dbRows.slice(i,i+100);
+          const ctrl=new AbortController();
+          const tid=setTimeout(()=>ctrl.abort(),15000);
+          try{
+            const res=await fetch(SB_URL+'/rest/v1/raw_material_receipt',{
+              method:'POST',
+              headers:{
+                'Content-Type':'application/json',
+                'apikey':SB_KEY,
+                'Authorization':'Bearer '+SB_KEY,
+                'Prefer':'return=minimal'
+              },
+              body:JSON.stringify(batch),
+              signal:ctrl.signal,
+              keepalive:batch.length<=30 /* [Rev5.5] 소량 배치는 페이지 이탈 후에도 전송 유지 */
+            });
+            clearTimeout(tid);
+            if(res.ok)sbOk+=batch.length;
+            else{
+              sbFail+=batch.length;
+              const err=await res.text().catch(()=>'');
+              console.error('Supabase 응답:',res.status,err);
+            }
+          }catch(e){
+            clearTimeout(tid);
+            sbFail+=batch.length;
+            console.error('Supabase 배치 실패:',e.message);
+          }
+        }
+      }catch(e){
+        console.error('Supabase 저장 오류:',e);
+        sbFail=dbRows.length-sbOk;
+      }
+    };
+
+    /* [Rev5.5] ② IQC 빈 성적서 생성 - 입고 저장과 병렬 실행 (직렬 대기 중 탭 종료로 인한 수입검사 누락 방지) */
+    let certAutoOk=0,certAutoFail=0,_certAutoErr='';
+    const postCertBatch=async()=>{
+      if(!_certSnapshot.length)return;
+      const emptyPayloads=_certSnapshot.map(c=>({
+        supplier:c.supplier,
+        vendor_site_id:c.supplier_code,
+        material_type:c.material_type,
+        thickness:parseFloat(c.thickness)||null,
+        width_mm:parseFloat(c.width)||null,
+        lot_no:c.lot,
+        heat_no:c.heat_no,
+        weight:c.weight,
+        coil_count:c.coil_count||1,
+        lots_detail:(c.lots_all&&c.lots_all.length)?c.lots_all.join(','):c.lot,
+        receipt_date:c.receipt_date,
+        cert_data:null,
+        has_millsheet:false,
+        final_judge:'대기',  /* [Rev5.4] '미검사'→'대기' — IQC 검사대기 판정 기준과 일치 */
+        charge:'',
+        sign:'',
+        created_at:kstISOString(new Date())
+      }));
+      if(emptyPayloads.length){
+        const postCerts=async(payloads)=>{
+          const res=await fetch(SB_URL+'/rest/v1/inspection_certs',{
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json',
+              'apikey':SB_KEY,
+              'Authorization':'Bearer '+SB_KEY,
+              'Prefer':'return=minimal'
+            },
+            body:JSON.stringify(payloads)
+          });
+          const txt=res.ok?'':await res.text().catch(()=>'');
+          return {ok:res.ok,status:res.status,text:txt};
+        };
+        try{
+          /* 1차: 풀 페이로드 */
+          let r=await postCerts(emptyPayloads);
+          if(!r.ok&&/PGRST204|column.*does not exist|Could not find/i.test(r.text)){
+            /* [Rev5.4] 컬럼 누락(coil_count/lots_detail 등) → 기본 컬럼만으로 재시도 */
+            console.warn('빈 성적서: 컬럼 누락 - 안전모드 재시도.',r.status,r.text.substring(0,200));
+            const safe=emptyPayloads.map(p=>{const {coil_count,lots_detail,...rest}=p;return rest});
+            r=await postCerts(safe);
+          }
+          if(r.ok){
+            certAutoOk=emptyPayloads.length;
+            if(_certBatch&&_certBatch.length)_certBatch.forEach(c=>{if(!c.done)c.autoCreated=true});
+          }else{
+            certAutoFail=emptyPayloads.length;
+            _certAutoErr='HTTP '+r.status+' '+r.text.substring(0,150);
+            console.error('빈 성적서 자동 생성 실패:',r.status,r.text);
+          }
+        }catch(e){
+          console.error('빈 성적서 자동 생성 오류:',e);
+          certAutoFail=emptyPayloads.length;
+          _certAutoErr=e.message||String(e);
+        }
+      }
+    };
+
+    /* [Rev5.5] 입고 저장 + 성적서 생성 병렬 실행 (둘 다 완료될 때까지 대기) */
+    await Promise.all([
+      postReceipts().catch(e=>console.error('입고 저장 오류:',e)),
+      postCertBatch().catch(e=>{console.error('성적서 생성 오류:',e);certAutoFail=_certSnapshot.length;_certAutoErr=e.message||String(e)})
+    ]);
+
+    const sbEl=document.getElementById('sbStatusLive');
+    if(sbEl){
+      let extra='';
+      if(certAutoOk>0)extra=`<br>📋 IQC 빈 성적서 ${certAutoOk}건 자동 생성 (수입검사 대기)`;
+      if(certAutoFail>0)extra+=`<br><span style="color:#c62828;font-weight:700">❌ IQC 성적서 ${certAutoFail}건 생성 실패 — 수입검사 대기에 표시되지 않습니다!<br>사유: ${_certAutoErr}</span>`;
+      if(sbOk>0&&sbFail===0){
+        sbEl.innerHTML='✅ Supabase 저장 완료: '+sbOk+'건 → 5분 이내 MES 자동등록 예정'+extra;
+        sbEl.style.color='#2e7d32';
+      }else if(sbOk>0&&sbFail>0){
+        sbEl.innerHTML='⚠ Supabase: '+sbOk+'건 성공, '+sbFail+'건 실패'+extra;
+        sbEl.style.color='#e65100';
+      }else{
+        sbEl.innerHTML='❌ Supabase 저장 실패 (네트워크 확인 필요)';
+        sbEl.style.color='#c62828';
+      }
+    }
+
+    const ntfyEl=document.getElementById('ntfyStatusLive');
+    if(ntfyEl){ntfyEl.textContent='📧 알림 발송 중...';ntfyEl.style.color='#1565c0'}
+
+    const ntfyMsg='📤 소재입고 등록 완료\n\n🏢 업체: '+(_batchCompany||cfg.from||'-')+' ('+cfg.fromCode+')\n📅 입고일: '+(_batchDate||todayStr)+'\n📦 등록: '+ok+'건\n💾 Supabase: '+sbOk+'건'+(sbFail?' (실패 '+sbFail+')':'')+'\n🔄 MES 자동등록: 5분 이내\n'+(cfg.worker?'👤 작업자: '+cfg.worker+'\n':'')+'\n📋 소재정보:\n  '+matSummary; /* [Rev5.6] 전체 출력 */
+
+    await Promise.all([
+      sendNtfyUploadComplete(ntfyMsg).catch(e=>console.log('ntfy 실패:',e)),
+      sendEmail({company:_batchCompany||cfg.from||'-',date:_batchDate||todayStr,count:ok,from:cfg.from,to:cfg.to,worker:cfg.worker,rows:rows}).catch(e=>console.log('메일 실패:',e))
+    ]);
+
+    if(ntfyEl){
+      ntfyEl.innerHTML='✅ 알림 발송 완료';
+      ntfyEl.style.color='#2e7d32';
+    }
+
+    const titleEl=document.getElementById('doneTitle');
+    if(titleEl&&sbOk>0){
+      titleEl.textContent='✅ '+sbOk+'건 처리 완료';
+    }
+
+    /* [Rev5.5] 저장 전부 완료 후에만 자동복귀 시작.
+       성적서 생성 실패 시 자동복귀 생략 → 화면에 남은 오류를 작업자가 확인 */
+    if(certAutoFail>0||sbFail>0){
+      showToast('⚠ 저장 오류 발생 - 화면의 상태를 확인하세요');
+    }else{
+      startAutoReturn(10);
+    }
+  })();
+}
+
+let _autoReturnTimer=null;
+function startAutoReturn(seconds){
+  if(_autoReturnTimer){clearInterval(_autoReturnTimer);_autoReturnTimer=null}
+  let remain=seconds;
+  const secEl=document.getElementById('autoReturnSec');
+  if(secEl)secEl.textContent=remain;
+  _autoReturnTimer=setInterval(()=>{
+    remain--;
+    if(secEl)secEl.textContent=remain;
+    if(remain<=0){
+      clearInterval(_autoReturnTimer);
+      _autoReturnTimer=null;
+      resetAll();
+    }
+  },1000);
+}
+
+function resetAll(){
+  if(_autoReturnTimer){clearInterval(_autoReturnTimer);_autoReturnTimer=null}
+  _batchData=[];_batchCompany='';_batchDate='';
+  document.getElementById('fileInfo').style.display='none';
+  document.getElementById('btnToStep3').disabled=true;
+  document.getElementById('regStatus').style.display='none';
+  document.getElementById('fileInput').value='';
+  goStep(1);
+}
+
+let _tt;function showToast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2000)}
+
+let _mailGasUrl='';
+const DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbyE1464Xfo8zo9JIOjNK-bHy6-9qeKndvEXhBPUdPhUvNRWB-eLP2rsTjb6ydhw8hqIQQ/exec';
+async function loadMailGasCfg(){try{const data=await sbSelect('common_code',{code_group:'eq.mail_gas',order:'sort_order.asc'},'code_value,sort_order');if(data&&data.length){const r=data.find(x=>x.sort_order===0);if(r&&r.code_value)_mailGasUrl=String(r.code_value).trim()}}catch(e){console.log('메일 설정 로드 실패:',e)}if(!_mailGasUrl){const lv=localStorage.getItem('MATERIAL_MAIL_GAS_URL')||'';if(lv)_mailGasUrl=lv}if(!_mailGasUrl){_mailGasUrl=DEFAULT_GAS_URL;localStorage.setItem('MATERIAL_MAIL_GAS_URL',_mailGasUrl)}}
+async function saveMailGas(){const st=document.getElementById('mailGasStatus');if(!_mailGasUrl){st.textContent='⚠ 서버에 GAS URL 미등록';st.style.color='#e65100';return}st.textContent='✅ GAS URL: 서버 설정됨';st.style.color='#2e7d32'}
+async function testMailGas(){const st=document.getElementById('mailGasStatus');if(!_mailGasUrl){st.textContent='❌ 서버에 GAS URL 미등록';st.style.color='#c62828';return}st.textContent='테스트 중...';st.style.color='#1565c0';try{const res=await fetch(_mailGasUrl+'?action=ping');const data=await res.json();if(data.success){st.textContent='✅ 연결 성공 (잔여 발송: '+data.quota+'통/일)';st.style.color='#2e7d32'}else{st.textContent='❌ '+data.message;st.style.color='#c62828'}}catch(e){st.textContent='❌ 연결 실패: '+e.message;st.style.color='#c62828'}}
+
+function getHHMM(){const n=new Date();return String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')}
+function initHistDates(){const t=new Date(),m=new Date();m.setMonth(m.getMonth()-1);document.getElementById('histEnd').value=t.toISOString().split('T')[0];document.getElementById('histStart').value=m.toISOString().split('T')[0]}
+async function histFetch(){const sd=document.getElementById('histStart').value,ed=document.getElementById('histEnd').value;if(!sd||!ed)return{ok:false,msg:'날짜 선택'};let url=getSbUrl()+'/rest/v1/move_history_tj?select=*&order=move_date.desc,move_time.desc&limit=5000&move_date=gte.'+sd+'&move_date=lte.'+ed;const co=document.getElementById('histCompany').value.trim();if(co)url+='&material_info=ilike.*'+encodeURIComponent(co)+'*';try{const r=await fetch(url,{headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(!r.ok)throw new Error(r.status);return{ok:true,data:await r.json()}}catch(e){return{ok:false,msg:e.message}}}
+async function histQuery(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const st=document.getElementById('histStatus'),area=document.getElementById('histArea');st.textContent='조회 중...';area.innerHTML='';const r=await histFetch();if(!r.ok){st.textContent='❌ '+r.msg;st.style.color='#c62828';return}if(!r.data.length){st.textContent='⚠ 이력 없음';st.style.color='#e65100';return}st.textContent='✅ '+r.data.length+'건';st.style.color='#2e7d32';let h='<table style="width:100%;border-collapse:collapse;font-size:10px"><tr style="background:#e8eaf6"><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">일자</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">소재</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">LOT</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">수량</th></tr>';r.data.slice(0,100).forEach(d=>{h+='<tr style="border-bottom:1px solid #eee"><td style="padding:4px">'+d.move_date+'</td><td style="padding:4px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.material_info||'-')+'</td><td style="padding:4px">'+(d.lot||'-')+'</td><td style="padding:4px">'+(d.qty||'-')+'</td></tr>'});area.innerHTML=h+'</table>'}
+async function histExcel(){const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}const hd=['일자','시간','공정','출발지','도착지','LOT','수량','소재정보','작업자','비고'];const rows=r.data.map(d=>[d.move_date,d.move_time,d.process,d.departure,d.destination,d.lot,d.qty,d.material_info,d.worker,d.note]);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([hd,...rows]),'소재입고');XLSX.writeFile(wb,'소재입고_'+document.getElementById('histStart').value.replace(/-/g,'')+'_'+document.getElementById('histEnd').value.replace(/-/g,'')+'.xlsx');showToast('📥 다운로드 완료')}
+async function histDelete(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}if(!confirm(r.data.length+'건 삭제?'))return;const ids=r.data.map(d=>d.id);for(let i=0;i<ids.length;i+=50){await fetch(getSbUrl()+'/rest/v1/move_history_tj?id=in.('+ids.slice(i,i+50).join(',')+')',{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}document.getElementById('histStatus').textContent='✅ 삭제 완료';document.getElementById('histArea').innerHTML=''}
+
+const NTFY_LS='MAT_NTFY_RULES';const NTFY_SV='https://ntfy.sh';
+function getNtfyRules(){try{return JSON.parse(localStorage.getItem(NTFY_LS)||'[]')}catch(e){return[]}}
+function saveNtfyRules(r){localStorage.setItem(NTFY_LS,JSON.stringify(r))}
+function renderNtfyRules(){const rules=getNtfyRules();const c=document.getElementById('ntfyRuleList');if(!c)return;if(!rules.length){c.innerHTML='<div style="font-size:11px;color:#999;padding:8px 0;text-align:center">등록된 방 없음</div>';return}c.innerHTML=rules.map((r,i)=>'<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f5f5f5;border-radius:8px;margin-bottom:4px;font-size:12px"><span style="color:#888;min-width:20px">'+(i+1)+'</span><span style="flex:1;color:#1565c0;font-family:monospace;font-size:12px;font-weight:600">#'+r.topic+'</span><button onclick="delNtfyRule('+i+')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700">✕</button></div>').join('')}
+function addNtfyRule(){const topic=document.getElementById('ntfyNewTopic').value.trim().replace(/\s/g,'-');if(!topic){document.getElementById('ntfyStatus').textContent='⚠ 방이름 입력';document.getElementById('ntfyStatus').style.color='#e65100';return}const rules=getNtfyRules();if(rules.find(r=>r.topic===topic)){document.getElementById('ntfyStatus').textContent='⚠ 이미 존재';document.getElementById('ntfyStatus').style.color='#e65100';return}rules.push({topic});saveNtfyRules(rules);document.getElementById('ntfyNewTopic').value='';document.getElementById('ntfyStatus').textContent='✅ #'+topic;document.getElementById('ntfyStatus').style.color='#2e7d32';renderNtfyRules()}
+function delNtfyRule(i){const r=getNtfyRules();r.splice(i,1);saveNtfyRules(r);renderNtfyRules()}
+async function sendNtfyUploadComplete(body){
+  const rules=getNtfyRules();
+  if(!rules.length)return;
+  /* [Rev4.9] Title 헤더에 한글 사용 시 모바일 브라우저에서 fetch 실패
+     → ntfy는 base64 인코딩된 Title을 X-Title-Base64로 받지 않으므로
+     → 안전하게 ASCII만 사용하거나 Title 헤더 제거 (본문에 제목 포함됨) */
+  for(const r of rules){
+    try{
+      const res=await fetch(NTFY_SV+'/'+r.topic,{
+        method:'POST',
+        headers:{'Priority':'3','Tags':'package'},  /* Title 제거 - 본문에 이미 포함 */
+        body
+      });
+      if(!res.ok){
+        console.error('ntfy 발송 실패 status:', res.status, await res.text().catch(()=>''));
+      }
+    }catch(e){
+      console.error('ntfy 발송 예외:', e);
+    }
+  }
+}
+async function testNtfyAll(){const rules=getNtfyRules();if(!rules.length){document.getElementById('ntfyStatus').textContent='⚠ 등록된 방 없음';document.getElementById('ntfyStatus').style.color='#e65100';return}const msg=document.getElementById('ntfyTestMsg').value.trim()||'test';let s=0;for(const r of rules){try{await fetch(NTFY_SV+'/'+r.topic,{method:'POST',headers:{'Priority':'3','Tags':'test_tube'},body:msg+' ('+new Date().toLocaleTimeString()+')'});s++}catch(e){}}document.getElementById('ntfyStatus').textContent='✅ '+s+'/'+rules.length+'개 발송';document.getElementById('ntfyStatus').style.color='#2e7d32'}
+
+async function saveAllSettings(){const st=document.getElementById('stgSaveStatus');st.textContent='서버 저장 중...';st.style.color='#1565c0';try{await _saveAllRulesToServer();st.textContent='✅ 서버 저장 완료 ('+new Date().toLocaleTimeString()+')';st.style.color='#2e7d32';showToast('💾 서버 저장 완료')}catch(e){st.textContent='❌ '+e.message;st.style.color='#c62828'}updateConnStatus()}
+function loadSettingsUI(){
+  const bar=document.getElementById('settingsUserBar');
+  const un=document.getElementById('settingsUserName');
+  if(bar&&un&&_settingsUnlockedBy){
+    un.textContent=_settingsUnlockedBy;
+    bar.style.display='block';
+  }
+  loadMailGasCfg();loadMailRecipients();initHistDates();_loadAllRulesFromServer();renderNtfyRules();loadVendorsAndRender();updateConnStatus();
+}
+
+let _vendorCache=[];
+
+// 1차 하드코딩 소재업체 (서버 미등록 시 fallback)
+const _DEFAULT_VENDORS=[
+  {id:null,code:'TG',name:'태경스틸',         sort:1},
+  {id:null,code:'DI',name:'㈜동일스테인레스',  sort:2},
+  {id:null,code:'DK',name:'동국산업',         sort:3},
+  {id:null,code:'NS',name:'나스테크',         sort:4},
+  {id:null,code:'HK',name:'한국금속',         sort:5}
+];
+
+async function loadVendorsFromServer(){
+  try{
+    const data=await sbSelect('common_code',{code_group:'eq.vendor_site',order:'sort_order.asc'},'id,code_value,sort_order,description');
+    _vendorCache=(data||[]).map(r=>({
+      id:r.id,
+      code:String(r.code_value||'').trim(),
+      name:String(r.description||'').trim(),
+      sort:r.sort_order||0
+    })).filter(v=>v.code&&v.name);
+  }catch(e){
+    console.log('업체 로드 실패 - 기본업체 사용:',e);
+    _vendorCache=[];
+  }
+  // 서버에 업체 정보가 없으면 1차 하드코딩 5개 사용
+  if(!_vendorCache.length){
+    _vendorCache=_DEFAULT_VENDORS.map(v=>({...v}));
+    console.log('[INIT] 기본 소재업체 5개 적용 (서버 미등록)');
+  }
+  return _vendorCache;
+}
+function populateVendorDropdown(){
+  const sel=document.getElementById('cfgFrom');
+  if(!sel)return;
+  const prev=sel.value;
+  sel.innerHTML='<option value="">선택하세요</option>'+_vendorCache.map(v=>'<option value="'+v.name+'|'+v.code+'">'+v.name+' ('+v.code+')</option>').join('');
+  if(prev&&_vendorCache.find(v=>(v.name+'|'+v.code)===prev))sel.value=prev;
+}
+function renderVendorList(){
+  const c=document.getElementById('vendorList');
+  if(!c)return;
+  if(!_vendorCache.length){
+    c.innerHTML='<div style="font-size:12px;color:#999;padding:20px;text-align:center;border:2px dashed #ddd;border-radius:8px;background:#fff">등록된 업체가 없습니다<br><span style="font-size:11px;color:#bbb">아래 "업체 추가"에서 등록하세요</span></div>';
+    return;
+  }
+  c.innerHTML=_vendorCache.map((v,i)=>{
+    const upDisabled=(i===0)?'disabled style="opacity:.3"':'';
+    const downDisabled=(i===_vendorCache.length-1)?'disabled style="opacity:.3"':'';
+    return '<div style="display:flex;align-items:center;gap:6px;padding:10px 12px;background:#fff;border-radius:8px;margin-bottom:4px;font-size:13px;border:1px solid #e8eaf6;box-shadow:0 1px 2px rgba(0,0,0,.03)">'
+      +'<span style="color:#9aa0b4;min-width:24px;font-weight:700;font-size:11px;text-align:center;background:#e8eaf6;padding:3px 0;border-radius:4px">'+String(i+1).padStart(2,'0')+'</span>'
+      +'<span style="flex:1;display:flex;align-items:center;gap:8px"><b style="color:#1a237e">'+v.name+'</b><span style="color:#fff;background:#3f51b5;font-family:monospace;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600">'+v.code+'</span></span>'
+      +'<button onclick="moveVendor('+i+',-1)" '+upDisabled+' style="border:none;background:rgba(26,35,126,.1);color:#1a237e;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="위로">▲</button>'
+      +'<button onclick="moveVendor('+i+',1)" '+downDisabled+' style="border:none;background:rgba(26,35,126,.1);color:#1a237e;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="아래로">▼</button>'
+      +'<button onclick="editVendor('+i+')" style="border:none;background:rgba(46,125,50,.1);color:#2e7d32;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="수정">✏️</button>'
+      +'<button onclick="delVendor('+i+')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="삭제">✕</button>'
+      +'</div>';
+  }).join('');
+}
+async function loadVendorsAndRender(){
+  await loadVendorsFromServer();
+  renderVendorList();
+  populateVendorDropdown();
+  const badge=document.getElementById('vendorCountBadge');
+  if(badge)badge.textContent=_vendorCache.length+'개';
+}
+async function saveVendor(){
+  const name=document.getElementById('vendorName').value.trim();
+  const code=document.getElementById('vendorCode').value.trim().toUpperCase();
+  const editId=document.getElementById('vendorEditId').value;
+  const st=document.getElementById('vendorStatus');
+  if(!name||!code){st.textContent='⚠ 업체명과 코드 모두 입력';st.style.color='#e65100';return}
+  if(!/^[A-Z0-9]{1,10}$/.test(code)){st.textContent='⚠ 코드는 영문대문자/숫자 1~10자';st.style.color='#e65100';return}
+  
+  const SB_URL=getSbUrl(),SB_KEY=getSbKey();
+  try{
+    if(editId){
+      const dup=_vendorCache.find(v=>String(v.id)!==editId&&(v.code===code));
+      if(dup){st.textContent='⚠ 동일 코드 존재: '+code;st.style.color='#e65100';return}
+      const r=await fetch(SB_URL+'/rest/v1/common_code?id=eq.'+editId,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+        body:JSON.stringify({code_value:code,description:name})
+      });
+      if(!r.ok){
+        const txt=await r.text().catch(()=>'');
+        st.textContent='❌ 수정 실패 HTTP '+r.status+(txt?': '+txt.substring(0,100):'');
+        st.style.color='#c62828';
+        console.error('[VENDOR] PATCH 실패:',r.status,txt);
+        return;
+      }
+      st.textContent='✅ 수정 완료: '+name+' ('+code+')';
+      st.style.color='#2e7d32';
+    }else{
+      if(_vendorCache.find(v=>v.code===code)){st.textContent='⚠ 이미 존재하는 코드: '+code;st.style.color='#e65100';return}
+      const maxSort=_vendorCache.length?Math.max(..._vendorCache.map(v=>v.sort)):0;
+      const r=await fetch(SB_URL+'/rest/v1/common_code',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
+        body:JSON.stringify({code_group:'vendor_site',code_value:code,description:name,sort_order:maxSort+1})
+      });
+      if(!r.ok){
+        const txt=await r.text().catch(()=>'');
+        let msg='❌ 추가 실패 HTTP '+r.status;
+        if(r.status===401||r.status===403)msg+=' (RLS 권한 차단 - Supabase에서 common_code 테이블 RLS 비활성화 필요)';
+        else if(txt)msg+=': '+txt.substring(0,150);
+        st.textContent=msg;
+        st.style.color='#c62828';
+        console.error('[VENDOR] POST 실패:',r.status,txt);
+        return;
+      }
+      // 응답 검증 — 실제로 INSERT 됐는지 확인
+      const saved=await r.json().catch(()=>null);
+      if(!saved||!saved.length||!saved[0].id){
+        st.textContent='⚠ POST 200이지만 응답에 id 없음 - DB 확인 필요';
+        st.style.color='#e65100';
+        console.warn('[VENDOR] 응답 비정상:',saved);
+        return;
+      }
+      st.textContent='✅ 추가 완료: '+name+' ('+code+') id='+saved[0].id;
+      st.style.color='#2e7d32';
+      console.log('[VENDOR] 저장 성공:',saved[0]);
+    }
+    cancelVendorEdit();
+    await loadVendorsAndRender();
+    showToast('💾 업체 저장 완료');
+  }catch(e){
+    st.textContent='❌ 네트워크 오류: '+e.message;st.style.color='#c62828';
+    console.error('[VENDOR] 예외:',e);
+  }
+}
+function editVendor(idx){
+  const v=_vendorCache[idx];
+  if(!v)return;
+  document.getElementById('vendorName').value=v.name;
+  document.getElementById('vendorCode').value=v.code;
+  document.getElementById('vendorEditId').value=v.id;
+  document.getElementById('vendorFormTitle').textContent='✏️ 업체 수정 중: '+v.name;
+  document.getElementById('vendorSaveBtn').textContent='💾 수정 저장';
+  document.getElementById('vendorCancelBtn').style.display='inline-flex';
+  document.getElementById('vendorStatus').textContent='';
+  document.getElementById('vendorName').focus();
+}
+function cancelVendorEdit(){
+  document.getElementById('vendorName').value='';
+  document.getElementById('vendorCode').value='';
+  document.getElementById('vendorEditId').value='';
+  document.getElementById('vendorFormTitle').textContent='➕ 업체 추가';
+  document.getElementById('vendorSaveBtn').textContent='💾 등록';
+  document.getElementById('vendorCancelBtn').style.display='none';
+}
+async function delVendor(idx){
+  const v=_vendorCache[idx];
+  if(!v)return;
+  if(!confirm(v.name+' ('+v.code+') 를 삭제하시겠습니까?\n\n※ 삭제 후에도 기존 입고 데이터는 영향 없습니다.'))return;
+  try{
+    await fetch(getSbUrl()+'/rest/v1/common_code?id=eq.'+v.id,{
+      method:'DELETE',
+      headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}
+    });
+    await loadVendorsAndRender();
+    showToast('🗑 삭제 완료');
+  }catch(e){
+    showToast('❌ '+e.message);
+  }
+}
+async function moveVendor(idx,dir){
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=_vendorCache.length)return;
+  const SB_URL=getSbUrl(),SB_KEY=getSbKey();
+  try{
+    const reordered=[..._vendorCache];
+    [reordered[idx],reordered[newIdx]]=[reordered[newIdx],reordered[idx]];
+    for(let i=0;i<reordered.length;i++){
+      const v=reordered[i];
+      if(v.sort!==i+1){
+        await fetch(SB_URL+'/rest/v1/common_code?id=eq.'+v.id,{
+          method:'PATCH',
+          headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+          body:JSON.stringify({sort_order:i+1})
+        });
+      }
+    }
+    await loadVendorsAndRender();
+  }catch(e){
+    showToast('❌ 순서변경 실패: '+e.message);
+  }
+}
+function updateConnStatus(){const c=document.getElementById('connStatusInfo');if(!c)return;const sbOk=!!(getSbUrl()&&getSbKey());const mailOk=!!_mailGasUrl;const ntfyCnt=getNtfyRules().length;c.innerHTML=(sbOk?'🟢':'🔴')+' Supabase: '+(sbOk?'설정됨':'미설정')+'<br>'+(mailOk?'🟢':'🔴')+' 메일 알림: '+(mailOk?'서버 설정됨':'미설정')+'<br>'+(ntfyCnt?'🟢':'🔴')+' ntfy: '+ntfyCnt+'개 방'+'<br>'+(_mailRecipients.length?'🟢':'🔴')+' 메일 수신자: '+(_mailRecipients.length?_mailRecipients.length+'명':'미설정')}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  try{
+    const cur=JSON.parse(localStorage.getItem(SB_LS_KEY)||'{}');
+    const isOld=!cur.url||/jgvikmakenpllwxwdugk/.test(cur.url||'')||cur.url!==SB_DEFAULT_URL;
+    if(isOld){
+      localStorage.setItem(SB_LS_KEY,JSON.stringify({url:SB_DEFAULT_URL,key:SB_DEFAULT_KEY}));
+      console.log('[INIT] Supabase 설정 갱신:',SB_DEFAULT_URL);
+    }
+  }catch(e){
+    localStorage.setItem(SB_LS_KEY,JSON.stringify({url:SB_DEFAULT_URL,key:SB_DEFAULT_KEY}));
+  }
+  loadMailGasCfg();
+  _loadAllRulesFromServer();
+  loadVendorsAndRender();
+  loadNoticeAndShow();  // [공지] 페이지 로드 시 공지 자동 팝업
+});
+
+async function _saveRulesToServer(cg,rules){const json=JSON.stringify(rules);try{await fetch(getSbUrl()+'/rest/v1/common_code?code_group=eq.'+cg,{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(rules.length){await fetch(getSbUrl()+'/rest/v1/common_code',{method:'POST',headers:{'Content-Type':'application/json','apikey':getSbKey(),'Authorization':'Bearer '+getSbKey(),'Prefer':'return=representation'},body:JSON.stringify({code_group:cg,code_value:json,sort_order:0})})}}catch(e){console.log('서버 저장 실패('+cg+'):',e)}}
+async function _loadRulesFromServer(cg,lsKey,renderFn){try{const res=await fetch(getSbUrl()+'/rest/v1/common_code?select=*&code_group=eq.'+cg+'&limit=1',{headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(res.ok){const data=await res.json();if(data&&data.length&&data[0].code_value){localStorage.setItem(lsKey,data[0].code_value);if(renderFn)renderFn()}}}catch(e){console.log('서버 로드 실패('+cg+'):',e)}}
+async function _saveAllRulesToServer(){await _saveRulesToServer('mat_chk_ntfy',getNtfyRules())}
+async function _loadAllRulesFromServer(){await _loadRulesFromServer('mat_chk_ntfy','MAT_NTFY_RULES',renderNtfyRules)}
+
+/* ===== 공지사항 (mat_notice) ===== */
+const NOTICE_HIDE_LS = 'MAT_NOTICE_HIDE';  // 오늘 하루 안보기 (날짜 + 공지해시 저장)
+
+function _kstTodayStr(){
+  const d=new Date(Date.now()+9*3600*1000);
+  return d.toISOString().slice(0,10);
+}
+
+async function loadNoticeFromServer(){
+  try{
+    const res=await fetch(getSbUrl()+'/rest/v1/common_code?select=code_value,description&code_group=eq.mat_notice&limit=1',{
+      headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}
+    });
+    if(!res.ok)return null;
+    const data=await res.json();
+    if(!data||!data.length)return null;
+    // code_value=제목, description=내용
+    const title=String(data[0].code_value||'').trim();
+    const body=String(data[0].description||'').trim();
+    if(!title && !body)return null;
+    return {title,body};
+  }catch(e){
+    console.log('공지 로드 실패:',e);
+    return null;
+  }
+}
+
+async function loadNoticeAndShow(){
+  // 설정 화면 입력란에도 미리 채워두기
+  const n=await loadNoticeFromServer();
+  const tEl=document.getElementById('noticeTitle');
+  const bEl=document.getElementById('noticeBody');
+  if(tEl) tEl.value=n?n.title:'';
+  if(bEl) bEl.value=n?n.body:'';
+  if(!n)return;
+  // "오늘 하루 보지 않기" 체크 여부
+  try{
+    const hide=JSON.parse(localStorage.getItem(NOTICE_HIDE_LS)||'{}');
+    const hash=(n.title+'|'+n.body).slice(0,200);
+    if(hide.date===_kstTodayStr() && hide.hash===hash)return;
+  }catch(e){}
+  // 팝업 표시
+  showNoticeModal(n.title,n.body);
+}
+
+function showNoticeModal(title,body){
+  const m=document.getElementById('noticeModal');
+  if(!m)return;
+  document.getElementById('noticeModalTitle').textContent=title||'공지사항';
+  document.getElementById('noticeModalBody').textContent=body||'';
+  document.getElementById('noticeHideToday').checked=false;
+  m.style.display='flex';
+}
+
+function closeNoticeModal(){
+  const m=document.getElementById('noticeModal');
+  if(!m)return;
+  if(document.getElementById('noticeHideToday').checked){
+    const title=document.getElementById('noticeModalTitle').textContent||'';
+    const body=document.getElementById('noticeModalBody').textContent||'';
+    const hash=(title+'|'+body).slice(0,200);
+    localStorage.setItem(NOTICE_HIDE_LS,JSON.stringify({date:_kstTodayStr(),hash}));
+  }
+  m.style.display='none';
+}
+
+async function saveNotice(){
+  const st=document.getElementById('noticeStatus');
+  const title=(document.getElementById('noticeTitle').value||'').trim();
+  const body=(document.getElementById('noticeBody').value||'').trim();
+  st.textContent='저장 중...';st.style.color='#1565c0';
+  try{
+    // 기존 행 삭제 후 1건만 INSERT
+    await fetch(getSbUrl()+'/rest/v1/common_code?code_group=eq.mat_notice',{
+      method:'DELETE',
+      headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}
+    });
+    if(title || body){
+      const res=await fetch(getSbUrl()+'/rest/v1/common_code',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'apikey':getSbKey(),
+          'Authorization':'Bearer '+getSbKey(),
+          'Prefer':'return=minimal'
+        },
+        body:JSON.stringify({code_group:'mat_notice',code_value:title,description:body,sort_order:0})
+      });
+      if(!res.ok){
+        const err=await res.text().catch(()=>'');
+        throw new Error('HTTP '+res.status+' '+err.slice(0,150));
+      }
+    }
+    // 저장하면 "오늘 안보기" 캐시 초기화 (새 공지는 다시 보여야 함)
+    localStorage.removeItem(NOTICE_HIDE_LS);
+    st.textContent='✅ 저장 완료 ('+new Date().toLocaleTimeString()+')';
+    st.style.color='#2e7d32';
+    showToast('💾 공지 저장 완료');
+  }catch(e){
+    st.textContent='❌ '+e.message;
+    st.style.color='#c62828';
+    alert('공지 저장 실패: '+e.message);
+  }
+}
+
+async function clearNotice(){
+  if(!confirm('공지를 완전히 삭제하시겠습니까?\n(접속 시 팝업이 더 이상 표시되지 않습니다)'))return;
+  document.getElementById('noticeTitle').value='';
+  document.getElementById('noticeBody').value='';
+  await saveNotice();
+}
+
+function previewNotice(){
+  const title=(document.getElementById('noticeTitle').value||'').trim();
+  const body=(document.getElementById('noticeBody').value||'').trim();
+  if(!title && !body){alert('제목 또는 내용을 입력하세요');return}
+  showNoticeModal(title,body);
+}
+
+// ESC로 닫기 + 배경 클릭 시 닫기
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const m=document.getElementById('noticeModal');
+    if(m && m.style.display==='flex')closeNoticeModal();
+  }
+});
+document.addEventListener('click',e=>{
+  const m=document.getElementById('noticeModal');
+  if(m && e.target===m)closeNoticeModal();
+});
+
+let _certBatch=[];
+let _certCurrentIdx=0;
+let _certMillsheets={};
+
+const SPEC_HIST_KEY='MATERIAL_CERT_SPEC_HISTORY';
+const SPEC_HIST_MAX=20;
+
+const SPEC_DEFAULTS={
+  r1:['결함없을것','과도한 스크래치 및 오염, Burr 없을것','이물·결함 없을것'],
+  r2:['SPCC','SUS304','SUS430','S55C','S70C','C55E','C67S'],
+  // r3(폭)·r4(두께) 옵션은 동적으로 생성됨 (getDynamicSpecOptions 참조)
+  // 공차 고정: 폭 ±0.1, 두께 ±0.05
+  r3:['33mm ±0.1','64mm ±0.1','90mm ±0.1','94mm ±0.1','102mm ±0.1','105mm ±0.1','118mm ±0.1'],
+  r4:['0.5T ±0.05','0.6T ±0.05','0.7T ±0.05','0.8T ±0.05','1.0T ±0.05','1.2T ±0.05'],
+  // r5(경도)/r6(연신율)/r7(형곡)/r8(평탄도) 제거됨 - 표면/재질/폭/두께 4개만 검사
+};
+
+// 입고된 모든 데이터 기반으로 폭(r3)·두께(r4) 옵션 동적 생성
+// 공차는 항상 폭 ±0.1, 두께 ±0.05
+function getDynamicSpecOptions(key){
+  if(key!=='r3' && key!=='r4') return SPEC_DEFAULTS[key]||[];
+  
+  const tol = (key==='r3') ? '±0.1' : '±0.05';
+  const unit = (key==='r3') ? 'mm' : 'T';
+  const field = (key==='r3') ? 'width' : 'thickness';
+  
+  // 입고 데이터에서 고유 값 수집
+  const values = new Set();
+  if(typeof _certBatch !== 'undefined' && Array.isArray(_certBatch)){
+    _certBatch.forEach(c=>{
+      const v = c?.[field];
+      if(v!==null && v!==undefined && String(v).trim()!=='') values.add(String(v).trim());
+    });
+  }
+  
+  // 동적 옵션 + 기본 옵션 병합
+  const dynamicOpts = Array.from(values).sort((a,b)=>parseFloat(a)-parseFloat(b))
+    .map(v=>`${v}${unit} ${tol}`);
+  const defaultOpts = SPEC_DEFAULTS[key]||[];
+  return [...new Set([...dynamicOpts, ...defaultOpts])];
+}
+
+function getSpecHistoryAll(){
+  try{return JSON.parse(localStorage.getItem(SPEC_HIST_KEY)||'{}')}catch(e){return{}}
+}
+function getSpecHistory(key){
+  const all=getSpecHistoryAll();
+  const userSpecs=Array.isArray(all[key])?all[key]:[];
+  // r3(폭)·r4(두께)는 입고 데이터 기반 동적 옵션 사용 (공차 ±0.1/±0.05 보장)
+  const defaults=(key==='r3'||key==='r4')?getDynamicSpecOptions(key):(SPEC_DEFAULTS[key]||[]);
+  const merged=[...new Set([...userSpecs,...defaults])];
+  return merged;
+}
+function saveSpecHistory(key,value){
+  if(!key||!value)return;
+  const v=String(value).trim();
+  if(!v||v==='-')return;
+  const all=getSpecHistoryAll();
+  let arr=Array.isArray(all[key])?all[key]:[];
+  arr=arr.filter(x=>x!==v);
+  arr.unshift(v);
+  if(arr.length>SPEC_HIST_MAX)arr=arr.slice(0,SPEC_HIST_MAX);
+  all[key]=arr;
+  try{localStorage.setItem(SPEC_HIST_KEY,JSON.stringify(all))}catch(e){console.warn('spec 메모리 저장 실패:',e)}
+}
+
+function prepareCertBatch(){
+  _certBatch=[];_certMillsheets={};
+  if(!_batchData||!_batchData.length){updateCertBadge();return}
+  const vi=getVendorInfo();
+  const today=kstDateStr();
+  const srcCols=Object.keys(_batchData[0]);
+  const colMap={};
+  srcCols.forEach(sc=>{const key=sc.trim().toLowerCase().replace(/\s+/g,'');if(COL_MAP[key])colMap[sc]=COL_MAP[key]});
+  
+  const items=[];
+  _batchData.forEach((raw,i)=>{
+    let mt='',th='',w='',lot='',weight=null;
+    srcCols.forEach(sc=>{const t=colMap[sc];if(!t)return;let v=raw[sc];if(v instanceof Date)v=excelDateToYMD(v);v=String(v||'').trim();if(!v)return;if(t==='_material_type')mt=v;else if(t==='_thickness')th=v;else if(t==='_width')w=v;else if(t==='lot')lot=v;else if(t==='weight')weight=parseFloat(v)||null});
+    if(!mt||!th||!w)return;
+    items.push({idx:i,mt,th,w,lot,weight});
+  });
+  
+  function getLotBase(lot){
+    if(!lot)return '';
+    let s=String(lot).trim();
+    // [Rev5.0] 일련번호 패턴 확장 — A01, A02 같은 영문+숫자 일련번호 인식
+    // 1) 괄호류 일련번호: " (1)", " [2]", " (A01)"
+    s=s.replace(/\s*[\(\[]\s*[A-Za-z]?\d{1,4}\s*[\)\]]\s*$/,'');
+    // 2) 구분자(-, _, /, ., #, 공백) 뒤의 일련번호
+    //    숫자만: 1, 01, 001, 0001
+    //    영문+숫자: A1, A01, B12, C1, AB01 (영문 1~2자 + 숫자 1~3자리)
+    s=s.replace(/[\s\-_\/\.\#]+(?:[A-Za-z]{1,2}\d{1,3}|\d{1,4})$/,'');
+    return s.trim();
+  }
+  
+  const groups={};
+  // [Rev5.3] 그룹키 변경: 공급자+재질+두께+폭 (LOT 제외)
+  // → 같은 공급자가 보낸 같은 사이즈는 LOT 무관하게 1개 성적서로 통합
+  // getLotBase는 LOT 표시(lot_base, lots_display)용으로만 사용
+  const supKey=(vi.code||vi.name||'').toUpperCase().trim();
+  items.forEach(it=>{
+    const lotBase=getLotBase(it.lot);
+    const mtKey=it.mt.toUpperCase().trim();
+    const thKey=String(parseFloat(it.th)||it.th);
+    const wKey=String(parseFloat(it.w)||it.w);
+    const key=`${supKey}|${mtKey}|${thKey}|${wKey}`;
+    if(!groups[key]){
+      groups[key]={
+        material_type:it.mt,
+        thickness:it.th,
+        width:it.w,
+        lot_base:lotBase,
+        lots:[],
+        coil_count:0,
+        total_weight:0,
+        idxs:[]
+      };
+    }
+    const g=groups[key];
+    if(it.lot)g.lots.push(it.lot);
+    g.coil_count++;
+    if(it.weight)g.total_weight+=it.weight;
+    g.idxs.push(it.idx);
+  });
+  
+  Object.values(groups).forEach((g,i)=>{
+    const repLot=g.lot_base||g.lots[0]||'';
+    const lotsDisplay=g.lots.length>1?g.lots.join(', '):repLot;
+    _certBatch.push({
+      idx:i,
+      supplier:vi.name,
+      supplier_code:vi.code,
+      material_type:g.material_type,
+      thickness:g.thickness,
+      width:g.width,
+      lot:repLot,
+      lot_base:g.lot_base,
+      lots_all:g.lots,
+      lots_display:lotsDisplay,
+      heat_no:(repLot||'').replace(/^LOT[-_\s]*/i,''),
+      weight:g.total_weight||null,
+      coil_count:g.coil_count,
+      receipt_date:_batchDate||today,
+      done:false,
+      certData:null
+    });
+  });
+  
+  updateCertBadge();
+}
+
+function updateCertBadge(){
+  const total=_certBatch.length;
+  const done=_certBatch.filter(c=>c.done).length;
+  const el=document.getElementById('certCntBadge');
+  if(el)el.textContent=done+'/'+total;
+}
+
+function openCertRegistration(){
+  if(!_certBatch.length){alert('등록된 소재가 없습니다');return}
+  const next=_certBatch.findIndex(c=>!c.done);
+  _certCurrentIdx=next>=0?next:0;
+  renderCertModal();
+  document.getElementById('certModal').style.display='flex';
+}
+
+function closeCertModal(){
+  document.getElementById('certModal').style.display='none';
+}
+
+function renderCertModal(){
+  const c=_certBatch[_certCurrentIdx];if(!c)return;
+  const isSUS=/SUS|STS|스테인|304|430/i.test(c.material_type);
+  document.getElementById('certNavInfo').textContent=`${_certCurrentIdx+1} / ${_certBatch.length}`;
+  
+  const totalWeight=c.weight?(Math.round(c.weight*100)/100).toLocaleString():'-';
+  const coilBadge=c.coil_count>1?`<span style="display:inline-block;background:#3b82f6;color:#fff;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:700;margin-left:6px">${c.coil_count}개 코일</span>`:'';
+  const lotsHtml=(c.lots_all&&c.lots_all.length>1)?
+    `<div style="margin-top:10px;padding:10px 14px;background:rgba(59,130,246,0.08);border-radius:8px;font-size:13px;color:#1e40af"><b>개별 LOT:</b> ${c.lots_all.join(' · ')}</div>`:'';
+  
+  const row=(label,value,extra)=>
+    `<div class="cert-info-row"><span class="ci-label">${label}</span><span class="ci-value">${value}</span>${extra||''}</div>`;
+  
+  document.getElementById('certInfoBox').innerHTML=
+    `<div class="cert-info-grid">`+
+      row('공급자',c.supplier)+
+      row('유형','4항목 (표면/재질/폭/두께)')+
+      row('재질',c.material_type)+
+      row('두께·폭',`${c.thickness}t × ${c.width}mm`)+
+      row('LOT',c.lot)+
+      row('HEAT NO',c.heat_no)+
+      row('합계 중량',`${totalWeight} kg`,coilBadge)+
+      row('입고일',c.receipt_date)+
+    `</div>`+lotsHtml;
+  
+  const widthSpec=c.width?`${c.width}mm ±0.1`:'';
+  const thickSpec=c.thickness?`${c.thickness}T ±0.05`:'';
+  const items=[
+    {k:'r1',n:'표면',         spec:'결함없을것', type:'text',   step:'',     ph:''},
+    {k:'r2',n:'재질',         spec:c.material_type||'', type:'text',   step:'',     ph:''},
+    {k:'r3',n:'폭(mm)',       spec:widthSpec,           type:'number', step:'0.01', ph:''},
+    {k:'r4',n:'두께(mm)',     spec:thickSpec,           type:'number', step:'0.001',ph:''},
+    // r5(경도)/r6(연신율)/r7(형곡)/r8(평탄도) 제거됨 - 표면/재질/폭/두께 4개만 검사
+  ];
+  
+  let h='<thead><tr>'+
+    '<th style="width:90px">항목</th>'+
+    '<th style="min-width:130px;width:130px">규격</th>'+
+    '<th style="width:70px">X1</th>'+
+    '<th style="width:70px">X2</th>'+
+    '<th style="width:70px">X3</th>'+
+    '<th style="width:80px">판정</th>'+
+    '</tr></thead><tbody>';
+  items.forEach(it=>{
+    const saved=c.certData?.[it.k]||{};
+    const specVal=saved.spec!==undefined?saved.spec:it.spec;
+    const v1=saved.x1!==undefined?saved.x1:'';
+    const v2=saved.x2!==undefined?saved.x2:'';
+    const v3=saved.x3!==undefined?saved.x3:'';
+    const j=saved.j||'OK';
+    const inputType=it.type==='number'?'number':'text';
+    const stepAttr=it.step?` step="${it.step}"`:'';
+    const optClass=it.optional?' optional':'';
+    const specListId=`specList_${it.k}`;
+    const specOpts=getSpecHistory(it.k).map(s=>`<option value="${String(s).replace(/"/g,'&quot;')}">`).join('');
+    h+=`<tr><td><b>${it.n}</b></td>`+
+       `<td><input type="text" value="${String(specVal||'').replace(/"/g,'&quot;')}" data-cert-k="${it.k}" data-cert-x="spec" list="${specListId}" class="spec-input${optClass}" title="기준값 (클릭 시 이전 입력값 선택)" onchange="saveSpecHistory('${it.k}',this.value); readCertModalData();" onblur="saveSpecHistory('${it.k}',this.value)"${it.optional?' placeholder="(선택)"':''}>`+
+       `<datalist id="${specListId}">${specOpts}</datalist></td>`+
+       `<td><input type="${inputType}"${stepAttr} data-cert-k="${it.k}" data-cert-x="x1" value="${v1}" class="meas-input${optClass}" oninput="readCertModalData()"${it.optional?' placeholder="-"':''}></td>`+
+       `<td><input type="${inputType}"${stepAttr} data-cert-k="${it.k}" data-cert-x="x2" value="${v2}" class="meas-input${optClass}" oninput="readCertModalData()"${it.optional?' placeholder="-"':''}></td>`+
+       `<td><input type="${inputType}"${stepAttr} data-cert-k="${it.k}" data-cert-x="x3" value="${v3}" class="meas-input${optClass}" oninput="readCertModalData()"${it.optional?' placeholder="-"':''}></td>`+
+       `<td><label><input type="radio" name="cert_${it.k}_j_${_certCurrentIdx}" value="OK" data-cert-k="${it.k}" data-cert-x="j"${j==='OK'?' checked':''} onchange="readCertModalData()">OK</label>`+
+       `<label><input type="radio" name="cert_${it.k}_j_${_certCurrentIdx}" value="NG" data-cert-k="${it.k}" data-cert-x="j"${j==='NG'?' checked':''} onchange="readCertModalData()">NG</label></td>`+
+       `</tr>`;
+  });
+  document.getElementById('certMeasTable').innerHTML=h+'</tbody>';
+  
+  const ms=_certMillsheets[_certCurrentIdx];
+  const preview=document.getElementById('certMillPreview');
+  if(ms){
+    const fname=ms.originalName||'밀시트';
+    const sizeKB=ms.fileSize?(ms.fileSize/1024).toFixed(0)+' KB':'';
+    if((ms.mimeType||'').startsWith('image/')){
+      preview.innerHTML=`<div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><img src="${ms.dataUrl}" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"><div style="margin-top:8px;font-size:12px;color:#16a34a;font-weight:600">✅ ${fname} ${sizeKB?'('+sizeKB+')':''} 첨부됨</div></div>`;
+    }else if((ms.mimeType||'')==='application/pdf'){
+      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;text-align:center"><div style="font-size:48px;margin-bottom:8px">📄</div><div style="font-size:14px;font-weight:700;color:#991b1b">${fname}</div><div style="margin-top:4px;font-size:12px;color:#7f1d1d">PDF · ${sizeKB}</div><div style="margin-top:10px;font-size:12px;color:#16a34a;font-weight:600">✅ 원본 그대로 메일 첨부됩니다</div></div>`;
+    }else{
+      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><div style="font-size:14px;font-weight:700">${fname}</div><div style="margin-top:4px;font-size:12px;color:#64748b">${ms.mimeType||''} · ${sizeKB}</div><div style="margin-top:8px;font-size:12px;color:#16a34a;font-weight:600">✅ 첨부됨</div></div>`;
+    }
+  }else{
+    preview.innerHTML='<div style="padding:40px 20px;text-align:center;color:#94a3b8;border:2px dashed #cbd5e1;border-radius:10px;background:#fafbfc;font-size:14px;margin-top:10px">📷 밀시트 (사진 또는 PDF)를 첨부하세요<br><span style="font-size:12px;color:#cbd5e1">스마트폰 카메라 / 갤러리 / PDF 파일 모두 가능</span></div>';
+  }
+  
+  const charge=c.certData?.charge||(isSUS?'허미정':'문수진');
+  const sign=c.certData?.sign||'강병주';
+  const finalJ=c.certData?.finalJ||'OK';
+  document.getElementById('certCharge').value=charge;
+  document.getElementById('certSign').value=sign;
+  document.getElementById('certFinalJ').value=finalJ;
+  
+  document.getElementById('certBtnPrev').disabled=_certCurrentIdx===0;
+  document.getElementById('certBtnNext').disabled=_certCurrentIdx>=_certBatch.length-1;
+  updateCertBadge();
+}
+
+// [Rev5.3] 기본값 자동 입력 — 표면/재질=OK, 폭/두께는 SPEC 값을 기본 측정치로 채움
+function fillCertDefaults(){
+  const c=_certBatch[_certCurrentIdx];
+  if(!c){alert('성적서 데이터가 없습니다');return;}
+  
+  // 폭: 소수점 2자리, 두께: 소수점 3자리 (기존 step과 일치)
+  const widthVal=c.width?Number(c.width).toFixed(2):'';
+  const thickVal=c.thickness?Number(c.thickness).toFixed(3):'';
+  
+  // 표면 r1: 모두 OK + 판정 OK
+  ['x1','x2','x3'].forEach(x=>{
+    const el=document.querySelector(`#certMeasTable input[data-cert-k="r1"][data-cert-x="${x}"]`);
+    if(el)el.value='OK';
+  });
+  // 재질 r2: 규격값을 그대로 측정값으로 (예: SPCC)
+  const r2spec=document.querySelector(`#certMeasTable input[data-cert-k="r2"][data-cert-x="spec"]`);
+  const r2val=(r2spec&&r2spec.value.trim())||c.material_type||'OK';
+  ['x1','x2','x3'].forEach(x=>{
+    const el=document.querySelector(`#certMeasTable input[data-cert-k="r2"][data-cert-x="${x}"]`);
+    if(el)el.value=r2val;
+  });
+  // 폭 r3: SPEC 기본값
+  if(widthVal){
+    ['x1','x2','x3'].forEach(x=>{
+      const el=document.querySelector(`#certMeasTable input[data-cert-k="r3"][data-cert-x="${x}"]`);
+      if(el)el.value=widthVal;
+    });
+  }
+  // 두께 r4: SPEC 기본값
+  if(thickVal){
+    ['x1','x2','x3'].forEach(x=>{
+      const el=document.querySelector(`#certMeasTable input[data-cert-k="r4"][data-cert-x="${x}"]`);
+      if(el)el.value=thickVal;
+    });
+  }
+  // 모든 항목 판정 OK
+  ['r1','r2','r3','r4'].forEach(k=>{
+    const el=document.querySelector(`#certMeasTable input[type="radio"][data-cert-k="${k}"][value="OK"]`);
+    if(el)el.checked=true;
+  });
+  // 최종 판정 OK
+  const finalJ=document.getElementById('certFinalJ');
+  if(finalJ)finalJ.value='OK';
+  
+  readCertModalData();
+  // 시각적 피드백
+  const btn=event&&event.target;
+  if(btn){
+    const orig=btn.textContent;
+    btn.textContent='✅ 입력 완료';
+    btn.style.background='#dcfce7';
+    btn.style.borderColor='#16a34a';
+    btn.style.color='#15803d';
+    setTimeout(()=>{
+      btn.textContent=orig;
+      btn.style.background='#fef3c7';
+      btn.style.borderColor='#f59e0b';
+      btn.style.color='#92400e';
+    },1200);
+  }
+}
+
+function readCertModalData(){
+  const c=_certBatch[_certCurrentIdx];if(!c)return;
+  const data={};
+  document.querySelectorAll('#certMeasTable input[data-cert-k][type="text"], #certMeasTable input[data-cert-k][type="number"]').forEach(el=>{
+    const k=el.dataset.certK,x=el.dataset.certX;
+    if(!data[k])data[k]={};
+    data[k][x]=el.value;
+  });
+  document.querySelectorAll('#certMeasTable input[type="radio"][data-cert-k]:checked').forEach(el=>{
+    const k=el.dataset.certK;
+    if(!data[k])data[k]={};
+    data[k].j=el.value;
+  });
+  document.querySelectorAll('#certMeasTable span[data-cert-k][data-cert-x="j"]').forEach(el=>{
+    const k=el.dataset.certK;
+    if(!data[k])data[k]={};
+    data[k].j='-';
+  });
+  data.charge=document.getElementById('certCharge').value.trim();
+  data.sign=document.getElementById('certSign').value.trim();
+  data.finalJ=document.getElementById('certFinalJ').value;
+  c.certData=data;
+}
+
+function certMillsheetUpload(input){
+  const f=input.files[0];if(!f)return;
+  const MAX=10*1024*1024;
+  if(f.size>MAX){
+    alert(`⚠ 파일 용량 초과: ${(f.size/1024/1024).toFixed(1)} MB\n10 MB 이하 파일만 첨부 가능합니다.\nPDF는 압축하거나, 사진은 해상도를 낮춰서 다시 첨부해 주세요.`);
+    input.value='';return;
+  }
+  const r=new FileReader();
+  r.onload=e=>{
+    /* [Rev4.9 핵심수정] 밀시트 첨부 시점에 사용자가 입력한 X1/X2/X3 값 먼저 보존 */
+    readCertModalData();
+    _certMillsheets[_certCurrentIdx]={
+      dataUrl:e.target.result,
+      originalName:f.name,
+      mimeType:f.type||(/\.pdf$/i.test(f.name)?'application/pdf':'image/jpeg'),
+      fileSize:f.size
+    };
+    renderCertModal();
+    showToast(`✅ 밀시트 첨부: ${f.name}`);
+  };
+  r.onerror=()=>{showToast('⚠ 파일 읽기 실패');};
+  r.readAsDataURL(f);
+  input.value='';
+}
+
+function certNavPrev(){
+  try{
+    if(_certCurrentIdx<=0){console.log('첫 번째 항목 - 이전 없음');return}
+    readCertModalData();
+    _certCurrentIdx--;
+    renderCertModal();
+  }catch(e){
+    console.error('이전 버튼 오류:',e);
+    _certCurrentIdx--;
+    if(_certCurrentIdx<0)_certCurrentIdx=0;
+    renderCertModal();
+  }
+}
+function certNavNext(){
+  try{
+    if(_certCurrentIdx>=_certBatch.length-1){console.log('마지막 항목 - 다음 없음');return}
+    readCertModalData();
+    _certCurrentIdx++;
+    renderCertModal();
+  }catch(e){
+    console.error('다음 버튼 오류:',e);
+    _certCurrentIdx++;
+    if(_certCurrentIdx>=_certBatch.length)_certCurrentIdx=_certBatch.length-1;
+    renderCertModal();
+  }
+}
+
+async function certSaveCurrent(){
+  readCertModalData();
+  const c=_certBatch[_certCurrentIdx];
+  const millsheetImg=_certMillsheets[_certCurrentIdx]||null;
+  
+  let saveOk=false, saveErr='';
+  const SB_URL=getSbUrl(),SB_KEY=getSbKey();
+  
+  /* 풀 페이로드 (모든 컬럼) */
+  const fullPayload={
+    supplier:c.supplier,
+    vendor_site_id:c.supplier_code,
+    material_type:c.material_type,
+    thickness:parseFloat(c.thickness)||null,
+    width_mm:parseFloat(c.width)||null,
+    lot_no:c.lot,
+    heat_no:c.heat_no,
+    weight:c.weight,
+    coil_count:c.coil_count||1,
+    lots_detail:(c.lots_all&&c.lots_all.length)?c.lots_all.join(','):c.lot,
+    receipt_date:c.receipt_date,
+    cert_data:c.certData,
+    has_millsheet:!!millsheetImg,
+    final_judge:'대기',  /* 공급자가 측정값 작성해도 수요자 검사 전 → IQC가 "최종:대기"로 표시 */
+    charge:c.certData?.charge||'',
+    sign:c.certData?.sign||'',
+    created_at:kstISOString(new Date())
+  };
+  
+  /* 안전 페이로드 (기본 컬럼만 — 기존 테이블에 새 컬럼 없을 때 폴백) */
+  const safePayload={
+    supplier:c.supplier,
+    vendor_site_id:c.supplier_code,
+    material_type:c.material_type,
+    thickness:parseFloat(c.thickness)||null,
+    width_mm:parseFloat(c.width)||null,
+    lot_no:c.lot,
+    heat_no:c.heat_no,
+    weight:c.weight,
+    receipt_date:c.receipt_date,
+    cert_data:c.certData,
+    has_millsheet:!!millsheetImg,
+    final_judge:'대기',  /* 공급자가 측정값 작성해도 수요자 검사 전 → IQC가 "최종:대기"로 표시 */
+    charge:c.certData?.charge||'',
+    sign:c.certData?.sign||'',
+    created_at:kstISOString(new Date())
+  };
+  
+  async function tryInsert(payload){
+    const res=await fetch(SB_URL+'/rest/v1/inspection_certs',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
+      body:JSON.stringify(payload)
+    });
+    const txt=await res.text().catch(()=>'');
+    return {ok:res.ok, status:res.status, text:txt};
+  }
+  
+  let lastResp=null;
+  try{
+    /* 1차: 풀 페이로드 시도 */
+    let r=await tryInsert(fullPayload);
+    if(r.ok){
+      saveOk=true;
+      lastResp=r;
+      console.log('[CERT] 저장 성공 (full):',r.text.substring(0,200));
+    }else if(/PGRST204|column.*does not exist|Could not find/i.test(r.text)){
+      /* 컬럼 없음 → 안전 페이로드로 재시도 */
+      console.warn('[CERT] 컬럼 누락 - 안전모드 재시도. 응답:',r.status,r.text);
+      r=await tryInsert(safePayload);
+      if(r.ok){
+        saveOk=true;
+        lastResp=r;
+        console.log('[CERT] 저장 성공 (safe):',r.text.substring(0,200));
+      }else{
+        saveErr=`HTTP ${r.status} (안전모드 재시도 실패)\n응답: ${r.text.substring(0,300)}`;
+      }
+    }else{
+      saveErr=`HTTP ${r.status}\n응답: ${r.text.substring(0,300)}`;
+    }
+  }catch(e){
+    saveErr='네트워크 오류: '+(e.message||e);
+    console.error('[CERT] 저장 실패:',e);
+  }
+  
+  if(saveOk){
+    c.done=true;
+    /* ★ 저장 직후 즉시 GET으로 검증 (return=representation으로 응답에 id가 있어야 함) */
+    let verifyMsg='';
+    try{
+      let savedId=null;
+      try{
+        const arr=JSON.parse(lastResp.text);
+        if(Array.isArray(arr)&&arr.length>0&&arr[0].id)savedId=arr[0].id;
+      }catch(_){}
+      
+      if(savedId){
+        /* id로 GET 검증 */
+        const vRes=await fetch(SB_URL+'/rest/v1/inspection_certs?id=eq.'+savedId+'&select=id,supplier,lot_no,created_at',{
+          headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+        });
+        if(vRes.ok){
+          const vData=await vRes.json();
+          if(vData&&vData.length>0){
+            verifyMsg=`✅ 검증 OK (id=${savedId})`;
+            console.log('[CERT] DB 검증 성공:',vData[0]);
+          }else{
+            verifyMsg=`⚠ 저장 후 GET 빈 결과 (id=${savedId}) - RLS 가능성`;
+            console.warn('[CERT] DB 검증 실패: id로 조회되지 않음',savedId);
+          }
+        }
+      }else{
+        /* id 못 받음 → lot+heat로 GET 검증 */
+        const vRes=await fetch(SB_URL+'/rest/v1/inspection_certs?lot_no=eq.'+encodeURIComponent(c.lot)+'&heat_no=eq.'+encodeURIComponent(c.heat_no)+'&select=id,created_at&order=created_at.desc&limit=1',{
+          headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+        });
+        if(vRes.ok){
+          const vData=await vRes.json();
+          if(vData&&vData.length>0){
+            verifyMsg=`✅ 검증 OK (id=${vData[0].id})`;
+            console.log('[CERT] DB 검증 성공 (lot+heat):',vData[0]);
+          }else{
+            verifyMsg=`⚠ POST 200 반환했지만 DB에 행 없음 - RLS 차단 의심`;
+            console.error('[CERT] POST 성공인데 DB에 없음! lot=',c.lot,'heat=',c.heat_no);
+            alert('⚠ 이상: POST는 성공인데 DB에 행이 없습니다.\n→ Supabase RLS 정책이 INSERT는 허용하지만 SELECT는 차단할 가능성.\n→ 또는 Trigger가 ROLLBACK 했을 수 있음.\n\n→ Supabase 콘솔에서 inspection_certs 테이블 직접 확인 필요.');
+          }
+        }
+      }
+    }catch(verifyErr){
+      console.warn('[CERT] 검증 단계 오류:',verifyErr);
+      verifyMsg='⚠ 검증 단계 오류';
+    }
+    showToast('✅ 성적서 저장 완료 '+verifyMsg);
+  }else{
+    /* 실패 시 done 표시 안 함 → 재시도 가능 */
+    /* 큰 모달로 에러 표시 (alert는 모바일에서 작아서 안 보일 수 있음) */
+    const errMsg='⚠ 성적서 저장 실패\n\n'+saveErr+'\n\n→ 다시 [저장 후 다음] 클릭 시 재시도됩니다.\n→ 계속 실패하면 캡처해서 관리자에게 전달하세요.';
+    console.error('[CERT] 최종 실패:',saveErr);
+    alert(errMsg);
+    return;  /* 실패하면 다음 카드로 안 넘어감 */
+  }
+  
+  /* [Rev4.9] 밀시트는 개별 메일 발송 안 함 — 최종등록(doRegister)에서 통합 메일로 발송됨
+     단, Storage 업로드는 별도 (IQC가 자동으로 PDF 첨부 표시) */
+  // if(millsheetImg){
+  //   sendMillsheetMail(c,millsheetImg).catch(e=>console.error('밀시트 메일 발송 실패:',e));
+  // }
+  
+  updateCertBadge();
+  const next=_certBatch.findIndex(x=>!x.done);
+  if(next>=0){_certCurrentIdx=next;renderCertModal()}
+  else{alert('🎉 모든 성적서 작성 완료!');closeCertModal()}
+}
+
+function certSkipCurrent(){
+  if(!confirm('이 성적서를 건너뛰시겠습니까?\n나중에 다시 작성할 수 있습니다.'))return;
+  certNavNext();
+}
+
+async function sendMillsheetMail(c,millsheet){
+  if(!_mailGasUrl){console.log('GAS URL 미설정 - 밀시트 메일 발송 스킵');return}
+  const recipients=(_mailRecipients||[]).filter(v=>v&&v.includes('@'));
+  if(!recipients.length){console.log('수신자 없음 - 밀시트 메일 발송 스킵');return}
+  
+  let dataUrl,originalName,mimeType;
+  if(typeof millsheet==='string'){
+    dataUrl=millsheet;
+    mimeType=dataUrl.match(/data:([^;]+)/)?.[1]||'image/jpeg';
+    originalName='millsheet.'+(mimeType==='application/pdf'?'pdf':(mimeType==='image/png'?'png':'jpg'));
+  }else{
+    dataUrl=millsheet.dataUrl;
+    mimeType=millsheet.mimeType||'application/octet-stream';
+    originalName=millsheet.originalName||'millsheet';
+  }
+  
+  const m=originalName.match(/^(.+?)(\.[^.]+)?$/);
+  const baseName=(m&&m[1])||originalName;
+  const ext=(m&&m[2])||(mimeType==='application/pdf'?'.pdf':(mimeType==='image/png'?'.png':'.jpg'));
+  const meta=`${c.supplier||''}_${c.material_type||''}_${c.thickness||''}t${c.width||''}_LOT${c.lot||''}_${c.heat_no||''}`.replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_').slice(0,80);
+  const filename=`밀시트_${meta}_${baseName}${ext}`.replace(/[\\/:*?"<>|]/g,'_');
+  
+  const subject=`📎 밀시트 — ${c.supplier} / ${c.material_type} ${c.thickness}t × ${c.width}mm / LOT ${c.lot}`;
+  const totalWeightDisp=c.weight?(Math.round(c.weight*100)/100).toLocaleString():'-';
+  const coilLine=(c.coil_count&&c.coil_count>1)?
+    `<tr><td style="padding:5px 0;color:#888">코일수</td><td><b>${c.coil_count}개</b></td></tr>`:'';
+  const lotsLine=(c.lots_all&&c.lots_all.length>1)?
+    `<tr><td style="padding:5px 0;color:#888">개별 LOT</td><td style="font-size:11px;color:#1565c0">${c.lots_all.join(', ')}</td></tr>`:'';
+  const fileTypeLabel=mimeType==='application/pdf'?'PDF':(mimeType.startsWith('image/')?'이미지':mimeType);
+  const html=`
+<div style="font-family:sans-serif;max-width:600px">
+  <div style="background:#1a237e;color:#fff;padding:14px 20px;border-radius:8px 8px 0 0">
+    <h2 style="margin:0;font-size:16px">📎 밀시트 첨부 — 성적서 등록 완료</h2>
+  </div>
+  <div style="padding:18px 20px;background:#f8f9fa;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px">
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+      <tr><td style="padding:5px 0;color:#888;width:90px">공급자</td><td style="font-weight:700">${c.supplier}</td></tr>
+      <tr><td style="padding:5px 0;color:#888">재질</td><td>${c.material_type}</td></tr>
+      <tr><td style="padding:5px 0;color:#888">규격</td><td>${c.thickness}t × ${c.width}mm</td></tr>
+      <tr><td style="padding:5px 0;color:#888">LOT NO</td><td>${c.lot}</td></tr>
+      ${lotsLine}
+      <tr><td style="padding:5px 0;color:#888">HEAT NO</td><td>${c.heat_no}</td></tr>
+      ${coilLine}
+      <tr><td style="padding:5px 0;color:#888">합계 중량</td><td><b>${totalWeightDisp} KG</b></td></tr>
+      <tr><td style="padding:5px 0;color:#888">입고일</td><td>${c.receipt_date}</td></tr>
+      <tr><td style="padding:5px 0;color:#888">최종판정</td><td style="font-weight:700;color:${(c.certData?.finalJ==='NG')?'#c62828':'#2e7d32'}">${c.certData?.finalJ||'OK'}</td></tr>
+      <tr><td style="padding:5px 0;color:#888">첨부파일</td><td>${filename} <span style="color:#64748b">(${fileTypeLabel})</span></td></tr>
+    </table>
+    <div style="margin-top:12px;padding:10px;background:#fff3e0;border-radius:4px;font-size:12px;color:#e65100">
+      📌 첨부파일: 밀시트 원본 (${fileTypeLabel}) — 업로드한 파일이 그대로 첨부됩니다<br>
+      📌 성적서 데이터는 시스템에 자동 등록되어 있습니다 (material_IQC.html)
+    </div>
+  </div>
+</div>`;
+  const base64Data=dataUrl.split(',')[1]||dataUrl;
+  try{
+    const res=await fetch(_mailGasUrl,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({
+        action:'sendMail',
+        subject:subject,
+        html:html,
+        text:subject,
+        recipients:recipients,
+        attachments:[{name:filename,base64:base64Data,mimeType:mimeType}]
+      })
+    });
+    if(res.ok){
+      showToast(`📧 밀시트 메일 발송 (${fileTypeLabel})`);
+    }else{
+      console.error('GAS 메일 실패 status:',res.status);
+      showToast('⚠ 메일 발송 실패 (HTTP '+res.status+')');
+    }
+  }catch(e){
+    console.error('GAS 메일 실패:',e);
+    showToast('⚠ 메일 발송 실패');
+  }
+}
+
+(function(){
+  const _origGoStep=window.goStep;
+  window.goStep=function(n){
+    _origGoStep.apply(this,arguments);
+    if(n===3||n===4)setTimeout(prepareCertBatch,500);
+  };
+})();
+
+function openCertRegistrationFromStep3(){
+  if(!_certBatch||!_certBatch.length)prepareCertBatch();
+  if(!_certBatch.length){alert('성적서 작성 대상이 없습니다.\n재질·두께·폭이 입력된 데이터가 있는지 확인하세요.');return}
+  openCertRegistration();
+}
+
+const _origUpdateCertBadge=window.updateCertBadge;
+window.updateCertBadge=function(){
+  if(_origUpdateCertBadge)_origUpdateCertBadge.apply(this,arguments);
+  const total=_certBatch.length;
+  const done=_certBatch.filter(c=>c.done).length;
+  const elStep3=document.getElementById('certCntBadgeStep3');
+  if(elStep3)elStep3.textContent=done+'/'+total;
+};
+</script>
+
+<!-- ===== 성적서 등록 모달 (흑백 단순 표 스타일) ===== -->
+<div id="certModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.7);z-index:9999;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(3px)">
+  <div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:95vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
+    <!-- 헤더 -->
+    <div style="padding:18px 24px;background:#fff;color:#000;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000;border-radius:14px 14px 0 0">
+      <div style="font-size:18px;font-weight:700;letter-spacing:-0.3px;color:#000">
+        검사 성적서 작성
+        <span style="font-size:13px;font-weight:500;color:#555;margin-left:10px;border:1px solid #888;padding:3px 10px;border-radius:4px">
+          <span id="certNavInfo">1 / 1</span>
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="fillCertDefaults()" title="외관·재질=OK / 폭·두께는 SPEC 기본값 자동 입력" style="background:#fef3c7;border:1.5px solid #f59e0b;color:#92400e;font-size:13px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:6px;transition:all 0.2s" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">🪄 기본값</button>
+        <button onclick="closeCertModal()" style="background:#fff;border:1px solid #888;color:#000;font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">×</button>
+      </div>
+    </div>
+    
+    <div style="padding:22px 26px">
+      <!-- 정보 박스 (단순화) -->
+      <div id="certInfoBox" style="padding:14px 18px;background:#fafafa;border:1px solid #ccc;border-radius:6px;font-size:14px;line-height:1.8;color:#000;margin-bottom:18px"></div>
+      
+      <!-- 측정값 표 제목 -->
+      <div style="font-size:15px;font-weight:700;color:#000;margin-bottom:8px">
+        측정값 (공급자 측정치)
+      </div>
+      <!-- 격자표 CSS - 강제 적용 -->
+      <style>
+        /* ============ 가는 검정선 격자표 (강제 적용) ============ */
+        #certMeasTable, #certMeasTable *{
+          box-sizing:border-box !important;
+        }
+        #certMeasTable{
+          border-collapse:collapse !important;
+          border-spacing:0 !important;
+          background:#fff !important;
+          border:1px solid #000 !important;
+          width:100% !important;
+          font-size:14px !important;
+          margin-bottom:20px !important;
+          table-layout:fixed !important;
+        }
+        #certMeasTable thead{display:table-header-group !important}
+        #certMeasTable tbody{display:table-row-group !important}
+        #certMeasTable tr{display:table-row !important}
+        #certMeasTable thead th{
+          background:#fff !important;
+          padding:8px 4px !important;
+          border:1px solid #000 !important;
+          text-align:center !important;
+          color:#000 !important;
+          font-weight:700 !important;
+          font-size:14px !important;
+          display:table-cell !important;
+        }
+        #certMeasTable tbody td{
+          padding:0 !important;
+          border:1px solid #000 !important;
+          text-align:center !important;
+          background:#fff !important;
+          font-size:14px !important;
+          color:#000 !important;
+          height:36px !important;
+          display:table-cell !important;
+          vertical-align:middle !important;
+        }
+        #certMeasTable tbody td:first-child{
+          font-weight:700 !important;
+          color:#000 !important;
+          background:#fff !important;
+          font-size:14px !important;
+          padding:6px 8px !important;
+          text-align:center !important;
+          white-space:nowrap !important;
+        }
+        /* input - 모든 브라우저 기본 스타일 완전 제거 */
+        #certMeasTable input[type="text"],
+        #certMeasTable input[type="number"]{
+          padding:6px 4px !important;
+          border:0 !important;
+          border-width:0 !important;
+          border-style:none !important;
+          border-radius:0 !important;
+          font-size:14px !important;
+          font-family:inherit !important;
+          font-weight:500 !important;
+          color:#000 !important;
+          background:transparent !important;
+          background-color:transparent !important;
+          background-image:none !important;
+          width:100% !important;
+          height:100% !important;
+          min-height:34px !important;
+          box-sizing:border-box !important;
+          box-shadow:none !important;
+          outline:none !important;
+          outline-width:0 !important;
+          display:block !important;
+          text-align:center !important;
+          margin:0 !important;
+          -webkit-appearance:none !important;
+          -moz-appearance:none !important;
+          appearance:none !important;
+          -webkit-tap-highlight-color:transparent !important;
+        }
+        #certMeasTable input[type="text"]:hover,
+        #certMeasTable input[type="number"]:hover{
+          background:#f8f8f8 !important;
+          background-color:#f8f8f8 !important;
+        }
+        #certMeasTable input[type="text"]:focus,
+        #certMeasTable input[type="number"]:focus{
+          background:#fffbe6 !important;
+          background-color:#fffbe6 !important;
+          outline:none !important;
+          box-shadow:none !important;
+        }
+        #certMeasTable input.meas-input{text-align:center !important}
+        #certMeasTable input.spec-input{
+          text-align:left !important;
+          padding:6px 8px !important;
+          font-size:13px !important;
+          font-weight:500 !important;
+        }
+        #certMeasTable input.optional{color:#888 !important}
+        #certMeasTable td:last-child{
+          padding:4px 2px !important;
+          white-space:nowrap !important;
+        }
+        #certMeasTable label{
+          cursor:pointer !important;
+          display:inline-flex !important;
+          align-items:center !important;
+          gap:3px !important;
+          font-size:12px !important;
+          font-weight:600 !important;
+          color:#000 !important;
+          margin:0 2px !important;
+          padding:2px 4px !important;
+          background:transparent !important;
+          border:0 !important;
+          border-radius:0 !important;
+        }
+        #certMeasTable input[type="radio"]{
+          width:13px !important;
+          height:13px !important;
+          cursor:pointer !important;
+          accent-color:#000 !important;
+          margin:0 !important;
+        }
+        /* 모바일 */
+        @media (max-width:640px){
+          #certMeasTable{min-width:480px !important}
+          #certMeasTable thead th{padding:6px 3px !important;font-size:12px !important}
+          #certMeasTable tbody td{font-size:12px !important;height:32px !important}
+          #certMeasTable tbody td:first-child{font-size:12px !important;padding:4px 6px !important}
+          #certMeasTable input[type="text"],
+          #certMeasTable input[type="number"]{
+            padding:5px 3px !important;font-size:12px !important;min-height:30px !important;
+          }
+          #certMeasTable input.spec-input{font-size:11px !important;padding:5px 6px !important}
+          #certMeasTable label{font-size:11px !important;padding:2px 2px !important;margin:0 1px !important}
+          #certMeasTable input[type="radio"]{width:12px !important;height:12px !important}
+        }
+      </style>
+      <div class="cert-table-wrap">
+      <table id="certMeasTable">
+      </table>
+      </div><!-- /.cert-table-wrap -->
+
+      <style>
+        #certBtnPrev:disabled, #certBtnNext:disabled{
+          opacity:0.4 !important;
+          cursor:not-allowed !important;
+          background:#f5f5f5 !important;
+          color:#aaa !important;
+          border-color:#ccc !important;
+        }
+      </style>
+      
+      <!-- 담당자 / 판정 (단순화) -->
+      <div class="cert-charge-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px">
+        <div>
+          <label style="font-size:13px;color:#000;font-weight:600;display:block;margin-bottom:5px">담당자</label>
+          <input type="text" id="certCharge" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:14px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
+        </div>
+        <div>
+          <label style="font-size:13px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 서명자</label>
+          <input type="text" id="certSign" placeholder="작성/검토/승인자" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:14px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
+        </div>
+        <div>
+          <label style="font-size:13px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 판정</label>
+          <select id="certFinalJ" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:14px;font-family:inherit;font-weight:600;color:#000;background:#fff;cursor:pointer">
+            <option>OK</option>
+            <option>NG</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- 밀시트 첨부 -->
+      <div style="font-size:15px;font-weight:700;color:#000;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #000">
+        📎 밀시트 첨부 (선택)
+      </div>
+      <div style="background:#fafafa;padding:12px 14px;border:1px solid #ccc;border-radius:4px;margin-bottom:8px">
+        <input type="file" id="certMillFile" accept="image/*,application/pdf,.pdf" onchange="certMillsheetUpload(this)" style="font-size:14px;font-family:inherit">
+        <div style="font-size:12px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 업로드한 원본 그대로 메일 첨부 (최대 10 MB)</div>
+      </div>
+      <div id="certMillPreview"></div>
+    </div>
+    
+    <!-- 하단 버튼 (단순화) -->
+    <div style="padding:16px 26px;background:#fafafa;border-radius:0 0 14px 14px;display:flex;gap:10px;flex-wrap:wrap;border-top:1.5px solid #000">
+      <button id="certBtnPrev" onclick="certNavPrev()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">◀ 이전</button>
+      <button onclick="certSkipCurrent()" style="padding:10px 20px;background:#fff;color:#666;border:1.5px solid #888;border-radius:4px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">건너뛰기</button>
+      <div style="flex:1"></div>
+      <button onclick="certSaveCurrent()" style="padding:11px 26px;background:#000;color:#fff;border:1.5px solid #000;border-radius:4px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">💾 저장 후 다음</button>
+      <button id="certBtnNext" onclick="certNavNext()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">다음 ▶</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('certModal').addEventListener('click',e=>{if(e.target.id==='certModal')closeCertModal()});
+</script>
+</body>
+</html>
