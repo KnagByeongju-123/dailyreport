@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.51</title>
+<title>프레스 생산관리 Rev.7.52</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -201,9 +201,32 @@
   .ps-crown {
     background: #334155; color: #e2e8f0; border-radius: 9px 9px 0 0;
     padding: 5px 8px; font-size: 10px; font-weight: 800; letter-spacing: -.2px;
-    display: flex; align-items: center; gap: 5px; justify-content: center;
+    display: flex; align-items: center; gap: 5px; justify-content: center; flex-wrap: wrap;
   }
   .ps-crown b { color: #fbbf24; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ps-crown-info {
+    display: none; width: 100%; justify-content: center; align-items: center; gap: 5px;
+    margin-top: 3px; padding-top: 3px; border-top: 1px solid rgba(255,255,255,.22);
+    font-size: 10.5px; font-weight: 800; letter-spacing: -.3px;
+  }
+  .ps-crown-info.show { display: flex; }
+  .ps-crown-info .cw-spm { color: #e2e8f0; font-variant-numeric: tabular-nums; }
+  .ps-crown-info .cw-dev { padding: 1px 6px; border-radius: 20px; font-size: 10px; }
+  .ps-crown-info .cw-dev.ok { background: #16a34a; color: #fff; }
+  .ps-crown-info .cw-dev.warn { background: #f59e0b; color: #3b2405; }
+  .ps-crown-info .cw-dev.danger { background: #dc2626; color: #fff; }
+  .ps-crown-info .cw-stop { color: #fecaca; }
+  .ps-crown-info .cw-time { font-family: ui-monospace, monospace; color: #fff; font-size: 11.5px; }
+
+  /* 코일 길게 누르기(0.8초) 사용완료 */
+  .ps-coil.holding { box-shadow: 0 0 0 5px rgba(22,163,74,.35), 0 3px 9px rgba(22,163,74,.5); }
+  .ps-hold {
+    display: none; width: var(--coil); height: 5px; border-radius: 3px;
+    background: #cbd5e1; overflow: hidden; margin-top: 2px;
+  }
+  .ps-hold.show { display: block; }
+  .ps-hold span { display: block; width: 0; height: 100%; background: #16a34a; animation: psHold .8s linear forwards; }
+  @keyframes psHold { from { width: 0; } to { width: 100%; } }
   .ps-frame {
     border: 3px solid #334155; border-top: none; border-radius: 0 0 4px 4px;
     background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 100%);
@@ -960,7 +983,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.51</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.52</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -989,7 +1012,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.51</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.52</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1044,9 +1067,10 @@
     <div class="ps-line">
       <div class="ps-mat">
         <span class="ps-ring" id="psRing"></span>
-        <button type="button" class="ps-coil" id="psCoil" onclick="coilAction()" title="소재 LOT">
+        <button type="button" class="ps-coil" id="psCoil" title="소재 LOT">
           <span class="ps-coil-tap" id="psCoilTap">＋</span>
         </button>
+        <div class="ps-hold" id="psHold"><span></span></div>
         <div class="ps-stand"></div>
         <div class="ps-cap">소재 코일<b id="psLotName">LOT 미선택</b><em id="psCoilRemain"></em><i id="psCoilHint">탭하여 선택</i></div>
       </div>
@@ -1054,7 +1078,10 @@
       <div class="ps-feed"><i></i><span>▶</span><i></i></div>
 
       <div class="ps-press">
-        <div class="ps-crown">PRESS<b id="psMachineName">호기 미선택</b></div>
+        <div class="ps-crown">
+          <span class="ps-crown-t">PRESS</span><b id="psMachineName">호기 미선택</b>
+          <span class="ps-crown-info" id="psCrownInfo"></span>
+        </div>
         <div class="ps-frame">
           <div class="ps-slide"></div>
           <div class="ps-btns">
@@ -3702,6 +3729,7 @@ function updateUI() {
       ? (sel.machine.machine_code + (sel.machine.machine_name ? ' ' + sel.machine.machine_name : ''))
       : '호기 미선택';
     renderCoilState();
+    renderCrownInfo();
   }
   updateWorkStageGuide(runCode);
   if (hint && Date.now() > _hintUntil) {
@@ -4356,6 +4384,7 @@ function espRender() {
   }
 
   document.getElementById('espSpm').textContent = espState.spm ? '실측 SPM ' + espState.spm : '실측 SPM —';
+  renderCrownInfo();
   document.getElementById('espLastSig').textContent = espState.lastSigAt
     ? '마지막 신호 ' + new Date(espState.lastSigAt).toLocaleTimeString('ko-KR', { hour12: false })
     : '마지막 신호 —';
@@ -5200,6 +5229,34 @@ function renderLotSelect() {
   if (document.getElementById('matPickModal').classList.contains('show')) renderMatPickList();
 }
 
+// [Rev.7.52] 크라운 표시 — 정지 중이면 정지사유·경과, 가동 중이면 실측/기준 SPM 편차
+function renderCrownInfo() {
+  const el = document.getElementById('psCrownInfo');
+  if (!el) return;
+  const runCode = runningStopCode();
+  if (runCode) {
+    const sc = STOP_CODES.find(function(x) { return x.code === runCode; });
+    el.className = 'ps-crown-info show';
+    el.innerHTML = '<span class="cw-stop">⏱ ' + escHtml(sc ? sc.name : runCode) + ' 정지</span>' +
+                   '<span class="cw-time">' + fmtTime(getCurrentMs(runCode)) + '</span>';
+    return;
+  }
+  if (!session.active) { el.className = 'ps-crown-info'; el.innerHTML = ''; return; }
+  const std = getMoldStandardSpm(sel.mold);
+  const act = espState.spm;
+  if (!(std > 0)) { el.className = 'ps-crown-info'; el.innerHTML = ''; return; }
+  if (!(act > 0)) {
+    el.className = 'ps-crown-info show';
+    el.innerHTML = '<span class="cw-spm">기준 ' + Number(std).toLocaleString() + ' SPM · 실측 —</span>';
+    return;
+  }
+  const dev = (act - std) / std * 100;
+  const cls = Math.abs(dev) <= 5 ? 'ok' : Math.abs(dev) <= 15 ? 'warn' : 'danger';
+  el.className = 'ps-crown-info show';
+  el.innerHTML = '<span class="cw-spm">SPM ' + act.toLocaleString() + ' / ' + Number(std).toLocaleString() + '</span>' +
+                 '<span class="cw-dev ' + cls + '">' + (dev >= 0 ? '+' : '') + dev.toFixed(0) + '%</span>';
+}
+
 // 코일 이미지 상태 (LOT 표시 / 활성화)
 function renderCoilState() {
   const tap = document.getElementById('psCoilTap');
@@ -5209,17 +5266,58 @@ function renderCoilState() {
   const done = !!(sel.lot && session.active);
   if (nm) nm.textContent = sel.lot ? sel.lot : 'LOT 미선택';
   if (tap) tap.textContent = sel.lot ? '✓' : '＋';
-  if (hint) hint.textContent = done ? '탭 → 사용완료' : (sel.lot ? '탭 → LOT 변경' : '탭하여 선택');
-  if (coil) coil.title = done ? ('현재 LOT ' + sel.lot + ' 사용완료 처리')
+  if (hint) hint.textContent = done ? '길게 눌러 사용완료' : (sel.lot ? '탭 → LOT 변경' : '탭하여 선택');
+  if (coil) coil.title = done ? ('현재 LOT ' + sel.lot + ' · 0.8초 길게 눌러 사용완료')
                              : (sel.lot ? ('현재 LOT ' + sel.lot + ' · 눌러서 변경')
                                         : (sel.mold ? '소재 LOT 선택 (QR / 직접입력)' : '금형을 먼저 선택하세요'));
 }
 
-// [Rev.7.50] 코일 클릭 — LOT 없으면 선택, 가동중 LOT 있으면 사용완료 확인 후 진행
+// [Rev.7.52] 코일 조작 — 가동 중 사용완료는 0.8초 길게 누르기(오탭 방지)
+const COIL_HOLD_MS = 800;
+let _coilTimer = null, _coilLong = false;
+function coilHoldTarget() { return !!(sel.lot && session.active); }
+function coilPressStart(e) {
+  _coilLong = false;
+  if (!coilHoldTarget()) return;
+  if (e && e.type === 'mousedown' && e.button !== 0) return;
+  const c = document.getElementById('psCoil'), h = document.getElementById('psHold');
+  if (c) c.classList.add('holding');
+  if (h) { h.classList.remove('show'); void h.offsetWidth; h.classList.add('show'); }
+  if (navigator.vibrate) navigator.vibrate(20);
+  _coilTimer = setTimeout(function() {
+    _coilTimer = null; _coilLong = true;
+    coilPressReset();
+    if (navigator.vibrate) navigator.vibrate([50, 40, 90]);
+    completeCurrentMaterial();
+  }, COIL_HOLD_MS);
+}
+function coilPressReset() {
+  if (_coilTimer) { clearTimeout(_coilTimer); _coilTimer = null; }
+  const c = document.getElementById('psCoil'), h = document.getElementById('psHold');
+  if (c) c.classList.remove('holding');
+  if (h) h.classList.remove('show');
+}
+function coilPressCancel() { coilPressReset(); }
 function coilAction() {
-  if (sel.lot && session.active) { completeCurrentMaterial(); return; }
+  if (_coilLong) { _coilLong = false; return; }
+  if (coilHoldTarget()) {
+    showHint('📦 소재완료는 코일을 <b>0.8초 길게</b> 눌러주세요');
+    if (navigator.vibrate) navigator.vibrate([25, 40, 25]);
+    return;
+  }
   openMatPick();
 }
+(function bindCoil() {
+  const c = document.getElementById('psCoil');
+  if (!c) return;
+  c.addEventListener('mousedown', coilPressStart);
+  c.addEventListener('touchstart', coilPressStart, { passive: true });
+  ['mouseup', 'mouseleave', 'touchend', 'touchcancel', 'touchmove'].forEach(function(ev) {
+    c.addEventListener(ev, coilPressCancel);
+  });
+  c.addEventListener('click', coilAction);
+  c.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+})();
 
 /* ===== 소재 LOT 선택 모달 ===== */
 function openMatPick() {
