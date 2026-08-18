@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.56</title>
+<title>프레스 생산관리 Rev.7.58</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -319,6 +319,37 @@
   .tpl-note { font-size: 11px; font-weight: 700; color: #64748b; line-height: 1.55; margin: 8px 0 10px;
     background: #f1f5f9; border-radius: 8px; padding: 8px 10px; }
   .insp-chip.off { background: #94a3b8; }
+
+  /* [Rev.7.57] 소재발주 품목 표 */
+  .ord-lines-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;
+    margin: 12px 0 6px; font-size: 12px; font-weight: 800; color: #475569; }
+  .ord-lines-head b { color: #0369a1; }
+  .olh-acts { display: flex; gap: 5px; }
+  .ol-btn { padding: 7px 10px; border: none; border-radius: 7px; font-size: 11.5px; font-weight: 800;
+    cursor: pointer; color: #fff; font-family: inherit; }
+  .ol-btn.add { background: #16a34a; }
+  .ol-btn.clr { background: #f8fafc; color: #475569; border: 1.5px solid #cbd5e1; }
+  .ol-btn:active { transform: scale(.97); }
+  table.ord-lines th, table.ord-lines td { padding: 4px 3px; }
+  table.ord-lines td.ol-no { text-align: center; font-size: 11px; font-weight: 800; color: #94a3b8; }
+  .ol-in { width: 100%; min-width: 52px; padding: 7px 6px; border: 1.5px solid #cbd5e1; border-radius: 6px;
+    font-size: 13px; font-family: inherit; background: #fff; color: #0f172a; }
+  .ol-in.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .ol-in:focus { outline: none; border-color: #38bdf8; background: #f0f9ff; }
+  .ol-del { width: 28px; height: 30px; padding: 0; border: 1.5px solid #fca5a5; background: #fef2f2;
+    color: #dc2626; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  table.ord-lines tfoot td { background: #f1f5f9; font-size: 12px; }
+  table.ord-lines tfoot b { color: #0369a1; font-size: 14px; }
+  .od-toggle { margin-top: 4px; padding: 3px 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569;
+    border-radius: 20px; font-size: 10px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  tr.od-detail td { background: #f8fafc; padding: 8px 10px; }
+  .od-line { display: flex; align-items: center; gap: 7px; padding: 4px 0; border-bottom: 1px dashed #e2e8f0; font-size: 12px; }
+  .od-line:last-child { border-bottom: none; }
+  .od-no { width: 18px; flex-shrink: 0; text-align: center; font-size: 10px; font-weight: 800; color: #94a3b8; }
+  .od-spec { font-weight: 800; color: #334155; }
+  .od-w { margin-left: auto; font-weight: 800; color: #0369a1; font-variant-numeric: tabular-nums; }
+  .od-note { font-size: 10.5px; color: #94a3b8; font-weight: 700; }
+  .od-req { margin-top: 6px; font-size: 11px; font-weight: 700; color: #64748b; }
   .mold-shot-sub { font-size: 10px; color: #94a3b8; font-weight: 700; }
   .mold-shot-sub b { color: #475569; }
   .insp-chip { display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 20px; font-size: 9px; font-weight: 800; color: #fff; }
@@ -1055,7 +1086,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.56</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.58</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1084,7 +1115,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.56</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.58</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1224,18 +1255,30 @@
   </div>
 
   <div class="card">
-    <div class="sec-title">🧾 소재발주 등록 <span class="right">발주 → 업체발송 → 수입검사 순서로 관리</span></div>
+    <div class="sec-title">🧾 소재발주 등록 <span class="right">업체 1곳에 여러 규격 일괄 발주</span></div>
     <div class="flow-guide">발주 정보는 이 생산일보 화면에서 관리합니다. 업체가 발송 등록을 하면 상단 <b>소재발송</b>에서 확인하고, 입고 후 <b>수입검사</b>에서 검사 처리할 수 있습니다.</div>
     <div class="form-grid">
       <div class="fld"><label>발주일 *</label><input type="date" id="ordDate"></div>
       <div class="fld"><label>납기예정일</label><input type="date" id="ordDueDate"></div>
       <div class="fld full"><label>공급업체 *</label><input type="text" id="ordVendor" placeholder="업체명"></div>
-      <div class="fld"><label>재질 *</label><input type="text" id="ordMaterial" placeholder="예: SPCC"></div>
-      <div class="fld"><label>두께(T)</label><input type="number" id="ordThickness" min="0" step="0.001" inputmode="decimal"></div>
-      <div class="fld"><label>폭(W)</label><input type="number" id="ordWidth" min="0" step="0.01" inputmode="decimal"></div>
-      <div class="fld"><label>발주중량(kg) *</label><input type="number" id="ordWeight" min="0" step="0.1" inputmode="decimal"></div>
-      <div class="fld full"><label>요청사항 / 비고</label><input type="text" id="ordNote" placeholder="납기, 포장, 성적서 요청 등"></div>
+      <div class="fld full"><label>요청사항 / 비고 (발주 전체)</label><input type="text" id="ordNote" placeholder="납기, 포장, 성적서 요청 등"></div>
     </div>
+
+    <div class="ord-lines-head">
+      <span>📦 발주 품목 <b id="ordLineCount">0</b> / 10</span>
+      <span class="olh-acts">
+        <button class="ol-btn add" onclick="addOrderLine()">✚ 행추가</button>
+        <button class="ol-btn clr" onclick="resetOrderLines()">↺ 비우기</button>
+      </span>
+    </div>
+    <div class="tbl-wrap">
+      <table class="mtable ord-lines" id="ordLineTable">
+        <thead><tr><th style="width:26px">#</th><th>재질 *</th><th style="width:64px">두께(T)</th><th style="width:64px">폭(W)</th><th style="width:76px">중량(kg) *</th><th>비고</th><th style="width:34px"></th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td colspan="4" style="text-align:right;font-weight:800">합계</td><td class="num"><b id="ordTotalWeight">0</b> kg</td><td colspan="2"></td></tr></tfoot>
+      </table>
+    </div>
+
     <button class="btn-primary" onclick="saveMaterialOrder()">✅ 소재발주 등록</button>
     <div style="margin-top:6px"><button class="btn-gray" onclick="clearMaterialOrderForm(true)">✚ 새 발주 입력</button></div>
   </div>
@@ -1247,11 +1290,11 @@
       <button class="pri" onclick="switchWorkTab('t-mat-dispatch')">📤 업체 발송현황 보기</button>
       <button class="green" onclick="switchWorkTab('t-iqc')">🔎 수입검사 보기</button>
     </div>
-    <div class="order-local-note">※ 발주 목록은 현재 브라우저에 저장됩니다. 발송·수입검사 현황은 기존 소재 시스템 DB에서 조회합니다.</div>
+    <div class="order-local-note" id="ordStoreNote">※ 발주 목록은 서버(pd_material_order)에 저장되어 모든 기기에서 동일하게 조회됩니다. 발송·수입검사 현황은 소재 시스템 DB에서 조회합니다.</div>
     <div class="search-row" style="margin-top:8px"><input type="text" id="ordSearch" placeholder="발주번호 / 업체 / 재질 / 규격 검색" oninput="renderMaterialOrders()"></div>
     <div class="tbl-wrap">
       <table class="mtable" id="ordTable">
-        <thead><tr><th>발주 / 납기</th><th>업체 / 규격</th><th>중량</th><th>상태</th><th></th></tr></thead>
+        <thead><tr><th>발주 / 납기</th><th>업체 / 품목</th><th>중량</th><th>상태</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -2345,7 +2388,7 @@ function switchTab(id, btn) {
   closeDrawer();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (id === 't-report') renderReportSummary();
-  if (id === 't-mat-order') { renderMaterialOrders(); refreshMaterialFlowStatus(false); }
+  if (id === 't-mat-order') { if (!ordLines.length) resetOrderLines(); fetchMaterialOrders(); refreshMaterialFlowStatus(false); }
   if (id === 't-mat-dispatch') { ensureMaterialFrame('matDispatchFrame'); refreshMaterialFlowStatus(false); }
   if (id === 't-iqc') { ensureMaterialFrame('matIqcFrame'); refreshMaterialFlowStatus(false); }
   if (id === 't-material') { renderMaterialPresets(); loadMaterialReceipts(); loadPendingCerts(false); }
@@ -2369,15 +2412,71 @@ const MATERIAL_SB_KEY = PD_KEY;
 let materialOrders = loadMaterialOrders();
 let materialFlowCache = { certs: [], insps: [], at: 0 };
 
+/* [Rev.7.58] 소재발주는 서버(pd_material_order)에 저장. 통신 실패 시 로컬 캐시로 표시 */
+const T_MAT_ORDER = 'pd_material_order';
+let _ordServerOk = true;
+
 function loadMaterialOrders() {
   try {
     const a = JSON.parse(localStorage.getItem(LS_MAT_ORDERS) || '[]');
     return Array.isArray(a) ? a : [];
   } catch (e) { return []; }
 }
+function cacheMaterialOrders() {
+  try { localStorage.setItem(LS_MAT_ORDERS, JSON.stringify(materialOrders)); } catch (e) {}
+}
 function persistMaterialOrders() {
-  localStorage.setItem(LS_MAT_ORDERS, JSON.stringify(materialOrders));
+  cacheMaterialOrders();
   updateMaterialOrderBadges();
+}
+function normalizeOrderRow(r) {
+  let ls = r.lines;
+  if (typeof ls === 'string') { try { ls = JSON.parse(ls); } catch (e) { ls = []; } }
+  return {
+    id: String(r.id), _dbId: r.id,
+    order_no: r.order_no, order_date: r.order_date, due_date: r.due_date || '',
+    vendor: r.vendor, lines: Array.isArray(ls) ? ls : [],
+    weight: r.total_weight != null ? String(r.total_weight) : '',
+    note: r.note || '', status: r.status || '발주완료',
+    worker: r.worker || '', created_at: r.created_at
+  };
+}
+async function fetchMaterialOrders() {
+  try {
+    const rows = await pd('GET', T_MAT_ORDER + '?select=*&order=order_date.desc,id.desc&limit=500') || [];
+    materialOrders = rows.map(normalizeOrderRow);
+    _ordServerOk = true;
+    cacheMaterialOrders();
+  } catch (e) {
+    _ordServerOk = false;
+    materialOrders = loadMaterialOrders();
+    console.warn('소재발주 서버 조회 실패 · 로컬 캐시 표시', e);
+  }
+  const note = document.getElementById('ordStoreNote');
+  if (note) {
+    note.style.color = _ordServerOk ? '#7c3aed' : '#b91c1c';
+    note.textContent = _ordServerOk
+      ? '※ 발주 목록은 서버(pd_material_order)에 저장되어 모든 기기에서 동일하게 조회됩니다. 발송·수입검사 현황은 소재 시스템 DB에서 조회합니다.'
+      : '⚠ 서버 연결 실패 — 마지막으로 조회한 내용을 표시 중입니다. 이 상태에서는 발주 등록이 저장되지 않습니다.';
+  }
+  updateMaterialOrderBadges();
+  renderMaterialOrders();
+}
+async function nextMaterialOrderNoRemote(day) {
+  const tag = String(day || kstTodayStr()).replace(/-/g, '');
+  const prefix = 'MO-' + tag + '-';
+  let max = 0;
+  try {
+    const rows = await pd('GET', T_MAT_ORDER + '?select=order_no&order_no=like.' +
+      encodeURIComponent(prefix + '*') + '&order=order_no.desc&limit=1') || [];
+    if (rows.length) max = parseInt(String(rows[0].order_no).slice(prefix.length), 10) || 0;
+  } catch (e) {
+    max = materialOrders.reduce(function(m, o) {
+      if (String(o.order_no || '').indexOf(prefix) !== 0) return m;
+      return Math.max(m, parseInt(String(o.order_no).slice(prefix.length), 10) || 0);
+    }, 0);
+  }
+  return prefix + String(max + 1).padStart(3, '0');
 }
 function materialOrderOpenCount() {
   return materialOrders.filter(function(o) { return o.status !== '검사완료' && o.status !== '취소'; }).length;
@@ -2389,11 +2488,90 @@ function updateMaterialOrderBadges() {
   });
 }
 function clearMaterialOrderForm(keepDate) {
-  ['ordVendor','ordMaterial','ordThickness','ordWidth','ordWeight','ordNote'].forEach(function(id) {
+  ['ordVendor','ordNote'].forEach(function(id) {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   const d = document.getElementById('ordDate'); if (d && (!keepDate || !d.value)) d.value = kstTodayStr();
   const due = document.getElementById('ordDueDate'); if (due && !keepDate) due.value = '';
+  resetOrderLines();
+}
+
+/* ===== [Rev.7.57] 소재발주 품목 표 (업체 1곳 · 최대 10품목 일괄) ===== */
+const ORD_LINE_MAX = 10;
+let ordLines = [];
+function blankOrderLine() { return { material: '', thickness: '', width: '', weight: '', note: '' }; }
+function resetOrderLines() {
+  ordLines = [blankOrderLine(), blankOrderLine(), blankOrderLine()];
+  renderOrderLines();
+}
+function addOrderLine() {
+  if (ordLines.length >= ORD_LINE_MAX) { alert('최대 ' + ORD_LINE_MAX + '품목까지 등록할 수 있습니다'); return; }
+  syncOrderLinesFromDom();
+  ordLines.push(blankOrderLine());
+  renderOrderLines();
+}
+function removeOrderLine(i) {
+  syncOrderLinesFromDom();
+  ordLines.splice(i, 1);
+  if (!ordLines.length) ordLines.push(blankOrderLine());
+  renderOrderLines();
+}
+function syncOrderLinesFromDom() {
+  const tb = document.querySelector('#ordLineTable tbody');
+  if (!tb) return;
+  Array.prototype.forEach.call(tb.querySelectorAll('tr'), function(tr, i) {
+    if (!ordLines[i]) return;
+    ['material','thickness','width','weight','note'].forEach(function(k) {
+      const el = tr.querySelector('[data-k="' + k + '"]');
+      if (el) ordLines[i][k] = el.value;
+    });
+  });
+}
+function orderLinesTotalWeight() {
+  return ordLines.reduce(function(a, l) { return a + (parseFloat(l.weight) || 0); }, 0);
+}
+function updateOrderLineTotals() {
+  syncOrderLinesFromDom();
+  const w = document.getElementById('ordTotalWeight');
+  if (w) w.textContent = orderLinesTotalWeight().toLocaleString(undefined, { maximumFractionDigits: 1 });
+  const c = document.getElementById('ordLineCount');
+  if (c) c.textContent = ordLines.filter(function(l) { return String(l.material || '').trim() || parseFloat(l.weight) > 0; }).length;
+}
+function renderOrderLines() {
+  const tb = document.querySelector('#ordLineTable tbody');
+  if (!tb) return;
+  if (!ordLines.length) ordLines = [blankOrderLine()];
+  tb.innerHTML = ordLines.map(function(l, i) {
+    return '<tr>' +
+      '<td class="ol-no">' + (i + 1) + '</td>' +
+      '<td><input class="ol-in" data-k="material" value="' + escHtml(l.material || '') + '" placeholder="SPCC" oninput="updateOrderLineTotals()"></td>' +
+      '<td><input class="ol-in num" data-k="thickness" type="number" step="0.001" inputmode="decimal" value="' + escHtml(l.thickness || '') + '" oninput="updateOrderLineTotals()"></td>' +
+      '<td><input class="ol-in num" data-k="width" type="number" step="0.01" inputmode="decimal" value="' + escHtml(l.width || '') + '" oninput="updateOrderLineTotals()"></td>' +
+      '<td><input class="ol-in num" data-k="weight" type="number" step="0.1" inputmode="decimal" value="' + escHtml(l.weight || '') + '" oninput="updateOrderLineTotals()"></td>' +
+      '<td><input class="ol-in" data-k="note" value="' + escHtml(l.note || '') + '" placeholder="" oninput="updateOrderLineTotals()"></td>' +
+      '<td><button class="ol-del" onclick="removeOrderLine(' + i + ')" title="행 삭제">✕</button></td>' +
+      '</tr>';
+  }).join('');
+  updateOrderLineTotals();
+}
+function orderLineSummary(o) {
+  const ls = orderLinesOf(o);
+  if (!ls.length) return '-';
+  const first = ls[0];
+  const spec = [first.material, first.thickness ? first.thickness + 'T' : '', first.width ? first.width + 'W' : ''].filter(Boolean).join(' × ');
+  return spec + (ls.length > 1 ? ' 외 ' + (ls.length - 1) + '품목' : '');
+}
+function orderLinesOf(o) {
+  if (o && Array.isArray(o.lines) && o.lines.length) return o.lines;
+  if (o && (o.material || o.weight)) return [{ material: o.material, thickness: o.thickness, width: o.width, weight: o.weight, note: '' }];
+  return [];
+}
+function orderTotalWeight(o) {
+  return orderLinesOf(o).reduce(function(a, l) { return a + (parseFloat(l.weight) || 0); }, 0);
+}
+function toggleOrderDetail(id) {
+  const tr = document.getElementById('ordDet_' + id);
+  if (tr) tr.style.display = (tr.style.display === 'none' || !tr.style.display) ? '' : 'none';
 }
 function nextMaterialOrderNo(day) {
   const tag = String(day || kstTodayStr()).replace(/-/g, '');
@@ -2408,55 +2586,93 @@ function nextMaterialOrderNo(day) {
 function saveMaterialOrder() {
   const orderDate = (document.getElementById('ordDate').value || kstTodayStr()).trim();
   const vendor = document.getElementById('ordVendor').value.trim();
-  const material = document.getElementById('ordMaterial').value.trim();
   if (!vendor) { alert('공급업체를 입력하세요'); return; }
-  if (!material) { alert('재질을 입력하세요'); return; }
-  const weight = document.getElementById('ordWeight').value;
-  if (!(Number(weight) > 0)) { alert('발주중량(kg)을 입력하세요'); return; }
+  syncOrderLinesFromDom();
+  const lines = ordLines
+    .map(function(l) {
+      return {
+        material: String(l.material || '').trim(),
+        thickness: String(l.thickness || '').trim(),
+        width: String(l.width || '').trim(),
+        weight: String(l.weight || '').trim(),
+        note: String(l.note || '').trim()
+      };
+    })
+    .filter(function(l) { return l.material || parseFloat(l.weight) > 0; });
+  if (!lines.length) { alert('발주 품목을 1건 이상 입력하세요'); return; }
+  const bad = lines.filter(function(l) { return !l.material || !(parseFloat(l.weight) > 0); });
+  if (bad.length) { alert('각 품목의 재질과 중량(kg)을 모두 입력하세요'); return; }
+  const total = lines.reduce(function(a, l) { return a + (parseFloat(l.weight) || 0); }, 0);
+  if (!confirm('🧾 소재발주 등록\n\n업체: ' + vendor + '\n품목: ' + lines.length + '건\n총중량: ' +
+               total.toLocaleString(undefined, { maximumFractionDigits: 1 }) + ' kg\n\n등록하시겠습니까?')) return;
+  saveMaterialOrderRemote(orderDate, vendor, lines, total);
+}
+async function saveMaterialOrderRemote(orderDate, vendor, lines, total) {
+  const orderNo = await nextMaterialOrderNoRemote(orderDate);
   const row = {
-    id: 'ORD-' + Date.now(), order_no: nextMaterialOrderNo(orderDate), order_date: orderDate,
-    due_date: document.getElementById('ordDueDate').value || '', vendor: vendor, material: material,
-    thickness: document.getElementById('ordThickness').value || '', width: document.getElementById('ordWidth').value || '',
-    weight: weight || '', note: document.getElementById('ordNote').value.trim(),
-    status: '발주완료', created_at: kstNowISO()
+    order_no: orderNo, order_date: orderDate,
+    due_date: document.getElementById('ordDueDate').value || null,
+    vendor: vendor, lines: lines, total_weight: total,
+    note: document.getElementById('ordNote').value.trim() || null,
+    status: '발주완료', worker: worker.name || null
   };
-  materialOrders.unshift(row);
-  persistMaterialOrders();
-  renderMaterialOrders();
-  clearMaterialOrderForm(true);
-  showHint('🧾 소재발주 <b>' + escHtml(row.order_no) + '</b> 등록됨');
+  try {
+    await pd('POST', T_MAT_ORDER, [row], { 'Prefer': 'return=minimal' });
+    await fetchMaterialOrders();
+    clearMaterialOrderForm(true);
+    showHint('🧾 소재발주 <b>' + escHtml(orderNo) + '</b> 등록 · ' + lines.length + '품목 ' +
+             total.toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'kg (서버 저장)');
+  } catch (e) {
+    console.error(e);
+    if (/pd_material_order|PGRST205|does not exist/i.test(e.message || '')) {
+      alert('소재발주 테이블이 없습니다.\nmaterial_order_ddl.sql 을 Supabase에서 실행하세요.');
+    } else {
+      alert('소재발주 저장 실패:\n' + e.message);
+    }
+  }
 }
 function materialOrderSpec(o) {
-  let s = o.material || '-';
-  if (o.thickness) s += ' ' + o.thickness + 'T';
-  if (o.width) s += ' × ' + o.width + 'W';
-  return s;
+  return orderLineSummary(o);
 }
-function setMaterialOrderStatus(id, status) {
+async function setMaterialOrderStatus(id, status) {
   const o = materialOrders.find(function(x){ return x.id === id; });
   if (!o) return;
+  const prev = o.status;
   o.status = status;
-  o.updated_at = kstNowISO();
   persistMaterialOrders();
   renderMaterialOrders();
+  if (!o._dbId) return;
+  try {
+    await pd('PATCH', T_MAT_ORDER + '?id=eq.' + o._dbId,
+      { status: status, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
+  } catch (e) {
+    o.status = prev;
+    persistMaterialOrders(); renderMaterialOrders();
+    alert('상태 변경 실패:\n' + e.message);
+  }
 }
-function deleteMaterialOrder(id) {
+async function deleteMaterialOrder(id) {
   const o = materialOrders.find(function(x){ return x.id === id; });
   if (!o) return;
   if (!confirm('발주 ' + o.order_no + ' 기록을 삭제할까요?')) return;
+  if (o._dbId) {
+    try {
+      await pd('DELETE', T_MAT_ORDER + '?id=eq.' + o._dbId, null, { 'Prefer': 'return=minimal' });
+    } catch (e) { alert('삭제 실패:\n' + e.message); return; }
+  }
   materialOrders = materialOrders.filter(function(x){ return x.id !== id; });
   persistMaterialOrders();
   renderMaterialOrders();
 }
 function renderMaterialOrders() {
-  materialOrders = loadMaterialOrders();
   updateMaterialOrderBadges();
   const tb = document.querySelector('#ordTable tbody');
   if (!tb) return;
   const q = (document.getElementById('ordSearch') ? document.getElementById('ordSearch').value : '').trim().toLowerCase();
   let rows = materialOrders.slice().filter(function(o) {
     if (!q) return true;
-    return [o.order_no,o.vendor,o.material,o.thickness,o.width,o.note,o.status].join(' ').toLowerCase().indexOf(q) >= 0;
+    const lt = orderLinesOf(o).map(function(l){ return [l.material,l.thickness,l.width,l.note].join(' '); }).join(' ');
+    return [o.order_no,o.vendor,lt,o.note,o.status].join(' ').toLowerCase().indexOf(q) >= 0;
   });
   const cnt = document.getElementById('ordCount'); if (cnt) cnt.textContent = rows.length + '건';
   if (!rows.length) {
@@ -2466,13 +2682,25 @@ function renderMaterialOrders() {
   const statusOpts = ['발주완료','발송대기','발송완료','검사대기','검사완료','보류','취소'];
   tb.innerHTML = rows.map(function(o) {
     const opts = statusOpts.map(function(st){ return '<option value="'+escHtml(st)+'"'+(o.status===st?' selected':'')+'>'+escHtml(st)+'</option>'; }).join('');
+    const ls = orderLinesOf(o);
+    const tw = orderTotalWeight(o);
+    const det = ls.map(function(l, i) {
+      const spec = [l.material, l.thickness ? l.thickness+'T' : '', l.width ? l.width+'W' : ''].filter(Boolean).join(' × ');
+      return '<div class="od-line"><span class="od-no">'+(i+1)+'</span>'+
+             '<span class="od-spec">'+escHtml(spec || '-')+'</span>'+
+             '<span class="od-w">'+(l.weight ? escHtml(String(l.weight))+'kg' : '-')+'</span>'+
+             (l.note ? '<span class="od-note">'+escHtml(l.note)+'</span>' : '')+'</div>';
+    }).join('');
     return '<tr>'+
       '<td><b>'+escHtml(o.order_no||'-')+'</b><div class="order-sub">발주 '+escHtml(o.order_date||'-')+' · 납기 '+escHtml(o.due_date||'-')+'</div></td>'+
-      '<td><b>'+escHtml(o.vendor||'-')+'</b><div class="order-spec">'+escHtml(materialOrderSpec(o))+'</div></td>'+
-      '<td class="num">'+(o.weight?'<b>'+escHtml(String(o.weight))+'</b> kg':'-')+'</td>'+
+      '<td><b>'+escHtml(o.vendor||'-')+'</b><div class="order-spec">'+escHtml(materialOrderSpec(o))+'</div>'+
+        (ls.length ? '<button class="od-toggle" onclick="toggleOrderDetail(\''+escHtml(o.id)+'\')">품목 '+ls.length+'건 ▾</button>' : '')+'</td>'+
+      '<td class="num">'+(tw>0?'<b>'+tw.toLocaleString(undefined,{maximumFractionDigits:1})+'</b> kg':'-')+'</td>'+
       '<td><select class="order-status" onchange="setMaterialOrderStatus(\''+escHtml(o.id)+'\',this.value)">'+opts+'</select></td>'+
       '<td style="text-align:right"><button class="btn-link-mini" onclick="deleteMaterialOrder(\''+escHtml(o.id)+'\')">삭제</button></td>'+
-      '</tr>';
+      '</tr>'+
+      (ls.length ? '<tr class="od-detail" id="ordDet_'+escHtml(o.id)+'" style="display:none"><td colspan="5">'+det+
+        (o.note ? '<div class="od-req">📝 '+escHtml(o.note)+'</div>' : '')+'</td></tr>' : '');
   }).join('');
 }
 /* [Rev.7.32] material_IQC.html 의 groupKeyOf() 와 동일 규칙으로 통일
