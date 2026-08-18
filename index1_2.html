@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.33</title>
+<title>ESP32 생산일보 Rev.7.34</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -680,7 +680,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.33</span></h1>
+  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.34</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -691,7 +691,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.33</small></span>
+    <span>📡 ESP32 생산일보 <small>Rev.7.34</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="drawer-sep">업무 절차</div>
@@ -1115,6 +1115,13 @@
   </div>
 
   <div class="card">
+    <div class="sec-title">📤 소재발송 설정 (업체·PIN 관리)</div>
+    <div class="sel-hint" style="margin-bottom:8px">소재입고 등록 화면의 <b>⚙ 설정</b> 탭 전체입니다. 출발지(소재업체) 목록, 업체코드, PIN 등을 여기서 관리합니다.<br>소재발송 메뉴에는 <b>등록 화면만</b> 표시됩니다.</div>
+    <button onclick="reloadMaterialFrame('matCfgFrame')">🔄 설정화면 새로고침</button>
+    <iframe class="embed-frame" id="matCfgFrame" title="소재발송 설정" style="margin-top:8px;min-height:640px"></iframe>
+  </div>
+
+  <div class="card">
     <div class="sec-title">🔗 소재 등록화면(소재입고 등록)</div>
     <div class="form-grid">
       <div class="fld"><label>동작 방식</label>
@@ -1127,7 +1134,7 @@
       <div class="fld full" id="cfgIqcUrlRow"><label>외부 URL (수입검사)</label><input type="text" id="cfgIqcUrl" placeholder="https://xxx.github.io/repo/material_IQC.html"></div>
     </div>
     <button class="btn-primary" onclick="saveMatUploadUrl()">💾 저장</button>
-    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재입고 등록(Rev6.1)과 소재 수입검사(v3.7) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없고, 기존 MES 시스템과 완전히 분리되어 동작합니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
+    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재입고 등록(Rev6.2)과 소재 수입검사(v3.7) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없고, 기존 MES 시스템과 완전히 분리되어 동작합니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
   </div>
 
   <div class="card">
@@ -1513,7 +1520,7 @@ function switchTab(id, btn) {
   if (id === 't-material') { renderMaterialPresets(); loadMaterialReceipts(); }
   if (id === 't-master') renderMachineTable();
   if (id === 't-mold') renderMoldTable();
-  if (id === 't-config') updateLocalInfo();
+  if (id === 't-config') { updateLocalInfo(); ensureMaterialFrame('matCfgFrame'); }
   // 카운팅 DB는 설비가동/생산일보 화면에서만 동작합니다. 다른 메뉴로 이동하면 즉시 중지합니다.
   restartEspPoll(id === 't-prod' || id === 't-report');
 }
@@ -1764,7 +1771,7 @@ function onMatModeChange() {
 function applyMatUploadUrl() {
   const mode = getMatMode();
   const lb = document.getElementById('matUploadPathLabel');
-  if (lb) lb.textContent = (mode === 'embed') ? '내장 · 소재입고 등록 Rev6.0' : (getMatUploadUrl().split('/').pop() || getMatUploadUrl());
+  if (lb) lb.textContent = (mode === 'embed') ? '내장 · 소재입고 등록 Rev6.2' : (getMatUploadUrl().split('/').pop() || getMatUploadUrl());
   const lb2 = document.getElementById('matIqcPathLabel');
   if (lb2) lb2.textContent = (mode === 'embed') ? '내장 · 수입검사 v3.7' : (getMatIqcUrl().split('/').pop() || getMatIqcUrl());
   const sel = document.getElementById('cfgMatMode');
@@ -1774,7 +1781,7 @@ function applyMatUploadUrl() {
   const inp2 = document.getElementById('cfgIqcUrl');
   if (inp2) inp2.value = getMatIqcUrl();
   onMatModeChange();
-  ['matDispatchFrame', 'matIqcFrame'].forEach(function (fid) {
+  ['matDispatchFrame', 'matIqcFrame', 'matCfgFrame'].forEach(function (fid) {
     const f = document.getElementById(fid);
     if (f && f.getAttribute('data-loaded') === '1') { f.removeAttribute('data-loaded'); ensureMaterialFrame(fid); }
   });
@@ -1804,11 +1811,13 @@ function openMatUploadWindow() {
 
 function _matFrameDoc(id) {
   if (id === 'matDispatchFrame') return getMatUploadDoc();
+  if (id === 'matCfgFrame') return getMatUploadDoc();   /* [Rev.7.34] DB설정 내 소재 설정 */
   if (id === 'matIqcFrame') return getMatIqcDoc();
   return '';
 }
 function _matFrameUrl(id) {
   if (id === 'matDispatchFrame') return getMatUploadUrl();
+  if (id === 'matCfgFrame') return getMatUploadUrl();
   if (id === 'matIqcFrame') return getMatIqcUrl();
   const f = document.getElementById(id);
   return (f && f.getAttribute('data-src')) || 'about:blank';
@@ -1816,6 +1825,10 @@ function _matFrameUrl(id) {
 function ensureMaterialFrame(id) {
   const f = document.getElementById(id); if (!f) return;
   if (f.getAttribute('data-loaded') === '1') return;
+  /* [Rev.7.34] 임베드 표시 모드 : window.name 으로 내장 화면에 전달
+     matDispatchFrame = 등록 전용 / matCfgFrame = 설정 전용 (DB설정 메뉴) */
+  if (id === 'matDispatchFrame') f.name = 'matUploadReg';
+  if (id === 'matCfgFrame') f.name = 'matUploadCfg';
   const doc = (getMatMode() === 'embed') ? _matFrameDoc(id) : '';
   if (doc) {
     f.removeAttribute('src');
@@ -5102,7 +5115,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- ============================================================
-     내장 소재입고 등록화면 (material_upload.html Rev6.1)
+     내장 소재입고 등록화면 (material_upload.html Rev6.2)
      @@ENDSCRIPT@@ 토큰은 런타임에 </scr+ipt 로 복원됩니다.
      ============================================================ -->
 <script type="text/x-material-upload" id="matUploadDoc"><!DOCTYPE html>
@@ -5110,7 +5123,7 @@ window.addEventListener('DOMContentLoaded', function() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재입고 등록 (Rev6.1)</title>
+  <title>소재입고 등록 (Rev6.2)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -5209,7 +5222,7 @@ window.addEventListener('DOMContentLoaded', function() {
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재입고 등록 (Rev6.1)</h1>
+  <h1>📤 소재입고 등록 (Rev6.2)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
@@ -5629,6 +5642,22 @@ function openPinLock(){
   const el=document.getElementById('pinLock');
   el.style.display='flex';
 }
+
+/* [Rev6.2] 포털 임베드 표시 모드 (window.name)
+   matUploadReg = 등록 전용(설정 탭 숨김, 소재발송 메뉴용)
+   matUploadCfg = 설정 전용(등록 숨김, 포털 DB설정 메뉴용)
+   그 외        = 단독 실행: 두 탭 모두 표시 */
+document.addEventListener('DOMContentLoaded',()=>{
+  const m=(window.name||'').trim();
+  const tabs=document.querySelectorAll('.tabs .tab');
+  if(m==='matUploadReg'){
+    if(tabs[1])tabs[1].style.display='none';
+  }else if(m==='matUploadCfg'){
+    const bar=document.querySelector('.tabs');if(bar)bar.style.display='none';
+    const h=document.querySelector('.hdr');if(h)h.style.display='none';
+    swMainTab(1);
+  }
+});
 
 function swMainTab(n){
   /* Rev5.8 : 설정 탭 PIN 잠금 해제 (마스터 비번 제거) */

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재입고 등록 (Rev6.1)</title>
+  <title>소재입고 등록 (Rev6.2)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -102,7 +102,7 @@
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재입고 등록 (Rev6.1)</h1>
+  <h1>📤 소재입고 등록 (Rev6.2)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
@@ -522,6 +522,22 @@ function openPinLock(){
   const el=document.getElementById('pinLock');
   el.style.display='flex';
 }
+
+/* [Rev6.2] 포털 임베드 표시 모드 (window.name)
+   matUploadReg = 등록 전용(설정 탭 숨김, 소재발송 메뉴용)
+   matUploadCfg = 설정 전용(등록 숨김, 포털 DB설정 메뉴용)
+   그 외        = 단독 실행: 두 탭 모두 표시 */
+document.addEventListener('DOMContentLoaded',()=>{
+  const m=(window.name||'').trim();
+  const tabs=document.querySelectorAll('.tabs .tab');
+  if(m==='matUploadReg'){
+    if(tabs[1])tabs[1].style.display='none';
+  }else if(m==='matUploadCfg'){
+    const bar=document.querySelector('.tabs');if(bar)bar.style.display='none';
+    const h=document.querySelector('.hdr');if(h)h.style.display='none';
+    swMainTab(1);
+  }
+});
 
 function swMainTab(n){
   /* Rev5.8 : 설정 탭 PIN 잠금 해제 (마스터 비번 제거) */
