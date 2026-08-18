@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재발송 등록 (Rev7.2)</title>
+  <title>소재발송 등록 (Rev7.3)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -102,7 +102,7 @@
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재발송 등록 (Rev7.2)</h1>
+  <h1>📤 소재발송 등록 (Rev7.3)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
@@ -1623,34 +1623,116 @@ const CERT_CONFLICT='?on_conflict=lot_no,heat_no,receipt_date';
 const CERT_NOCONSTRAINT=/42P10|no unique or exclusion constraint|ON CONFLICT/i;
 let _certConflictOff=false;
 
-/* [Rev6.0] 밀시트 서버 저장용 이미지 압축 : 50KB 이하 JPEG */
-const MS_MAX_BYTES=50*1024;
+/* 밀시트 서버 저장용 자동 압축 (Rev7.3: 이미지 + PDF) */
+/* [Rev7.3] 밀시트 자동압축 : 이미지 + PDF 모두 지원
+   PDF 는 pdf.js 로 페이지를 렌더링해 JPEG 로 변환 후 동일 파이프라인으로 압축 */
+const MS_MAX_BYTES=120*1024;      /* 문자 판독 가능하도록 상향 (구 50KB) */
+const MS_PDF_MAX_PAGES=4;         /* PDF 변환 최대 페이지 (세로 연결) */
 function _b64Bytes(dataUrl){const i=dataUrl.indexOf(',');return Math.ceil((dataUrl.length-i-1)*3/4)}
+
+/* 캔버스 → 목표 용량 이하 JPEG (해상도·품질 단계적 축소) */
+function _canvasToJpeg(srcCanvas,maxBytes){
+  const sw=srcCanvas.width, sh=srcCanvas.height;
+  let dim=1800,best=null;
+  while(dim>=600){
+    const scale=Math.min(1,dim/Math.max(sw,sh));
+    const w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(srcCanvas,0,0,w,h);
+    for(let q=0.85;q>=0.36;q-=0.08){
+      const d=cv.toDataURL('image/jpeg',q);
+      const size=_b64Bytes(d);
+      if(!best||size<best.size)best={dataUrl:d,size};
+      if(size<=maxBytes)return {dataUrl:d,size};
+    }
+    dim=Math.round(dim*0.78);
+  }
+  return best;
+}
+
 function compressImageForServer(file,maxBytes){
   return new Promise((resolve,reject)=>{
     const url=URL.createObjectURL(file);
     const img=new Image();
     img.onload=()=>{
       URL.revokeObjectURL(url);
-      let dim=1400,best=null;
-      while(dim>=420){
-        const scale=Math.min(1,dim/Math.max(img.width,img.height));
-        const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
-        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
-        const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
-        for(let q=0.8;q>=0.34;q-=0.1){
-          const d=cv.toDataURL('image/jpeg',q);
-          const size=_b64Bytes(d);
-          if(!best||size<best.size)best={dataUrl:d,size};
-          if(size<=maxBytes){resolve({dataUrl:d,size});return}
-        }
-        dim=Math.round(dim*0.72);
-      }
-      if(best)resolve(best);else reject(new Error('압축 실패'));
+      const cv=document.createElement('canvas');
+      cv.width=img.width;cv.height=img.height;
+      const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.drawImage(img,0,0);
+      const r=_canvasToJpeg(cv,maxBytes);
+      if(r)resolve(r);else reject(new Error('압축 실패'));
     };
     img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('이미지 로드 실패'))};
     img.src=url;
   });
+}
+
+/* pdf.js 지연 로드 (CDN 차단 대비 2단계 폴백) */
+let _pdfJsReady=null;
+function _loadPdfJs(){
+  if(_pdfJsReady)return _pdfJsReady;
+  const SRC=[
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'
+  ];
+  const WK=[
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'
+  ];
+  _pdfJsReady=new Promise((resolve,reject)=>{
+    const tryLoad=(i)=>{
+      if(i>=SRC.length){reject(new Error('PDF 변환 모듈을 불러오지 못했습니다 (네트워크 차단)'));return}
+      const sc=document.createElement('script');
+      sc.src=SRC[i];
+      sc.onload=()=>{
+        const lib=window.pdfjsLib||(window['pdfjs-dist/build/pdf']);
+        if(!lib){tryLoad(i+1);return}
+        try{lib.GlobalWorkerOptions.workerSrc=WK[i]}catch(e){}
+        resolve(lib);
+      };
+      sc.onerror=()=>tryLoad(i+1);
+      document.head.appendChild(sc);
+    };
+    tryLoad(0);
+  });
+  return _pdfJsReady;
+}
+
+/* PDF → 세로 연결 JPEG (최대 MS_PDF_MAX_PAGES 페이지) */
+async function compressPdfForServer(file,maxBytes,onProgress){
+  const lib=await _loadPdfJs();
+  const buf=await file.arrayBuffer();
+  const pdf=await lib.getDocument({data:buf}).promise;
+  const pages=Math.min(pdf.numPages,MS_PDF_MAX_PAGES);
+  const canvases=[];
+  for(let i=1;i<=pages;i++){
+    if(onProgress)onProgress(i,pages);
+    const page=await pdf.getPage(i);
+    const vp0=page.getViewport({scale:1});
+    const scale=Math.min(2.2,1800/Math.max(vp0.width,vp0.height));
+    const vp=page.getViewport({scale:scale});
+    const cv=document.createElement('canvas');
+    cv.width=Math.round(vp.width);cv.height=Math.round(vp.height);
+    const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    canvases.push(cv);
+  }
+  if(!canvases.length)throw new Error('PDF 페이지를 읽지 못했습니다');
+  let merged=canvases[0];
+  if(canvases.length>1){
+    const W=Math.max(...canvases.map(c=>c.width));
+    const H=canvases.reduce((a,c)=>a+Math.round(c.height*(W/c.width)),0);
+    merged=document.createElement('canvas');merged.width=W;merged.height=H;
+    const mc=merged.getContext('2d');mc.fillStyle='#fff';mc.fillRect(0,0,W,H);
+    let y=0;
+    canvases.forEach(c=>{const h=Math.round(c.height*(W/c.width));mc.drawImage(c,0,y,W,h);y+=h});
+  }
+  const r=_canvasToJpeg(merged,maxBytes);
+  if(!r)throw new Error('PDF 압축 실패');
+  return {dataUrl:r.dataUrl,size:r.size,pages:pages,totalPages:pdf.numPages};
 }
 function certMillsheetUpload(input){
   const f=input.files[0];if(!f)return;
@@ -1671,19 +1753,23 @@ function certMillsheetUpload(input){
       showToast('✅ 밀시트 첨부: '+(res.size/1024).toFixed(0)+'KB로 압축 완료');
     }).catch(e=>{showToast('⚠ 이미지 압축 실패: '+e.message)});
   }else if(isPdf){
-    if(f.size>MS_MAX_BYTES){
-      alert('⚠ PDF는 50KB 이하만 서버 저장이 가능합니다. (현재 '+(f.size/1024).toFixed(0)+'KB)\n\n밀시트를 사진으로 촬영해 첨부해 주세요.\n사진은 자동으로 50KB 이하로 압축됩니다.');
-      return;
-    }
-    const r=new FileReader();
-    r.onload=e=>{
-      readCertModalData();
-      _certMillsheets[_certCurrentIdx]={dataUrl:e.target.result,originalName:f.name,mimeType:'application/pdf',fileSize:f.size};
+    /* [Rev7.3] PDF 자동 변환·압축 (용량 제한 없음) */
+    readCertModalData();
+    showToast('⏳ PDF 변환 중...');
+    compressPdfForServer(f,MS_MAX_BYTES,(i,n)=>{showToast('⏳ PDF 변환 중... ('+i+'/'+n+'p)')}).then(res=>{
+      _certMillsheets[_certCurrentIdx]={
+        dataUrl:res.dataUrl,
+        originalName:f.name.replace(/\.[^.]+$/,'')+'.jpg',
+        mimeType:'image/jpeg',
+        fileSize:res.size
+      };
       renderCertModal();
-      showToast('✅ 밀시트 첨부: '+f.name);
-    };
-    r.onerror=()=>{showToast('⚠ 파일 읽기 실패')};
-    r.readAsDataURL(f);
+      const more=(res.totalPages>res.pages)?(' / 전체 '+res.totalPages+'p 중 '+res.pages+'p'):'';
+      showToast('✅ 밀시트 첨부: '+(res.size/1024).toFixed(0)+'KB로 압축 완료'+more);
+    }).catch(e=>{
+      showToast('⚠ PDF 변환 실패: '+e.message);
+      alert('PDF 변환에 실패했습니다.\n\n사유: '+e.message+'\n\n밀시트를 사진으로 촬영해 첨부해 주세요. 사진은 자동 압축됩니다.');
+    });
   }else{
     alert('이미지 또는 PDF 파일만 첨부할 수 있습니다.');
   }
@@ -2145,7 +2231,7 @@ window.updateCertBadge=function(){
       </div>
       <div style="background:#fafafa;padding:12px 14px;border:1px solid #ccc;border-radius:4px;margin-bottom:8px">
         <input type="file" id="certMillFile" accept="image/*,application/pdf,.pdf" onchange="certMillsheetUpload(this)" style="font-size:14px;font-family:inherit">
-        <div style="font-size:12px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 업로드한 원본 그대로 메일 첨부 (최대 10 MB)</div>
+        <div style="font-size:12px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 서버 저장용은 자동 압축, 메일은 원본 첨부 (최대 10 MB)</div>
       </div>
       <div id="certMillPreview"></div>
     </div>
