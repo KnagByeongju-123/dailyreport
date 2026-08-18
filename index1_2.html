@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.45</title>
+<title>프레스 생산관리 Rev.7.46</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -685,7 +685,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.45</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.46</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -696,7 +696,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.45</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.46</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="drawer-sep">업무 절차</div>
@@ -1128,7 +1128,7 @@
       <div class="fld full" id="cfgIqcUrlRow"><label>외부 URL (수입검사)</label><input type="text" id="cfgIqcUrl" placeholder="https://xxx.github.io/repo/material_IQC.html"></div>
     </div>
     <button class="btn-primary" onclick="saveMatUploadUrl()">💾 저장</button>
-    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재발송 등록(Rev7.3)과 소재 수입검사(v4.2) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없습니다.<br>이 시스템 전체는 <b>신규 회사 전용 프로젝트 하나</b>만 사용하며 태진 기존 DB와 절대 연결되지 않습니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
+    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재발송 등록(Rev7.4)과 소재 수입검사(v4.2) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없습니다.<br>이 시스템 전체는 <b>신규 회사 전용 프로젝트 하나</b>만 사용하며 태진 기존 DB와 절대 연결되지 않습니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
   </div>
 
   <div class="card">
@@ -1766,7 +1766,7 @@ function onMatModeChange() {
 function applyMatUploadUrl() {
   const mode = getMatMode();
   const lb = document.getElementById('matUploadPathLabel');
-  if (lb) lb.textContent = (mode === 'embed') ? '내장 · 소재발송 등록 Rev7.3' : (getMatUploadUrl().split('/').pop() || getMatUploadUrl());
+  if (lb) lb.textContent = (mode === 'embed') ? '내장 · 소재발송 등록 Rev7.4' : (getMatUploadUrl().split('/').pop() || getMatUploadUrl());
   const lb2 = document.getElementById('matIqcPathLabel');
   if (lb2) lb2.textContent = (mode === 'embed') ? '내장 · 수입검사 v4.2' : (getMatIqcUrl().split('/').pop() || getMatIqcUrl());
   const sel = document.getElementById('cfgMatMode');
@@ -5234,7 +5234,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- ============================================================
-     내장 소재발송 등록화면 (material_upload.html Rev7.3)
+     내장 소재발송 등록화면 (material_upload.html Rev7.4)
      @@ENDSCRIPT@@ 토큰은 런타임에 </scr+ipt 로 복원됩니다.
      ============================================================ -->
 <script type="text/x-material-upload" id="matUploadDoc"><!DOCTYPE html>
@@ -5242,7 +5242,7 @@ window.addEventListener('DOMContentLoaded', function() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재발송 등록 (Rev7.3)</title>
+  <title>소재발송 등록 (Rev7.4)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -5252,46 +5252,46 @@ window.addEventListener('DOMContentLoaded', function() {
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Noto Sans KR',sans-serif;background:#f0f2f5;color:#212121;min-height:100vh}
     .hdr{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:14px 16px;text-align:center}
-    .hdr h1{font-size:17px;font-weight:700}.hdr p{font-size:10px;opacity:.7;margin-top:2px}
-    .wrap{max-width:540px;margin:0 auto;padding:12px 12px 80px}
+    .hdr h1{font-size:20px;font-weight:700}.hdr p{font-size:12px;opacity:.7;margin-top:2px}
+    .wrap{max-width:640px;margin:0 auto;padding:12px 12px 80px}
     .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-    .card-tit{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .card-tit{font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .fg{margin-bottom:12px}
-    .fg label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:4px}
-    .fg select,.fg input{width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
-    .btn{padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
+    .fg label{display:block;font-size:14px;font-weight:600;color:#555;margin-bottom:4px}
+    .fg select,.fg input{width:100%;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-size:16px;font-family:inherit;background:#fff}
+    .btn{padding:14px;border:none;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
     .btn:active{transform:scale(.97)}
     .btn-green{background:linear-gradient(135deg,#00c853,#00e676);color:#000}
     .btn-blue{background:linear-gradient(135deg,#1565c0,#42a5f5);color:#fff}
     .btn-gray{background:#f5f5f5;color:#555;border:1px solid #ddd}
-    .btn-sm{padding:8px 14px;font-size:12px;width:auto;border-radius:8px}
+    .btn-sm{padding:8px 14px;font-size:14px;width:auto;border-radius:8px}
     .btn-row{display:flex;gap:8px;margin-bottom:12px}
     .step{display:flex;gap:0;margin-bottom:14px;border-radius:10px;overflow:hidden;border:2px solid #e0e0e0}
-    .step-item{flex:1;padding:10px 6px;text-align:center;font-size:12px;font-weight:700;color:#aaa;background:#f5f5f5;transition:all .2s}
+    .step-item{flex:1;padding:10px 6px;text-align:center;font-size:14px;font-weight:700;color:#aaa;background:#f5f5f5;transition:all .2s}
     .step-item.active{background:#1a237e;color:#fff}
     .step-item.done{background:#e8f5e9;color:#2e7d32}
-    .info-box{padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.7;margin-bottom:10px}
+    .info-box{padding:10px 12px;border-radius:8px;font-size:14px;line-height:1.7;margin-bottom:10px}
     .info-box.blue{background:#e3f2fd;border:1px solid #bbdefb;color:#1565c0}
     .info-box.green{background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32}
     .info-box.orange{background:#fff3e0;border:1px solid #ffe0b2;color:#e65100}
-    .preview-tbl{width:100%;border-collapse:collapse;font-size:10px;margin-top:8px}
-    .preview-tbl th{padding:5px 6px;background:#e8eaf6;border:1px solid #c5cae9;white-space:nowrap;color:#1a237e;font-weight:700}
-    .preview-tbl td{padding:4px 6px;border:1px solid #eee;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:18px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
-    .back-link{display:inline-block;padding:10px 0;font-size:12px;color:#888;text-decoration:none}
+    .preview-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .preview-tbl th{padding:7px 8px;background:#e8eaf6;border:1px solid #c5cae9;white-space:nowrap;color:#1a237e;font-weight:700}
+    .preview-tbl td{padding:6px 8px;border:1px solid #eee;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:18px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
+    .back-link{display:inline-block;padding:10px 0;font-size:14px;color:#888;text-decoration:none}
     .back-link:hover{color:#1a237e}
     .tabs{display:flex;background:#fff;border-bottom:2px solid #e0e0e0;position:sticky;top:0;z-index:50}
-    .tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#888}
+    .tab{flex:1;padding:10px;text-align:center;font-size:15px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#888}
     .tab.on{color:#1a237e;border-bottom-color:#1a237e}
     .main-pnl{display:none}.main-pnl.on{display:block}
     .file-drop{border:2.5px dashed #c5cae9;border-radius:12px;padding:30px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
     .file-drop:hover,.file-drop.dragover{border-color:#1a237e;background:#e8eaf6}
     .file-drop .fd-icon{font-size:36px;margin-bottom:6px}
-    .file-drop .fd-text{font-size:13px;font-weight:600;color:#555}
-    .file-drop .fd-sub{font-size:11px;color:#999;margin-top:4px}
+    .file-drop .fd-text{font-size:15px;font-weight:600;color:#555}
+    .file-drop .fd-sub{font-size:13px;color:#999;margin-top:4px}
     .stat-row{display:flex;gap:8px;margin-bottom:8px}
     .stat-card{flex:1;padding:10px;border-radius:8px;text-align:center}
-    .stat-card .sv{font-size:20px;font-weight:700}.stat-card .sl{font-size:10px;color:#888;margin-top:2px}
+    .stat-card .sv{font-size:22px;font-weight:700}.stat-card .sl{font-size:12px;color:#888;margin-top:2px}
 
     /* ===== 검사성적서 모달 - 정보 박스 그리드 (모바일 자동 1컬럼) ===== */
     .cert-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}
@@ -5315,33 +5315,33 @@ window.addEventListener('DOMContentLoaded', function() {
       .cert-info-grid{grid-template-columns:1fr;gap:6px}
       .cert-info-row{padding:4px 0;border-bottom:1px solid #e0e7ff}
       .cert-info-row:last-child{border-bottom:none}
-      .cert-info-row .ci-label{min-width:80px;font-size:13px}
-      .cert-info-row .ci-value{font-size:14px}
+      .cert-info-row .ci-label{min-width:80px;font-size:15px}
+      .cert-info-row .ci-value{font-size:16px}
       /* 모달 본문 패딩 축소 */
       #certModal > div > div{padding:14px 16px !important}
       /* 측정값 표 - 모바일에서 더 컴팩트 (격자 유지) */
       .cert-table-wrap #certMeasTable{min-width:480px}
-      #certMeasTable th{padding:6px 3px !important;font-size:12px !important}
-      #certMeasTable td{font-size:12px !important;height:32px !important}
-      #certMeasTable td:first-child{font-size:12px !important;padding:4px 6px !important}
+      #certMeasTable th{padding:6px 3px !important;font-size:14px !important}
+      #certMeasTable td{font-size:14px !important;height:32px !important}
+      #certMeasTable td:first-child{font-size:14px !important;padding:4px 6px !important}
       #certMeasTable input[type="text"],
       #certMeasTable input[type="number"]{
-        padding:5px 3px !important;font-size:12px !important;min-width:50px;
+        padding:5px 3px !important;font-size:14px !important;min-width:50px;
       }
-      #certMeasTable input.spec-input{font-size:11px !important;padding:5px 6px !important}
-      #certMeasTable label{font-size:11px !important;padding:2px 2px !important;margin:0 1px !important}
+      #certMeasTable input.spec-input{font-size:13px !important;padding:5px 6px !important}
+      #certMeasTable label{font-size:13px !important;padding:2px 2px !important;margin:0 1px !important}
       #certMeasTable input[type="radio"]{width:12px !important;height:12px !important}
       /* 정보 박스 자체 패딩 축소 */
-      #certInfoBox{padding:12px 14px !important;font-size:13px !important;line-height:1.6 !important}
+      #certInfoBox{padding:12px 14px !important;font-size:15px !important;line-height:1.6 !important}
       /* 담당자/판정 그리드도 1컬럼으로 */
       .cert-charge-grid{grid-template-columns:1fr !important;gap:8px !important}
-      #certCharge,#certSign,#certFinalJ{font-size:14px}
+      #certCharge,#certSign,#certFinalJ{font-size:16px}
     }
   </style>
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재발송 등록 (Rev7.3)</h1>
+  <h1>📤 소재발송 등록 (Rev7.4)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
@@ -5397,41 +5397,41 @@ window.addEventListener('DOMContentLoaded', function() {
         <div class="stat-card" style="background:#e8f5e9"><div class="sv" id="pvCompany">-</div><div class="sl">업체명</div></div>
         <div class="stat-card" style="background:#fff3e0"><div class="sv" id="pvDate">-</div><div class="sl">입고일자</div></div>
       </div>
-      <div id="pvSettings" class="info-box blue" style="font-size:11px"></div>
+      <div id="pvSettings" class="info-box blue" style="font-size:13px"></div>
       <div style="overflow-x:auto"><table class="preview-tbl" id="pvTable"></table></div>
-      <div id="pvMore" style="text-align:center;padding:6px;color:#888;font-size:10px"></div>
+      <div id="pvMore" style="text-align:center;padding:6px;color:#888;font-size:12px"></div>
     </div>
-    <!-- 성적서 작성 카드 (MES 등록 전 작성 가능) -->
+    <!-- 성적서 작성 카드 (최종등록 전 작성 가능) -->
     <div class="card" style="background:#fff3e0;border:2px solid #fb8c00">
-      <div style="font-size:14px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 (선택)</div>
-      <div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:10px">
+      <div style="font-size:16px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 (선택)</div>
+      <div style="font-size:14px;color:#555;line-height:1.5;margin-bottom:10px">
         등록 전에 성적서를 작성하실 수 있습니다.<br>
         <b>재질 · 두께 · 폭 · LOT</b>가 같으면 1건으로 자동 묶이며 (코일수·합계 중량으로 합산),<br>
         측정값과 밀시트 사진만 입력하시면 됩니다.
       </div>
-      <button class="btn btn-orange" style="width:100%;font-size:15px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistrationFromStep3()">📝 성적서 작성하기 (<span id="certCntBadgeStep3">0</span>건)</button>
+      <button class="btn btn-orange" style="width:100%;font-size:17px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistrationFromStep3()">📝 성적서 작성하기 (<span id="certCntBadgeStep3">0</span>건)</button>
     </div>
     <div class="btn-row">
       <button class="btn btn-gray btn-sm" onclick="goStep(2)" style="flex:0 0 auto;width:auto">← 수정</button>
-      <button class="btn btn-green" onclick="doRegister()" id="btnRegister" style="flex:1;font-size:16px">✅ <span id="pvRegCnt">0</span>건 최종등록</button>
+      <button class="btn btn-green" onclick="doRegister()" id="btnRegister" style="flex:1;font-size:18px">✅ <span id="pvRegCnt">0</span>건 최종등록</button>
     </div>
-    <div id="regStatus" style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;text-align:center"></div>
+    <div id="regStatus" style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:600;text-align:center"></div>
   </div>
   <div id="pnlStep4" style="display:none">
     <div class="card" style="text-align:center;padding:30px 16px">
       <div style="font-size:48px;margin-bottom:10px">✅</div>
-      <div style="font-size:18px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="doneTitle">완료</div>
-      <div style="font-size:13px;color:#555" id="doneSummary"></div>
-      <div id="autoReturnMsg" style="margin-top:20px;padding:10px;background:#e3f2fd;border-radius:8px;font-size:12px;color:#1565c0;font-weight:600"><span id="autoReturnSec">10</span>초 후 등록 화면으로 돌아갑니다</div>
+      <div style="font-size:20px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="doneTitle">완료</div>
+      <div style="font-size:15px;color:#555" id="doneSummary"></div>
+      <div id="autoReturnMsg" style="margin-top:20px;padding:10px;background:#e3f2fd;border-radius:8px;font-size:14px;color:#1565c0;font-weight:600"><span id="autoReturnSec">10</span>초 후 등록 화면으로 돌아갑니다</div>
     </div>
     <!-- 성적서 등록 안내 -->
     <div class="card" style="background:#fff3e0;border:2px solid #fb8c00;margin-top:8px">
-      <div style="font-size:14px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 등록</div>
-      <div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:10px">
+      <div style="font-size:16px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 등록</div>
+      <div style="font-size:14px;color:#555;line-height:1.5;margin-bottom:10px">
         등록한 소재별로 검사 성적서를 작성하고 밀시트를 첨부할 수 있습니다.<br>
         <b>재질 · 두께 · 폭</b>이 자동으로 채워지며 측정값과 밀시트만 입력하시면 됩니다.
       </div>
-      <button class="btn btn-orange" style="width:100%;font-size:15px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistration()">📝 성적서 작성하기 (<span id="certCntBadge">0</span>건)</button>
+      <button class="btn btn-orange" style="width:100%;font-size:17px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistration()">📝 성적서 작성하기 (<span id="certCntBadge">0</span>건)</button>
     </div>
     <div class="btn-row"><button class="btn btn-blue" onclick="resetAll()">🔄 지금 새 등록하기</button></div>
   </div>
@@ -5440,8 +5440,8 @@ window.addEventListener('DOMContentLoaded', function() {
 
 <div class="main-pnl" id="mainPnl1">
 <div class="wrap">
-  <div id="settingsUserBar" style="display:none;padding:8px 12px;background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:12px;text-align:center">
-    🔓 <span id="settingsUserName"></span> 님 접속중 · <span style="opacity:.8;font-size:11px">10분 후 자동 잠금</span>
+  <div id="settingsUserBar" style="display:none;padding:8px 12px;background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;border-radius:10px;font-size:14px;font-weight:600;margin-bottom:12px;text-align:center">
+    🔓 <span id="settingsUserName"></span> 님 접속중 · <span style="opacity:.8;font-size:13px">10분 후 자동 잠금</span>
   </div>
   <div class="card">
     <div class="card-tit">📊 이력 관리</div>
@@ -5455,69 +5455,69 @@ window.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-sm btn-green" onclick="histExcel()">📥 엑셀</button>
     </div>
     <button class="btn btn-sm" onclick="histDelete()" style="width:100%;background:#fff3e0;color:#e65100;border:1.5px solid #ffe0b2">🗑 선택범위 삭제</button>
-    <div id="histStatus" style="font-size:11px;margin-top:6px;color:#888"></div>
+    <div id="histStatus" style="font-size:13px;margin-top:6px;color:#888"></div>
     <div id="histArea" style="margin-top:10px;max-height:300px;overflow-y:auto"></div>
   </div>
   <div class="card">
     <div class="card-tit" style="display:flex;align-items:center;gap:8px">
       <span>🏢 출발지 (소재업체) 관리</span>
-      <span id="vendorCountBadge" style="background:#1a237e;color:#fff;font-size:11px;padding:2px 10px;border-radius:10px;font-weight:600">0</span>
+      <span id="vendorCountBadge" style="background:#1a237e;color:#fff;font-size:13px;padding:2px 10px;border-radius:10px;font-weight:600">0</span>
     </div>
-    <div class="info-box blue" style="font-size:10px">💡 등록한 업체는 <b>등록 탭의 출발지 드롭다운</b>에 표시됩니다.<br>업체코드는 MES <b>VENDOR_SITE_ID</b>에 해당합니다 (예: TG, JM).<br>순서는 ▲▼ 버튼으로 변경 가능합니다.</div>
-    <div style="font-size:12px;font-weight:700;color:#1a237e;margin:8px 0 6px 2px;padding-left:6px;border-left:3px solid #1a237e">📋 등록된 업체 목록</div>
+    <div class="info-box blue" style="font-size:12px">💡 등록한 업체는 <b>등록 탭의 출발지 드롭다운</b>에 표시됩니다.<br>업체코드는 발송 데이터의 <b>업체 식별자</b>로 저장됩니다 (예: AA, BB).<br>순서는 ▲▼ 버튼으로 변경 가능합니다.</div>
+    <div style="font-size:14px;font-weight:700;color:#1a237e;margin:8px 0 6px 2px;padding-left:6px;border-left:3px solid #1a237e">📋 등록된 업체 목록</div>
     <div id="vendorList" style="margin-bottom:10px;max-height:420px;overflow-y:auto;padding:4px;background:#fafafa;border-radius:8px;border:1px solid #eee"></div>
     <div style="border-top:2px solid #e0e0e0;padding-top:14px;margin-top:12px">
-      <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
+      <div style="font-size:14px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
-        <div class="fg" style="margin-bottom:0"><label style="font-size:11px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: aaa" style="font-size:14px;padding:10px 12px"></div>
-        <div class="fg" style="margin-bottom:0"><label style="font-size:11px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="TG" maxlength="10" style="font-size:14px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:13px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: aaa" style="font-size:16px;padding:10px 12px"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:13px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="TG" maxlength="10" style="font-size:16px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
       </div>
       <input type="hidden" id="vendorEditId">
       <div class="btn-row" style="margin-bottom:0">
         <button class="btn btn-sm btn-blue" onclick="saveVendor()" id="vendorSaveBtn" style="flex:1">💾 등록</button>
         <button class="btn btn-sm btn-gray" onclick="cancelVendorEdit()" id="vendorCancelBtn" style="display:none">취소</button>
       </div>
-      <div id="vendorStatus" style="font-size:11px;margin-top:6px;color:#888"></div>
+      <div id="vendorStatus" style="font-size:13px;margin-top:6px;color:#888"></div>
     </div>
   </div>
   <div class="card">
     <div class="card-tit">📢 공지사항 (접속 시 팝업)</div>
-    <div class="info-box blue" style="font-size:10px">💡 입력한 공지가 페이지 접속 시 자동 팝업됩니다.<br>비워두고 저장하면 팝업이 표시되지 않습니다. 사용자가 "오늘 하루 보지 않기" 선택 가능.</div>
+    <div class="info-box blue" style="font-size:12px">💡 입력한 공지가 페이지 접속 시 자동 팝업됩니다.<br>비워두고 저장하면 팝업이 표시되지 않습니다. 사용자가 "오늘 하루 보지 않기" 선택 가능.</div>
     <div class="fg">
       <label>제목</label>
-      <input type="text" id="noticeTitle" placeholder="예: 추석 연휴 입고 일정 안내" style="padding:10px 12px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box">
+      <input type="text" id="noticeTitle" placeholder="예: 추석 연휴 입고 일정 안내" style="padding:10px 12px;font-size:16px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box">
     </div>
     <div class="fg">
       <label>내용 (줄바꿈 가능)</label>
-      <textarea id="noticeBody" rows="5" placeholder="예: 9/15(월) ~ 9/17(수) 입고 불가&#10;9/18(목)부터 정상 운영" style="padding:10px 12px;font-size:13px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6"></textarea>
+      <textarea id="noticeBody" rows="5" placeholder="예: 9/15(월) ~ 9/17(수) 입고 불가&#10;9/18(목)부터 정상 운영" style="padding:10px 12px;font-size:15px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6"></textarea>
     </div>
     <div class="btn-row">
       <button class="btn btn-sm btn-blue" onclick="saveNotice()" style="flex:1">💾 공지 저장</button>
       <button class="btn btn-sm btn-gray" onclick="clearNotice()" style="flex:0 0 auto">🗑 삭제</button>
       <button class="btn btn-sm" onclick="previewNotice()" style="background:#10b981;color:#fff;flex:0 0 auto">👁 미리보기</button>
     </div>
-    <div id="noticeStatus" style="font-size:11px;margin-top:6px;color:#888"></div>
+    <div id="noticeStatus" style="font-size:13px;margin-top:6px;color:#888"></div>
   </div>
   <div class="card">
     <div class="card-tit">🔔 ntfy 알림</div>
-    <div class="info-box blue" style="font-size:10px">💡 <b>소재업체에서 파일 업로드 완료 시</b> 등록된 ntfy 방으로 자동 발송됩니다.</div>
+    <div class="info-box blue" style="font-size:12px">💡 <b>소재업체에서 파일 업로드 완료 시</b> 등록된 ntfy 방으로 자동 발송됩니다.</div>
     <div id="ntfyRuleList"></div>
     <div style="display:flex;gap:6px;margin-top:8px">
-      <input type="text" id="ntfyNewTopic" placeholder="방이름 (예: tj-mat)" style="flex:1;padding:8px;font-size:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
+      <input type="text" id="ntfyNewTopic" placeholder="방이름 (예: tj-mat)" style="flex:1;padding:8px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
       <button class="btn btn-sm btn-blue" onclick="addNtfyRule()" style="flex-shrink:0">+</button>
     </div>
     <div class="btn-row" style="margin-top:8px">
-      <input type="text" id="ntfyTestMsg" value="ntfy 테스트" style="flex:1;padding:8px;font-size:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
+      <input type="text" id="ntfyTestMsg" value="ntfy 테스트" style="flex:1;padding:8px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
       <button class="btn btn-sm" onclick="testNtfyAll()" style="background:#ef4444;color:#fff;flex-shrink:0">🔔 테스트</button>
     </div>
-    <div id="ntfyStatus" style="font-size:11px;margin-top:4px;color:#888"></div>
+    <div id="ntfyStatus" style="font-size:13px;margin-top:4px;color:#888"></div>
   </div>
   <div class="card">
     <div class="card-tit">🔧 Supabase 설정</div>
-    <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
-    <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
+    <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
+    <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
   </div>
-  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;font-size:10px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS move_history_tj (
+  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:14px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;font-size:12px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS move_history_tj (
   id bigint generated always as identity primary key,
   move_date date, move_time text, process text,
   departure text, destination text,
@@ -5533,24 +5533,24 @@ ALTER TABLE move_history_tj ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "anon_all" ON move_history_tj;
 CREATE POLICY "anon_all" ON move_history_tj FOR ALL TO anon USING (true) WITH CHECK (true);</pre></details>
   <button class="btn btn-blue" onclick="saveAllSettings()" style="margin-bottom:8px">💾 모든 설정 서버에 저장</button>
-  <div style="text-align:center"><span id="stgSaveStatus" style="font-size:11px;color:#888"></span></div>
-  <div class="card" style="margin-top:8px"><div class="card-tit">ℹ️ 연결 상태</div><div id="connStatusInfo" style="font-size:12px;color:#555;line-height:1.8"></div></div>
+  <div style="text-align:center"><span id="stgSaveStatus" style="font-size:13px;color:#888"></span></div>
+  <div class="card" style="margin-top:8px"><div class="card-tit">ℹ️ 연결 상태</div><div id="connStatusInfo" style="font-size:14px;color:#555;line-height:1.8"></div></div>
 </div>
 </div>
 
 <!-- 공지사항 팝업 모달 -->
 <div id="noticeModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px;box-sizing:border-box">
   <div style="background:#fff;max-width:520px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);max-height:90vh;display:flex;flex-direction:column">
-    <div style="background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;padding:16px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px">
+    <div style="background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;padding:16px 20px;font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px">
       <span>📢</span><span id="noticeModalTitle">공지사항</span>
     </div>
-    <div id="noticeModalBody" style="padding:20px 22px;font-size:14px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;overflow-y:auto;flex:1;max-height:60vh"></div>
+    <div id="noticeModalBody" style="padding:20px 22px;font-size:16px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;overflow-y:auto;flex:1;max-height:60vh"></div>
     <div style="padding:12px 20px;background:#f7f8fc;border-top:1px solid #e0e0e0;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-      <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer">
+      <label style="font-size:14px;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer">
         <input type="checkbox" id="noticeHideToday" style="width:16px;height:16px;cursor:pointer">
         오늘 하루 보지 않기
       </label>
-      <button onclick="closeNoticeModal()" style="background:#1a237e;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer">확인</button>
+      <button onclick="closeNoticeModal()" style="background:#1a237e;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:16px;cursor:pointer">확인</button>
     </div>
   </div>
 </div>
@@ -5559,23 +5559,23 @@ CREATE POLICY "anon_all" ON move_history_tj FOR ALL TO anon USING (true) WITH CH
 
 <!-- PIN 키패드 모달 -->
 <div id="pinLock" style="display:none;position:fixed;inset:0;background:linear-gradient(180deg,#181b26,#0f1117);z-index:99999;flex-direction:column;align-items:center;justify-content:center;padding:20px">
-  <div style="font-size:22px;font-weight:800;color:#e2b04a;margin-bottom:6px;text-align:center">🔒 설정 메뉴 접속</div>
-  <div style="font-size:12px;color:#8b8fa3;margin-bottom:32px">본인의 PIN을 입력하세요</div>
+  <div style="font-size:25px;font-weight:800;color:#e2b04a;margin-bottom:6px;text-align:center">🔒 설정 메뉴 접속</div>
+  <div style="font-size:14px;color:#8b8fa3;margin-bottom:32px">본인의 PIN을 입력하세요</div>
   <div id="pinDots" style="display:flex;gap:12px;margin-bottom:24px">
     <div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div>
   </div>
-  <div id="pinLockoutMsg" style="display:none;color:#ef4444;font-size:13px;font-weight:600;text-align:center;margin-bottom:16px"></div>
+  <div id="pinLockoutMsg" style="display:none;color:#ef4444;font-size:15px;font-weight:600;text-align:center;margin-bottom:16px"></div>
   <div id="pinKeypad" style="display:grid;grid-template-columns:repeat(3,72px);gap:14px;justify-content:center"></div>
-  <div style="margin-top:28px"><button onclick="closePinLock()" style="background:transparent;border:none;color:#8b8fa3;font-size:12px;padding:8px 16px;cursor:pointer;font-family:inherit">✕ 취소</button></div>
+  <div style="margin-top:28px"><button onclick="closePinLock()" style="background:transparent;border:none;color:#8b8fa3;font-size:14px;padding:8px 16px;cursor:pointer;font-family:inherit">✕ 취소</button></div>
 </div>
 <style>
 #pinLock .pd{width:12px;height:12px;border-radius:50%;background:#2a2e3d;border:2px solid #2a2e3d;transition:all .15s}
 #pinLock .pd.filled{background:#e2b04a;border-color:#e2b04a;box-shadow:0 0 10px rgba(226,176,74,.4)}
 #pinLock .pd.err{background:#ef4444;border-color:#ef4444;animation:pinshake .4s}
 @keyframes pinshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-#pinLock .pk{width:72px;height:72px;border-radius:50%;background:#1a1d27;border:1.5px solid #2a2e3d;color:#e8eaf0;font-size:26px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+#pinLock .pk{width:72px;height:72px;border-radius:50%;background:#1a1d27;border:1.5px solid #2a2e3d;color:#e8eaf0;font-size:29px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s;display:flex;align-items:center;justify-content:center;font-family:inherit}
 #pinLock .pk:active{background:#2a2e3d;transform:scale(.92)}
-#pinLock .pk.fn{background:transparent;border:none;font-size:18px;color:#8b8fa3}
+#pinLock .pk.fn{background:transparent;border:none;font-size:20px;color:#8b8fa3}
 </style>
 
 <script>
@@ -5836,10 +5836,10 @@ function parseFile(file){const reader=new FileReader();reader.onload=function(e)
   });
   if(!raw.length){showToast('데이터가 없습니다');return}
   _batchData=raw;
-const longLots=[];raw.forEach((r,i)=>{const lot=String(r['로트']||r['lot']||r['로트번호']||'').trim();const lotClean=lot.replace(/^LOT[-_\s]*/i,'');if(lotClean.length>20)longLots.push({row:i+4,lot:lotClean,len:lotClean.length})});if(longLots.length){const list=longLots.slice(0,5).map(x=>`  • ${x.row}행: ${x.lot} (${x.len}자)`).join('\n');alert('⚠️ LOT 길이 초과 경고\n\nOracle MES의 HEAT_NO 컬럼은 최대 20자까지만 저장됩니다.\n다음 '+longLots.length+'건이 20자를 초과합니다:\n\n'+list+(longLots.length>5?`\n  ... 외 ${longLots.length-5}건`:'')+'\n\n→ 그대로 등록 시 MES 동기화에서 ORA-12899 오류가 발생합니다.\n→ LOT를 수정한 후 다시 업로드하세요.')}
+const longLots=[];raw.forEach((r,i)=>{const lot=String(r['로트']||r['lot']||r['로트번호']||'').trim();const lotClean=lot.replace(/^LOT[-_\s]*/i,'');if(lotClean.length>20)longLots.push({row:i+4,lot:lotClean,len:lotClean.length})});if(longLots.length){const list=longLots.slice(0,5).map(x=>`  • ${x.row}행: ${x.lot} (${x.len}자)`).join('\n');alert('⚠️ LOT 길이 초과 경고\n\nLOT / HEAT NO 는 최대 20자까지 저장됩니다.\n다음 '+longLots.length+'건이 20자를 초과합니다:\n\n'+list+(longLots.length>5?`\n  ... 외 ${longLots.length-5}건`:'')+'\n\n→ 그대로 등록하면 LOT 뒷부분이 잘릴 수 있습니다.\n→ LOT를 수정한 후 다시 업로드하세요.')}
 document.getElementById('fileInfo').style.display='block';document.getElementById('fileInfoText').innerHTML='✅ <b>'+file.name+'</b> 읽기 완료<br>업체: <b>'+(_batchCompany||'미기입')+'</b> · 입고일: <b>'+(_batchDate||'미기입')+'</b> · <b>'+raw.length+'건</b>'+(longLots.length?'<br><span style="color:#c62828;font-weight:700">⚠️ LOT 20자 초과 '+longLots.length+'건 — 수정 권장</span>':'');document.getElementById('btnToStep3').disabled=false;showToast('✅ '+raw.length+'건 읽기 완료'+(longLots.length?' (LOT 초과 '+longLots.length+'건)':''))}catch(err){showToast('파일 읽기 오류: '+err.message)}};reader.readAsArrayBuffer(file)}
 
-function renderPreview(){const vi=getVendorInfo();const cfg={from:vi.name,fromCode:vi.code,to:document.getElementById('cfgTo').value.trim(),worker:document.getElementById('cfgWorker').value.trim()};document.getElementById('pvTotal').textContent=_batchData.length;document.getElementById('pvCompany').textContent=_batchCompany||vi.name||'-';document.getElementById('pvDate').textContent=_batchDate||'-';document.getElementById('pvRegCnt').textContent=_batchData.length;document.getElementById('pvSettings').innerHTML='출발지: <b>'+cfg.from+' ('+cfg.fromCode+')</b> → 도착지: <b>'+cfg.to+'</b>'+(cfg.worker?' · 담당자: <b>'+cfg.worker+'</b>':'')+'<br><span style="color:#2e7d32;font-weight:700">→ MES 등록: VENDOR_SITE_ID=<b>'+cfg.fromCode+'</b> (5분 주기 자동)</span>';const cols=Object.keys(_batchData[0]);const showRows=_batchData.slice(0,15);let html='<thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';showRows.forEach(row=>{html+='<tr>'+cols.map(c=>{let v=row[c];if(v instanceof Date)v=excelDateToYMD(v);return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'});html+='</tbody>';document.getElementById('pvTable').innerHTML=html;document.getElementById('pvMore').textContent=_batchData.length>15?'... 외 '+(_batchData.length-15)+'건':''}
+function renderPreview(){const vi=getVendorInfo();const cfg={from:vi.name,fromCode:vi.code,to:document.getElementById('cfgTo').value.trim(),worker:document.getElementById('cfgWorker').value.trim()};document.getElementById('pvTotal').textContent=_batchData.length;document.getElementById('pvCompany').textContent=_batchCompany||vi.name||'-';document.getElementById('pvDate').textContent=_batchDate||'-';document.getElementById('pvRegCnt').textContent=_batchData.length;document.getElementById('pvSettings').innerHTML='출발지: <b>'+cfg.from+' ('+cfg.fromCode+')</b> → 도착지: <b>'+cfg.to+'</b>'+(cfg.worker?' · 담당자: <b>'+cfg.worker+'</b>':'')+'<br><span style="color:#2e7d32;font-weight:700">→ 업체코드: <b>'+cfg.fromCode+'</b> · 등록 즉시 도착지에서 확인 가능</span>';const cols=Object.keys(_batchData[0]);const showRows=_batchData.slice(0,15);let html='<thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';showRows.forEach(row=>{html+='<tr>'+cols.map(c=>{let v=row[c];if(v instanceof Date)v=excelDateToYMD(v);return'<td>'+(v||'')+'</td>'}).join('')+'</tr>'});html+='</tbody>';document.getElementById('pvTable').innerHTML=html;document.getElementById('pvMore').textContent=_batchData.length>15?'... 외 '+(_batchData.length-15)+'건':''}
 
 async function doRegister(){
   if(!_batchData.length){showToast('데이터 없음');return}
@@ -5854,11 +5854,11 @@ async function doRegister(){
   });
   if(longLots.length){
     const list=longLots.slice(0,10).map(x=>`  • ${x.row}행: ${x.lot} (${x.len}자)`).join('\n');
-    alert('🚫 등록 차단 — LOT 길이 초과\n\nOracle MES의 HEAT_NO 컬럼 최대 길이는 20자입니다.\n다음 '+longLots.length+'건의 LOT가 20자를 초과하여 등록할 수 없습니다:\n\n'+list+(longLots.length>10?`\n  ... 외 ${longLots.length-10}건`:'')+'\n\n→ 엑셀 파일에서 LOT를 20자 이내로 수정한 후 다시 업로드하세요.\n→ 또는 DBA에게 HEAT_NO 컬럼 확장(VARCHAR2(50))을 요청하세요.');
+    alert('🚫 등록 차단 — LOT 길이 초과\n\nLOT / HEAT NO 최대 길이는 20자입니다.\n다음 '+longLots.length+'건의 LOT가 20자를 초과하여 등록할 수 없습니다:\n\n'+list+(longLots.length>10?`\n  ... 외 ${longLots.length-10}건`:'')+'\n\n→ 엑셀 파일에서 LOT를 20자 이내로 수정한 후 다시 업로드하세요.\n→ 또는 DBA에게 HEAT_NO 컬럼 확장(VARCHAR2(50))을 요청하세요.');
     return;
   }
 
-  if(!confirm(_batchData.length+'건을 Supabase에 저장하고 MES에 자동 등록됩니다.\n(5분 이내 자동 처리)\n\n계속하시겠습니까?'))return;
+  if(!confirm(_batchData.length+'건을 발송 등록합니다.\n등록 후 도착지에서 소재입고·수입검사가 진행됩니다.\n\n계속하시겠습니까?'))return;
 
   const st=document.getElementById('regStatus');
   st.style.display='block';st.style.background='#e3f2fd';st.style.color='#1565c0';
@@ -5909,8 +5909,8 @@ async function doRegister(){
 
   document.getElementById('doneTitle').textContent='✅ '+ok+'건 처리 시작';
   let summary='업체: <b>'+(_batchCompany||cfg.from||'-')+' ('+cfg.fromCode+')</b> · 입고일: <b>'+(_batchDate||todayStr)+'</b><br>출발지: '+cfg.from+' → 도착지: '+cfg.to+(cfg.worker?' · 담당자: '+cfg.worker:'');
-  summary+='<br><br><span id="sbStatusLive" style="color:#1565c0;font-weight:700">💾 Supabase 저장 중... (백그라운드)</span>';
-  summary+='<br><span id="ntfyStatusLive" style="color:#888;font-size:11px">📧 알림 발송 대기중</span>';
+  summary+='<br><br><span id="sbStatusLive" style="color:#1565c0;font-weight:700">💾 발송 등록 중... (백그라운드)</span>';
+  summary+='<br><span id="ntfyStatusLive" style="color:#888;font-size:13px">📧 알림 발송 대기중</span>';
   document.getElementById('doneSummary').innerHTML=summary;
   document.getElementById('btnRegister').disabled=false;
   /* [Rev5.5] _certBatch 스냅샷 - goStep(4)의 500ms prepareCertBatch 재빌드/자동복귀 초기화와 무관하게 보존 */
@@ -6048,13 +6048,13 @@ async function doRegister(){
       if(certAutoOk>0)extra=`<br>📋 IQC 빈 성적서 ${certAutoOk}건 자동 생성 (수입검사 대기)`;
       if(certAutoFail>0)extra+=`<br><span style="color:#c62828;font-weight:700">❌ IQC 성적서 ${certAutoFail}건 생성 실패 — 수입검사 대기에 표시되지 않습니다!<br>사유: ${_certAutoErr}</span>`;
       if(sbOk>0&&sbFail===0){
-        sbEl.innerHTML='✅ Supabase 저장 완료: '+sbOk+'건 → 5분 이내 MES 자동등록 예정'+extra;
+        sbEl.innerHTML='✅ 발송 등록 완료: '+sbOk+'건 → 도착지 소재입고 대기'+extra;
         sbEl.style.color='#2e7d32';
       }else if(sbOk>0&&sbFail>0){
-        sbEl.innerHTML='⚠ Supabase: '+sbOk+'건 성공, '+sbFail+'건 실패'+extra;
+        sbEl.innerHTML='⚠ 발송 등록: '+sbOk+'건 성공, '+sbFail+'건 실패'+extra;
         sbEl.style.color='#e65100';
       }else{
-        sbEl.innerHTML='❌ Supabase 저장 실패 (네트워크 확인 필요)';
+        sbEl.innerHTML='❌ 발송 등록 실패 (네트워크 확인 필요)';
         sbEl.style.color='#c62828';
       }
     }
@@ -6062,7 +6062,7 @@ async function doRegister(){
     const ntfyEl=document.getElementById('ntfyStatusLive');
     if(ntfyEl){ntfyEl.textContent='📧 알림 발송 중...';ntfyEl.style.color='#1565c0'}
 
-    const ntfyMsg='📤 소재입고 등록 완료\n\n🏢 업체: '+(_batchCompany||cfg.from||'-')+' ('+cfg.fromCode+')\n📅 입고일: '+(_batchDate||todayStr)+'\n📦 등록: '+ok+'건\n💾 Supabase: '+sbOk+'건'+(sbFail?' (실패 '+sbFail+')':'')+'\n🔄 MES 자동등록: 5분 이내\n'+(cfg.worker?'👤 작업자: '+cfg.worker+'\n':'')+'\n📋 소재정보:\n  '+matSummary; /* [Rev5.6] 전체 출력 */
+    const ntfyMsg='📤 소재발송 등록 완료\n\n🏢 업체: '+(_batchCompany||cfg.from||'-')+' ('+cfg.fromCode+')\n📅 입고일: '+(_batchDate||todayStr)+'\n📦 등록: '+ok+'건\n💾 저장: '+sbOk+'건'+(sbFail?' (실패 '+sbFail+')':'')+'\n📥 도착지 소재입고 대기\n'+(cfg.worker?'👤 작업자: '+cfg.worker+'\n':'')+'\n📋 소재정보:\n  '+matSummary; /* [Rev5.6] 전체 출력 */
 
     await Promise.all([
       sendNtfyUploadComplete(ntfyMsg).catch(e=>console.log('ntfy 실패:',e)),
@@ -6121,14 +6121,14 @@ let _tt;function showToast(m){const el=document.getElementById('toast');el.textC
 function getHHMM(){const n=new Date();return String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')}
 function initHistDates(){const t=new Date(),m=new Date();m.setMonth(m.getMonth()-1);document.getElementById('histEnd').value=t.toISOString().split('T')[0];document.getElementById('histStart').value=m.toISOString().split('T')[0]}
 async function histFetch(){const sd=document.getElementById('histStart').value,ed=document.getElementById('histEnd').value;if(!sd||!ed)return{ok:false,msg:'날짜 선택'};let url=getSbUrl()+'/rest/v1/move_history_tj?select=*&order=move_date.desc,move_time.desc&limit=5000&move_date=gte.'+sd+'&move_date=lte.'+ed;const co=document.getElementById('histCompany').value.trim();if(co)url+='&material_info=ilike.*'+encodeURIComponent(co)+'*';try{const r=await fetch(url,{headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(!r.ok)throw new Error(r.status);return{ok:true,data:await r.json()}}catch(e){return{ok:false,msg:e.message}}}
-async function histQuery(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const st=document.getElementById('histStatus'),area=document.getElementById('histArea');st.textContent='조회 중...';area.innerHTML='';const r=await histFetch();if(!r.ok){st.textContent='❌ '+r.msg;st.style.color='#c62828';return}if(!r.data.length){st.textContent='⚠ 이력 없음';st.style.color='#e65100';return}st.textContent='✅ '+r.data.length+'건';st.style.color='#2e7d32';let h='<table style="width:100%;border-collapse:collapse;font-size:10px"><tr style="background:#e8eaf6"><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">일자</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">소재</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">LOT</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">수량</th></tr>';r.data.slice(0,100).forEach(d=>{h+='<tr style="border-bottom:1px solid #eee"><td style="padding:4px">'+d.move_date+'</td><td style="padding:4px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.material_info||'-')+'</td><td style="padding:4px">'+(d.lot||'-')+'</td><td style="padding:4px">'+(d.qty||'-')+'</td></tr>'});area.innerHTML=h+'</table>'}
+async function histQuery(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const st=document.getElementById('histStatus'),area=document.getElementById('histArea');st.textContent='조회 중...';area.innerHTML='';const r=await histFetch();if(!r.ok){st.textContent='❌ '+r.msg;st.style.color='#c62828';return}if(!r.data.length){st.textContent='⚠ 이력 없음';st.style.color='#e65100';return}st.textContent='✅ '+r.data.length+'건';st.style.color='#2e7d32';let h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e8eaf6"><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">일자</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">소재</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">LOT</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">수량</th></tr>';r.data.slice(0,100).forEach(d=>{h+='<tr style="border-bottom:1px solid #eee"><td style="padding:4px">'+d.move_date+'</td><td style="padding:4px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.material_info||'-')+'</td><td style="padding:4px">'+(d.lot||'-')+'</td><td style="padding:4px">'+(d.qty||'-')+'</td></tr>'});area.innerHTML=h+'</table>'}
 async function histExcel(){const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}const hd=['일자','시간','공정','출발지','도착지','LOT','수량','소재정보','작업자','비고'];const rows=r.data.map(d=>[d.move_date,d.move_time,d.process,d.departure,d.destination,d.lot,d.qty,d.material_info,d.worker,d.note]);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([hd,...rows]),'소재입고');XLSX.writeFile(wb,'소재입고_'+document.getElementById('histStart').value.replace(/-/g,'')+'_'+document.getElementById('histEnd').value.replace(/-/g,'')+'.xlsx');showToast('📥 다운로드 완료')}
 async function histDelete(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}if(!confirm(r.data.length+'건 삭제?'))return;const ids=r.data.map(d=>d.id);for(let i=0;i<ids.length;i+=50){await fetch(getSbUrl()+'/rest/v1/move_history_tj?id=in.('+ids.slice(i,i+50).join(',')+')',{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}document.getElementById('histStatus').textContent='✅ 삭제 완료';document.getElementById('histArea').innerHTML=''}
 
 const NTFY_LS='PD_MAT_NTFY_RULES';const NTFY_SV='https://ntfy.sh';
 function getNtfyRules(){try{return JSON.parse(localStorage.getItem(NTFY_LS)||'[]')}catch(e){return[]}}
 function saveNtfyRules(r){localStorage.setItem(NTFY_LS,JSON.stringify(r))}
-function renderNtfyRules(){const rules=getNtfyRules();const c=document.getElementById('ntfyRuleList');if(!c)return;if(!rules.length){c.innerHTML='<div style="font-size:11px;color:#999;padding:8px 0;text-align:center">등록된 방 없음</div>';return}c.innerHTML=rules.map((r,i)=>'<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f5f5f5;border-radius:8px;margin-bottom:4px;font-size:12px"><span style="color:#888;min-width:20px">'+(i+1)+'</span><span style="flex:1;color:#1565c0;font-family:monospace;font-size:12px;font-weight:600">#'+r.topic+'</span><button onclick="delNtfyRule('+i+')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700">✕</button></div>').join('')}
+function renderNtfyRules(){const rules=getNtfyRules();const c=document.getElementById('ntfyRuleList');if(!c)return;if(!rules.length){c.innerHTML='<div style="font-size:13px;color:#999;padding:8px 0;text-align:center">등록된 방 없음</div>';return}c.innerHTML=rules.map((r,i)=>'<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f5f5f5;border-radius:8px;margin-bottom:4px;font-size:14px"><span style="color:#888;min-width:20px">'+(i+1)+'</span><span style="flex:1;color:#1565c0;font-family:monospace;font-size:14px;font-weight:600">#'+r.topic+'</span><button onclick="delNtfyRule('+i+')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700">✕</button></div>').join('')}
 function addNtfyRule(){const topic=document.getElementById('ntfyNewTopic').value.trim().replace(/\s/g,'-');if(!topic){document.getElementById('ntfyStatus').textContent='⚠ 방이름 입력';document.getElementById('ntfyStatus').style.color='#e65100';return}const rules=getNtfyRules();if(rules.find(r=>r.topic===topic)){document.getElementById('ntfyStatus').textContent='⚠ 이미 존재';document.getElementById('ntfyStatus').style.color='#e65100';return}rules.push({topic});saveNtfyRules(rules);document.getElementById('ntfyNewTopic').value='';document.getElementById('ntfyStatus').textContent='✅ #'+topic;document.getElementById('ntfyStatus').style.color='#2e7d32';renderNtfyRules()}
 function delNtfyRule(i){const r=getNtfyRules();r.splice(i,1);saveNtfyRules(r);renderNtfyRules()}
 async function sendNtfyUploadComplete(body){
@@ -6204,15 +6204,15 @@ function renderVendorList(){
   const c=document.getElementById('vendorList');
   if(!c)return;
   if(!_vendorCache.length){
-    c.innerHTML='<div style="font-size:12px;color:#999;padding:20px;text-align:center;border:2px dashed #ddd;border-radius:8px;background:#fff">등록된 업체가 없습니다<br><span style="font-size:11px;color:#bbb">아래 "업체 추가"에서 등록하세요</span></div>';
+    c.innerHTML='<div style="font-size:14px;color:#999;padding:20px;text-align:center;border:2px dashed #ddd;border-radius:8px;background:#fff">등록된 업체가 없습니다<br><span style="font-size:13px;color:#bbb">아래 "업체 추가"에서 등록하세요</span></div>';
     return;
   }
   c.innerHTML=_vendorCache.map((v,i)=>{
     const upDisabled=(i===0)?'disabled style="opacity:.3"':'';
     const downDisabled=(i===_vendorCache.length-1)?'disabled style="opacity:.3"':'';
-    return '<div style="display:flex;align-items:center;gap:6px;padding:10px 12px;background:#fff;border-radius:8px;margin-bottom:4px;font-size:13px;border:1px solid #e8eaf6;box-shadow:0 1px 2px rgba(0,0,0,.03)">'
-      +'<span style="color:#9aa0b4;min-width:24px;font-weight:700;font-size:11px;text-align:center;background:#e8eaf6;padding:3px 0;border-radius:4px">'+String(i+1).padStart(2,'0')+'</span>'
-      +'<span style="flex:1;display:flex;align-items:center;gap:8px"><b style="color:#1a237e">'+v.name+'</b><span style="color:#fff;background:#3f51b5;font-family:monospace;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600">'+v.code+'</span></span>'
+    return '<div style="display:flex;align-items:center;gap:6px;padding:10px 12px;background:#fff;border-radius:8px;margin-bottom:4px;font-size:15px;border:1px solid #e8eaf6;box-shadow:0 1px 2px rgba(0,0,0,.03)">'
+      +'<span style="color:#9aa0b4;min-width:24px;font-weight:700;font-size:13px;text-align:center;background:#e8eaf6;padding:3px 0;border-radius:4px">'+String(i+1).padStart(2,'0')+'</span>'
+      +'<span style="flex:1;display:flex;align-items:center;gap:8px"><b style="color:#1a237e">'+v.name+'</b><span style="color:#fff;background:#3f51b5;font-family:monospace;font-size:13px;padding:2px 8px;border-radius:4px;font-weight:600">'+v.code+'</span></span>'
       +'<button onclick="moveVendor('+i+',-1)" '+upDisabled+' style="border:none;background:rgba(26,35,126,.1);color:#1a237e;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="위로">▲</button>'
       +'<button onclick="moveVendor('+i+',1)" '+downDisabled+' style="border:none;background:rgba(26,35,126,.1);color:#1a237e;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="아래로">▼</button>'
       +'<button onclick="editVendor('+i+')" style="border:none;background:rgba(46,125,50,.1);color:#2e7d32;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="수정">✏️</button>'
@@ -6680,9 +6680,9 @@ function renderCertModal(){
   document.getElementById('certNavInfo').textContent=`${_certCurrentIdx+1} / ${_certBatch.length}`;
   
   const totalWeight=c.weight?(Math.round(c.weight*100)/100).toLocaleString():'-';
-  const coilBadge=c.coil_count>1?`<span style="display:inline-block;background:#3b82f6;color:#fff;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:700;margin-left:6px">${c.coil_count}개 코일</span>`:'';
+  const coilBadge=c.coil_count>1?`<span style="display:inline-block;background:#3b82f6;color:#fff;padding:3px 10px;border-radius:12px;font-size:15px;font-weight:700;margin-left:6px">${c.coil_count}개 코일</span>`:'';
   const lotsHtml=(c.lots_all&&c.lots_all.length>1)?
-    `<div style="margin-top:10px;padding:10px 14px;background:rgba(59,130,246,0.08);border-radius:8px;font-size:13px;color:#1e40af"><b>개별 LOT:</b> ${c.lots_all.join(' · ')}</div>`:'';
+    `<div style="margin-top:10px;padding:10px 14px;background:rgba(59,130,246,0.08);border-radius:8px;font-size:15px;color:#1e40af"><b>개별 LOT:</b> ${c.lots_all.join(' · ')}</div>`:'';
   
   const row=(label,value,extra)=>
     `<div class="cert-info-row"><span class="ci-label">${label}</span><span class="ci-value">${value}</span>${extra||''}</div>`;
@@ -6747,14 +6747,14 @@ function renderCertModal(){
     const fname=ms.originalName||'밀시트';
     const sizeKB=ms.fileSize?(ms.fileSize/1024).toFixed(0)+' KB':'';
     if((ms.mimeType||'').startsWith('image/')){
-      preview.innerHTML=`<div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><img src="${ms.dataUrl}" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"><div style="margin-top:8px;font-size:12px;color:#16a34a;font-weight:600">✅ ${fname} ${sizeKB?'('+sizeKB+')':''} 압축 완료 · 서버 저장 예정</div></div>`;
+      preview.innerHTML=`<div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><img src="${ms.dataUrl}" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"><div style="margin-top:8px;font-size:14px;color:#16a34a;font-weight:600">✅ ${fname} ${sizeKB?'('+sizeKB+')':''} 압축 완료 · 서버 저장 예정</div></div>`;
     }else if((ms.mimeType||'')==='application/pdf'){
-      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;text-align:center"><div style="font-size:48px;margin-bottom:8px">📄</div><div style="font-size:14px;font-weight:700;color:#991b1b">${fname}</div><div style="margin-top:4px;font-size:12px;color:#7f1d1d">PDF · ${sizeKB}</div><div style="margin-top:10px;font-size:12px;color:#16a34a;font-weight:600">✅ 서버에 저장됩니다 (수입검사에서 확인 가능)</div></div>`;
+      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;text-align:center"><div style="font-size:48px;margin-bottom:8px">📄</div><div style="font-size:16px;font-weight:700;color:#991b1b">${fname}</div><div style="margin-top:4px;font-size:14px;color:#7f1d1d">PDF · ${sizeKB}</div><div style="margin-top:10px;font-size:14px;color:#16a34a;font-weight:600">✅ 서버에 저장됩니다 (수입검사에서 확인 가능)</div></div>`;
     }else{
-      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><div style="font-size:14px;font-weight:700">${fname}</div><div style="margin-top:4px;font-size:12px;color:#64748b">${ms.mimeType||''} · ${sizeKB}</div><div style="margin-top:8px;font-size:12px;color:#16a34a;font-weight:600">✅ 첨부됨</div></div>`;
+      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><div style="font-size:16px;font-weight:700">${fname}</div><div style="margin-top:4px;font-size:14px;color:#64748b">${ms.mimeType||''} · ${sizeKB}</div><div style="margin-top:8px;font-size:14px;color:#16a34a;font-weight:600">✅ 첨부됨</div></div>`;
     }
   }else{
-    preview.innerHTML='<div style="padding:40px 20px;text-align:center;color:#94a3b8;border:2px dashed #cbd5e1;border-radius:10px;background:#fafbfc;font-size:14px;margin-top:10px">📷 밀시트 (사진 또는 PDF)를 첨부하세요<br><span style="font-size:12px;color:#cbd5e1">스마트폰 카메라 / 갤러리 / PDF 파일 모두 가능</span></div>';
+    preview.innerHTML='<div style="padding:40px 20px;text-align:center;color:#94a3b8;border:2px dashed #cbd5e1;border-radius:10px;background:#fafbfc;font-size:16px;margin-top:10px">📷 밀시트 (사진 또는 PDF)를 첨부하세요<br><span style="font-size:14px;color:#cbd5e1">스마트폰 카메라 / 갤러리 / PDF 파일 모두 가능</span></div>';
   }
   
   const charge=c.certData?.charge||(isSUS?'허미정':'문수진');
@@ -7271,24 +7271,24 @@ window.updateCertBadge=function(){
   <div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:95vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
     <!-- 헤더 -->
     <div style="padding:18px 24px;background:#fff;color:#000;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000;border-radius:14px 14px 0 0">
-      <div style="font-size:18px;font-weight:700;letter-spacing:-0.3px;color:#000">
+      <div style="font-size:20px;font-weight:700;letter-spacing:-0.3px;color:#000">
         검사 성적서 작성
-        <span style="font-size:13px;font-weight:500;color:#555;margin-left:10px;border:1px solid #888;padding:3px 10px;border-radius:4px">
+        <span style="font-size:15px;font-weight:500;color:#555;margin-left:10px;border:1px solid #888;padding:3px 10px;border-radius:4px">
           <span id="certNavInfo">1 / 1</span>
         </span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button onclick="fillCertDefaults()" title="외관·재질=OK / 폭·두께는 SPEC 기본값 자동 입력" style="background:#fef3c7;border:1.5px solid #f59e0b;color:#92400e;font-size:13px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:6px;transition:all 0.2s" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">🪄 기본값</button>
-        <button onclick="closeCertModal()" style="background:#fff;border:1px solid #888;color:#000;font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">×</button>
+        <button onclick="fillCertDefaults()" title="외관·재질=OK / 폭·두께는 SPEC 기본값 자동 입력" style="background:#fef3c7;border:1.5px solid #f59e0b;color:#92400e;font-size:15px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:6px;transition:all 0.2s" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">🪄 기본값</button>
+        <button onclick="closeCertModal()" style="background:#fff;border:1px solid #888;color:#000;font-size:22px;cursor:pointer;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">×</button>
       </div>
     </div>
     
     <div style="padding:22px 26px">
       <!-- 정보 박스 (단순화) -->
-      <div id="certInfoBox" style="padding:14px 18px;background:#fafafa;border:1px solid #ccc;border-radius:6px;font-size:14px;line-height:1.8;color:#000;margin-bottom:18px"></div>
+      <div id="certInfoBox" style="padding:14px 18px;background:#fafafa;border:1px solid #ccc;border-radius:6px;font-size:16px;line-height:1.8;color:#000;margin-bottom:18px"></div>
       
       <!-- 측정값 표 제목 -->
-      <div style="font-size:15px;font-weight:700;color:#000;margin-bottom:8px">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:8px">
         측정값 (공급자 측정치)
       </div>
       <!-- 격자표 CSS - 강제 적용 -->
@@ -7303,7 +7303,7 @@ window.updateCertBadge=function(){
           background:#fff !important;
           border:1px solid #000 !important;
           width:100% !important;
-          font-size:14px !important;
+          font-size:16px !important;
           margin-bottom:20px !important;
           table-layout:fixed !important;
         }
@@ -7317,7 +7317,7 @@ window.updateCertBadge=function(){
           text-align:center !important;
           color:#000 !important;
           font-weight:700 !important;
-          font-size:14px !important;
+          font-size:16px !important;
           display:table-cell !important;
         }
         #certMeasTable tbody td{
@@ -7325,7 +7325,7 @@ window.updateCertBadge=function(){
           border:1px solid #000 !important;
           text-align:center !important;
           background:#fff !important;
-          font-size:14px !important;
+          font-size:16px !important;
           color:#000 !important;
           height:36px !important;
           display:table-cell !important;
@@ -7335,7 +7335,7 @@ window.updateCertBadge=function(){
           font-weight:700 !important;
           color:#000 !important;
           background:#fff !important;
-          font-size:14px !important;
+          font-size:16px !important;
           padding:6px 8px !important;
           text-align:center !important;
           white-space:nowrap !important;
@@ -7348,7 +7348,7 @@ window.updateCertBadge=function(){
           border-width:0 !important;
           border-style:none !important;
           border-radius:0 !important;
-          font-size:14px !important;
+          font-size:16px !important;
           font-family:inherit !important;
           font-weight:500 !important;
           color:#000 !important;
@@ -7386,7 +7386,7 @@ window.updateCertBadge=function(){
         #certMeasTable input.spec-input{
           text-align:left !important;
           padding:6px 8px !important;
-          font-size:13px !important;
+          font-size:15px !important;
           font-weight:500 !important;
         }
         #certMeasTable input.optional{color:#888 !important}
@@ -7399,7 +7399,7 @@ window.updateCertBadge=function(){
           display:inline-flex !important;
           align-items:center !important;
           gap:3px !important;
-          font-size:12px !important;
+          font-size:14px !important;
           font-weight:600 !important;
           color:#000 !important;
           margin:0 2px !important;
@@ -7418,15 +7418,15 @@ window.updateCertBadge=function(){
         /* 모바일 */
         @media (max-width:640px){
           #certMeasTable{min-width:480px !important}
-          #certMeasTable thead th{padding:6px 3px !important;font-size:12px !important}
-          #certMeasTable tbody td{font-size:12px !important;height:32px !important}
-          #certMeasTable tbody td:first-child{font-size:12px !important;padding:4px 6px !important}
+          #certMeasTable thead th{padding:6px 3px !important;font-size:14px !important}
+          #certMeasTable tbody td{font-size:14px !important;height:32px !important}
+          #certMeasTable tbody td:first-child{font-size:14px !important;padding:4px 6px !important}
           #certMeasTable input[type="text"],
           #certMeasTable input[type="number"]{
-            padding:5px 3px !important;font-size:12px !important;min-height:30px !important;
+            padding:5px 3px !important;font-size:14px !important;min-height:30px !important;
           }
-          #certMeasTable input.spec-input{font-size:11px !important;padding:5px 6px !important}
-          #certMeasTable label{font-size:11px !important;padding:2px 2px !important;margin:0 1px !important}
+          #certMeasTable input.spec-input{font-size:13px !important;padding:5px 6px !important}
+          #certMeasTable label{font-size:13px !important;padding:2px 2px !important;margin:0 1px !important}
           #certMeasTable input[type="radio"]{width:12px !important;height:12px !important}
         }
       </style>
@@ -7448,16 +7448,16 @@ window.updateCertBadge=function(){
       <!-- 담당자 / 판정 (단순화) -->
       <div class="cert-charge-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px">
         <div>
-          <label style="font-size:13px;color:#000;font-weight:600;display:block;margin-bottom:5px">담당자</label>
-          <input type="text" id="certCharge" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:14px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
+          <label style="font-size:15px;color:#000;font-weight:600;display:block;margin-bottom:5px">담당자</label>
+          <input type="text" id="certCharge" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:16px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
         </div>
         <div>
-          <label style="font-size:13px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 서명자</label>
-          <input type="text" id="certSign" placeholder="작성/검토/승인자" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:14px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
+          <label style="font-size:15px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 서명자</label>
+          <input type="text" id="certSign" placeholder="작성/검토/승인자" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:16px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
         </div>
         <div>
-          <label style="font-size:13px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 판정</label>
-          <select id="certFinalJ" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:14px;font-family:inherit;font-weight:600;color:#000;background:#fff;cursor:pointer">
+          <label style="font-size:15px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 판정</label>
+          <select id="certFinalJ" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:16px;font-family:inherit;font-weight:600;color:#000;background:#fff;cursor:pointer">
             <option>OK</option>
             <option>NG</option>
           </select>
@@ -7465,23 +7465,23 @@ window.updateCertBadge=function(){
       </div>
       
       <!-- 밀시트 첨부 -->
-      <div style="font-size:15px;font-weight:700;color:#000;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #000">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #000">
         📎 밀시트 첨부 (선택)
       </div>
       <div style="background:#fafafa;padding:12px 14px;border:1px solid #ccc;border-radius:4px;margin-bottom:8px">
-        <input type="file" id="certMillFile" accept="image/*,application/pdf,.pdf" onchange="certMillsheetUpload(this)" style="font-size:14px;font-family:inherit">
-        <div style="font-size:12px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 서버 저장용은 자동 압축, 메일은 원본 첨부 (최대 10 MB)</div>
+        <input type="file" id="certMillFile" accept="image/*,application/pdf,.pdf" onchange="certMillsheetUpload(this)" style="font-size:16px;font-family:inherit">
+        <div style="font-size:14px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 서버 저장용은 자동 압축, 메일은 원본 첨부 (최대 10 MB)</div>
       </div>
       <div id="certMillPreview"></div>
     </div>
     
     <!-- 하단 버튼 (단순화) -->
     <div style="padding:16px 26px;background:#fafafa;border-radius:0 0 14px 14px;display:flex;gap:10px;flex-wrap:wrap;border-top:1.5px solid #000">
-      <button id="certBtnPrev" onclick="certNavPrev()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">◀ 이전</button>
-      <button onclick="certSkipCurrent()" style="padding:10px 20px;background:#fff;color:#666;border:1.5px solid #888;border-radius:4px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">건너뛰기</button>
+      <button id="certBtnPrev" onclick="certNavPrev()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">◀ 이전</button>
+      <button onclick="certSkipCurrent()" style="padding:10px 20px;background:#fff;color:#666;border:1.5px solid #888;border-radius:4px;font-size:16px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">건너뛰기</button>
       <div style="flex:1"></div>
-      <button onclick="certSaveCurrent()" style="padding:11px 26px;background:#000;color:#fff;border:1.5px solid #000;border-radius:4px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">💾 저장 후 다음</button>
-      <button id="certBtnNext" onclick="certNavNext()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">다음 ▶</button>
+      <button onclick="certSaveCurrent()" style="padding:11px 26px;background:#000;color:#fff;border:1.5px solid #000;border-radius:4px;font-size:17px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">💾 저장 후 다음</button>
+      <button id="certBtnNext" onclick="certNavNext()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">다음 ▶</button>
     </div>
   </div>
 </div>
