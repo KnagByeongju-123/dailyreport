@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.53</title>
+<title>프레스 생산관리 Rev.7.54</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -276,7 +276,39 @@
   .press-scene.stopped .ps-bed { background: #7f1d1d; }
   @keyframes psStroke { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
-  /* 소재 LOT 선택 모달 */
+  /* [Rev.7.54] 금형 누적 타발수 · 점검주기 */
+  .shot-box { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 11px; margin-top: 2px; }
+  .sb-row { display: flex; align-items: baseline; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+  .sb-l { font-weight: 800; color: #475569; }
+  .sb-v { font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; font-size: 14px; }
+  .sb-v.muted { color: #94a3b8; font-size: 12px; font-weight: 700; }
+  .sb-bar { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; margin: 8px 0 6px; }
+  .sb-bar i { display: block; width: 0; height: 100%; background: #16a34a; transition: width .3s; }
+  .sb-bar.warn i { background: #f59e0b; }
+  .sb-bar.due i { background: #dc2626; }
+  .sb-msg { font-size: 11.5px; font-weight: 800; color: #64748b; line-height: 1.5; }
+  .sb-msg.warn { color: #c2410c; }
+  .sb-msg.due { color: #b91c1c; }
+  .sb-acts { display: flex; gap: 6px; margin-top: 9px; }
+  .sb-btn { flex: 1; padding: 9px 4px; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; font-family: inherit; }
+  .sb-btn.insp { background: #0284c7; }
+  .sb-btn.hist { background: #64748b; }
+  .sb-btn.adj { background: #f8fafc; color: #475569; border: 1.5px solid #cbd5e1; }
+  .sb-btn:active { transform: scale(.97); }
+  .mold-shot-sub { font-size: 10px; color: #94a3b8; font-weight: 700; }
+  .mold-shot-sub b { color: #475569; }
+  .insp-chip { display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 20px; font-size: 9px; font-weight: 800; color: #fff; }
+  .insp-chip.soon { background: #f59e0b; }
+  .insp-chip.due { background: #dc2626; }
+
+  /* 생산작업 다이어그램 점검 경고 */
+  .ps-insp {
+    display: none; align-items: center; gap: 6px; margin-bottom: 8px;
+    padding: 7px 10px; border-radius: 9px; font-size: 11.5px; font-weight: 800; line-height: 1.4;
+  }
+  .ps-insp.show { display: flex; }
+  .ps-insp.soon { background: #fff7ed; border: 1.5px solid #fb923c; color: #c2410c; }
+  .ps-insp.due { background: #fef2f2; border: 1.5px solid #f87171; color: #b91c1c; animation: rsPulse 1.4s infinite; }
   .mp-actions { display: flex; gap: 8px; margin-bottom: 10px; }
   .mp-actions button {
     flex: 1; padding: 13px 6px; border: none; border-radius: 10px; color: #fff;
@@ -983,7 +1015,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.53</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.54</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1012,7 +1044,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.53</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.54</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1064,6 +1096,7 @@
   <!-- [Rev.7.49] 로트 선택 박스 제거 → 아래 소재 코일 이미지를 눌러 QR/직접입력으로 선택 -->
   <!-- [Rev.7.48] 소재(코일) → 프레스 → 배출 흐름에 맞춰 조작 버튼 배치 -->
   <div class="press-scene" id="pressScene">
+    <div class="ps-insp" id="psInsp"></div>
     <div class="ps-line">
       <div class="ps-mat">
         <span class="ps-ring" id="psRing"></span>
@@ -1654,7 +1687,19 @@
       <div class="spec-pin" id="fSpecPin">📌 —</div>
       <div class="fld"><label>비중</label><input type="number" step="0.01" id="fGravity" placeholder="" oninput="calcMoldSpec()"></div>
       <div class="fld"><label>고객사</label><input type="text" id="fCustomer" placeholder=""></div>
+      <div class="fld"><label>점검주기 (타발수)</label><input type="number" id="fInspCycle" min="0" step="1000" placeholder="예: 100000" inputmode="numeric"></div>
       <div class="fld full"><label>QR 코드값 (미입력 시 금형제번)</label><input type="text" id="fQr" placeholder=""></div>
+      <div class="shot-box full" id="fShotBox">
+        <div class="sb-row"><span class="sb-l">누적 타발수</span><span class="sb-v" id="sbTotal">0 회</span></div>
+        <div class="sb-row"><span class="sb-l">마지막 점검</span><span class="sb-v muted" id="sbLast">기록 없음</span></div>
+        <div class="sb-bar"><i id="sbBar"></i></div>
+        <div class="sb-msg" id="sbMsg">점검주기를 입력하면 도래 시점을 알려줍니다</div>
+        <div class="sb-acts">
+          <button type="button" class="sb-btn insp" onclick="registerMoldInspection()">🔧 점검완료 등록</button>
+          <button type="button" class="sb-btn hist" onclick="openMoldInspHistory()">📋 점검이력</button>
+          <button type="button" class="sb-btn adj" onclick="adjustMoldShot()">✏️ 누적 보정</button>
+        </div>
+      </div>
       <input type="hidden" id="fMoldId">
     </div>
     <button class="btn-primary" onclick="saveMold()">✅ 저장</button>
@@ -1662,6 +1707,17 @@
       <button class="edit-cancel" onclick="closeMoldEdit()">닫기</button>
       <button class="edit-clear" id="btnMoldDelete" onclick="deleteMold()">🗑 삭제</button>
     </div>
+  </div>
+</div>
+
+<!-- [Rev.7.54] 금형 점검 이력 -->
+<div class="modal-bg" id="moldInspModal">
+  <div class="modal" style="border:2px solid #0284c7;max-width:520px">
+    <h2 id="moldInspTitle">📋 금형 점검이력 <button class="x" onclick="closeMoldInspHistory()" style="margin-left:auto">✕</button></h2>
+    <table class="mtable" id="moldInspTable">
+      <thead><tr><th>점검일</th><th>누적타발 / 구간</th><th>결과</th><th>점검자</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
 </div>
 
@@ -3729,6 +3785,7 @@ function updateUI() {
       : '호기 미선택';
     renderCoilState();
     renderCrownInfo();
+    renderInspWarn();
   }
   updateWorkStageGuide(runCode);
   if (hint && Date.now() > _hintUntil) {
@@ -5772,6 +5829,22 @@ async function saveProductionReport() {
     setSyncStatus('syncing', '⏳ 저장');
     await pd('PATCH', T_LOG + '?id=eq.' + session.logId, payload, { 'Prefer': 'return=minimal' });
 
+    // [Rev.7.54] 금형별 생산수량을 누적 타발수에 반영 → 점검주기 판정
+    const shotMap = {};
+    runHist.forEach(function(r) {
+      const q = (Number(r.pass) || 0) + (Number(r.bad) || 0);
+      if (r.mold_no && q > 0) shotMap[r.mold_no] = (shotMap[r.mold_no] || 0) + q;
+    });
+    const shotDone = await addMoldShots(shotMap);
+    const inspMsg = shotDone.filter(function(d) { return d.st.state === 'due' || d.st.state === 'soon'; })
+      .map(function(d) {
+        return (d.st.state === 'due' ? '🔴 ' : '🟠 ') + d.mold_no +
+               ' 누적 ' + d.total.toLocaleString() + '회 · ' +
+               (d.st.state === 'due' ? '점검 도래(초과 ' + Math.abs(d.st.remain).toLocaleString() + ')'
+                                     : '점검 임박(남은 ' + d.st.remain.toLocaleString() + ')');
+      }).join('\n');
+    renderMoldTable();
+
     // 작업 종료가 서버에 확정된 뒤 로컬 실제가동 시계도 종료한다.
     pauseActualRun(Date.now());
     const opRate = payload.op_rate;
@@ -5799,7 +5872,8 @@ async function saveProductionReport() {
           '\n✅ 양품 ' + passQty.toLocaleString() + ' EA' +
           '\n❌ 불량 ' + badQty.toLocaleString() + ' EA' +
           '\n📊 가동률 ' + opRate.toFixed(1) + '%' +
-          (theoryQty > 0 ? '\n⚡ 생산효율 ' + eff.toFixed(1) + '% (이론 ' + theoryQty.toLocaleString() + ' EA)' : ''));
+          (theoryQty > 0 ? '\n⚡ 생산효율 ' + eff.toFixed(1) + '% (이론 ' + theoryQty.toLocaleString() + ' EA)' : '') +
+          (inspMsg ? '\n\n🔧 금형 점검 알림\n' + inspMsg : ''));
   } catch (e) {
     console.error(e);
     setSyncStatus('error', '❌ 저장 실패');
@@ -5893,6 +5967,180 @@ function calcUnitWeight() {
   if (!t || !w || !p || !sg) return 0;
   return (t / 10) * (w / 10) * (p / 10) * sg;
 }
+/* ===== [Rev.7.54] 금형 누적 타발수 · 점검주기 ===== */
+const T_MOLD_INSP = 'pd_mold_inspection';
+let _moldShotDbWarned = false;
+
+function moldTotalShot(m) { return Math.max(0, Number(m && m.total_shot) || 0); }
+function moldInspCycle(m) { return Math.max(0, Number(m && m.insp_cycle_shot) || 0); }
+function moldLastInspShot(m) { return Math.max(0, Number(m && m.last_insp_shot) || 0); }
+function moldInspStatus(m) {
+  const cyc = moldInspCycle(m);
+  const used = Math.max(0, moldTotalShot(m) - moldLastInspShot(m));
+  if (!(cyc > 0)) return { state: 'none', used: used, cyc: 0, remain: 0, pct: 0 };
+  const remain = cyc - used;
+  const pct = Math.max(0, Math.min(100, used / cyc * 100));
+  return { state: remain <= 0 ? 'due' : (pct >= 80 ? 'soon' : 'ok'), used: used, cyc: cyc, remain: remain, pct: pct };
+}
+function moldShotDbHint(e) {
+  if (_moldShotDbWarned) return;
+  _moldShotDbWarned = true;
+  console.warn('금형 타발수 컬럼 미적용', e);
+  showHint('⚠ 금형 누적 타발수 컬럼이 DB에 없습니다 · <b>mold_shot_ddl.sql</b>을 실행하세요');
+}
+
+// 생산일보 저장 시 금형별 생산수량을 누적 타발수에 반영
+async function addMoldShots(map) {
+  const keys = Object.keys(map || {});
+  const done = [];
+  for (let i = 0; i < keys.length; i++) {
+    const no = keys[i], qty = Math.max(0, Number(map[no]) || 0);
+    if (!no || !(qty > 0)) continue;
+    const m = molds.find(function(x) { return x.mold_no === no; });
+    if (!m) continue;
+    const next = moldTotalShot(m) + qty;
+    try {
+      await pd('PATCH', T_MOLD + '?id=eq.' + m.id, { total_shot: next }, { 'Prefer': 'return=minimal' });
+      m.total_shot = next;
+      done.push({ mold_no: no, added: qty, total: next, st: moldInspStatus(m) });
+    } catch (e) { moldShotDbHint(e); }
+  }
+  return done;
+}
+
+// 점검완료 등록
+async function registerMoldInspection() {
+  const id = document.getElementById('fMoldId').value;
+  const m = molds.find(function(x) { return String(x.id) === String(id); });
+  if (!m) { alert('먼저 금형을 저장한 뒤 점검을 등록하세요'); return; }
+  const cur = moldTotalShot(m);
+  const prev = moldLastInspShot(m);
+  const result = prompt('🔧 점검 결과를 입력하세요 (양호 / 보수 / 교체)', '양호');
+  if (result === null) return;
+  const note = prompt('비고 (선택)', '') || '';
+  if (!confirm('🔧 점검완료 등록\n\n금형: ' + m.mold_no +
+               '\n현재 누적 타발수: ' + cur.toLocaleString() + ' 회' +
+               '\n직전 점검 이후: ' + (cur - prev).toLocaleString() + ' 회' +
+               '\n결과: ' + (result || '-') +
+               '\n\n이 시점을 마지막 점검으로 기록할까요?')) return;
+  try {
+    await pd('PATCH', T_MOLD + '?id=eq.' + m.id,
+      { last_insp_shot: cur, last_insp_date: kstTodayStr() }, { 'Prefer': 'return=minimal' });
+    m.last_insp_shot = cur; m.last_insp_date = kstTodayStr();
+    try {
+      await pd('POST', T_MOLD_INSP, [{
+        mold_no: m.mold_no, insp_date: kstTodayStr(), shot_at: cur, prev_shot: prev,
+        cycle_shot: moldInspCycle(m) || null, worker: worker.name,
+        result: (result || '').trim() || null, note: note.trim() || null
+      }], { 'Prefer': 'return=minimal' });
+    } catch (e2) { console.warn('점검이력 저장 실패', e2); }
+    renderMoldShotBox(m);
+    renderMoldTable();
+    updateUI();
+    showHint('🔧 <b>' + escHtml(m.mold_no) + '</b> 점검완료 등록 · 누적 ' + cur.toLocaleString() + '회');
+  } catch (e) { moldShotDbHint(e); alert('점검 등록 실패:\n' + e.message); }
+}
+
+// 누적 타발수 수동 보정 (초기 이관 / 오차 정정)
+async function adjustMoldShot() {
+  const id = document.getElementById('fMoldId').value;
+  const m = molds.find(function(x) { return String(x.id) === String(id); });
+  if (!m) { alert('먼저 금형을 저장한 뒤 보정하세요'); return; }
+  const v = prompt('✏️ 누적 타발수를 직접 입력하세요 (현재 ' + moldTotalShot(m).toLocaleString() + ')', String(moldTotalShot(m)));
+  if (v === null) return;
+  const n = Math.max(0, parseInt(String(v).replace(/[^0-9]/g, ''), 10) || 0);
+  if (!confirm('누적 타발수를 ' + n.toLocaleString() + ' 회로 변경할까요?')) return;
+  try {
+    await pd('PATCH', T_MOLD + '?id=eq.' + m.id, { total_shot: n }, { 'Prefer': 'return=minimal' });
+    m.total_shot = n;
+    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    showHint('✏️ <b>' + escHtml(m.mold_no) + '</b> 누적 타발수 ' + n.toLocaleString() + '회로 보정');
+  } catch (e) { moldShotDbHint(e); alert('보정 실패:\n' + e.message); }
+}
+
+// 금형 모달 내 누적/점검 박스
+function renderMoldShotBox(m) {
+  const tot = document.getElementById('sbTotal');
+  const last = document.getElementById('sbLast');
+  const bar = document.getElementById('sbBar');
+  const barWrap = bar ? bar.parentElement : null;
+  const msg = document.getElementById('sbMsg');
+  if (!tot) return;
+  if (!m) {
+    tot.textContent = '0 회'; last.textContent = '기록 없음'; last.className = 'sb-v muted';
+    if (bar) bar.style.width = '0%';
+    if (barWrap) barWrap.className = 'sb-bar';
+    msg.className = 'sb-msg'; msg.textContent = '금형 저장 후 누적 타발수가 집계됩니다';
+    return;
+  }
+  const st = moldInspStatus(m);
+  tot.textContent = moldTotalShot(m).toLocaleString() + ' 회';
+  last.textContent = m.last_insp_date
+    ? (m.last_insp_date + ' · ' + moldLastInspShot(m).toLocaleString() + '회 시점')
+    : '기록 없음';
+  last.className = 'sb-v' + (m.last_insp_date ? '' : ' muted');
+  if (st.state === 'none') {
+    if (bar) bar.style.width = '0%';
+    if (barWrap) barWrap.className = 'sb-bar';
+    msg.className = 'sb-msg';
+    msg.textContent = '점검주기(타발수)를 입력하면 도래 시점을 알려줍니다 · 직전 점검 이후 ' + st.used.toLocaleString() + '회';
+    return;
+  }
+  if (bar) bar.style.width = st.pct.toFixed(1) + '%';
+  const cls = st.state === 'due' ? 'due' : st.state === 'soon' ? 'warn' : '';
+  if (barWrap) barWrap.className = 'sb-bar ' + cls;
+  msg.className = 'sb-msg ' + cls;
+  msg.textContent = st.state === 'due'
+    ? '🔴 점검 도래 · 주기 ' + st.cyc.toLocaleString() + '회 초과 ' + Math.abs(st.remain).toLocaleString() + '회'
+    : (st.state === 'soon' ? '🟠 점검 임박 · ' : '🟢 정상 · ') +
+      st.used.toLocaleString() + ' / ' + st.cyc.toLocaleString() + '회 (남은 ' + st.remain.toLocaleString() + '회)';
+}
+
+// 점검 이력 모달
+async function openMoldInspHistory() {
+  const id = document.getElementById('fMoldId').value;
+  const m = molds.find(function(x) { return String(x.id) === String(id); });
+  if (!m) { alert('먼저 금형을 저장하세요'); return; }
+  document.getElementById('moldInspTitle').innerHTML =
+    '📋 ' + escHtml(m.mold_no) + ' 점검이력 <button class="x" onclick="closeMoldInspHistory()" style="margin-left:auto">✕</button>';
+  const tb = document.querySelector('#moldInspTable tbody');
+  tb.innerHTML = '<tr><td colspan="4"><div class="empty">불러오는 중…</div></td></tr>';
+  document.getElementById('moldInspModal').classList.add('show');
+  let rows = [];
+  try {
+    rows = await pd('GET', T_MOLD_INSP + '?select=*&mold_no=eq.' + encodeURIComponent(m.mold_no) +
+      '&order=insp_date.desc&limit=100') || [];
+  } catch (e) {
+    tb.innerHTML = '<tr><td colspan="4"><div class="empty">점검이력 테이블이 없습니다 (mold_shot_ddl.sql 실행)</div></td></tr>';
+    return;
+  }
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="4"><div class="empty">점검 이력이 없습니다</div></td></tr>'; return; }
+  tb.innerHTML = rows.map(function(r) {
+    const span = Math.max(0, (Number(r.shot_at) || 0) - (Number(r.prev_shot) || 0));
+    return '<tr><td>' + escHtml(r.insp_date || '-') + '</td>' +
+      '<td><b>' + (Number(r.shot_at) || 0).toLocaleString() + '</b>회' +
+      '<div class="mold-shot-sub">구간 ' + span.toLocaleString() + '회</div></td>' +
+      '<td>' + escHtml(r.result || '-') + (r.note ? '<div class="mold-shot-sub">' + escHtml(r.note) + '</div>' : '') + '</td>' +
+      '<td>' + escHtml(r.worker || '-') + '</td></tr>';
+  }).join('');
+}
+function closeMoldInspHistory() { document.getElementById('moldInspModal').classList.remove('show'); }
+
+// 생산작업 다이어그램의 점검 경고
+function renderInspWarn() {
+  const el = document.getElementById('psInsp');
+  if (!el) return;
+  if (!sel.mold) { el.className = 'ps-insp'; el.innerHTML = ''; return; }
+  const st = moldInspStatus(sel.mold);
+  if (st.state !== 'due' && st.state !== 'soon') { el.className = 'ps-insp'; el.innerHTML = ''; return; }
+  el.className = 'ps-insp show ' + st.state;
+  el.innerHTML = st.state === 'due'
+    ? '🔧 <b>' + escHtml(sel.mold.mold_no) + '</b> 점검 도래 — 주기 ' + st.cyc.toLocaleString() +
+      '회 초과 ' + Math.abs(st.remain).toLocaleString() + '회 (누적 ' + moldTotalShot(sel.mold).toLocaleString() + ')'
+    : '🔧 <b>' + escHtml(sel.mold.mold_no) + '</b> 점검 임박 — 남은 ' + st.remain.toLocaleString() +
+      '회 / 주기 ' + st.cyc.toLocaleString() + '회';
+}
+
 function openMoldEdit(id) {
   const m = id ? molds.find(function(x) { return x.id === id; }) : null;
   document.getElementById('moldModalTitle').innerHTML =
@@ -5911,6 +6159,8 @@ function openMoldEdit(id) {
   v('fGravity', m ? m.specific_gravity : '');
   v('fCustomer', m ? m.customer : '');
   v('fQr', m ? m.qr_code : '');
+  v('fInspCycle', m ? (moldInspCycle(m) || '') : '');
+  renderMoldShotBox(m);
   calcMoldSpec();
   document.getElementById('btnMoldDelete').style.display = m ? '' : 'none';
   document.getElementById('moldModal').classList.add('show');
@@ -5942,6 +6192,7 @@ async function saveMold() {
     qr_code: document.getElementById('fQr').value.trim() || moldNo,
     standard_spm: standardSpm,
     spm: standardSpm,
+    insp_cycle_shot: numOrNull('fInspCycle'),
     active: true,
     updated_at: kstNowISO()
   };
@@ -5952,8 +6203,22 @@ async function saveMold() {
       if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
       else await pd('POST', T_MOLD, [row], { 'Prefer': 'return=minimal' });
     } catch (e1) {
-      // standard_spm 컬럼이 없는 구버전 DB → 해당 키만 제외하고 재시도 + 로컬 보관
-      if (/standard_spm/i.test(e1.message || '')) {
+      // standard_spm / insp_cycle_shot 컬럼이 없는 구버전 DB → 해당 키만 제외하고 재시도 + 로컬 보관
+      if (/insp_cycle_shot/i.test(e1.message || '')) {
+        moldShotDbHint(e1);
+        delete row.insp_cycle_shot;
+        try {
+          if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
+          else await pd('POST', T_MOLD, [row], { 'Prefer': 'return=minimal' });
+        } catch (e3) {
+          if (/standard_spm/i.test(e3.message || '')) {
+            spmDbSaved = false;
+            delete row.standard_spm;
+            if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
+            else await pd('POST', T_MOLD, [row], { 'Prefer': 'return=minimal' });
+          } else throw e3;
+        }
+      } else if (/standard_spm/i.test(e1.message || '')) {
         spmDbSaved = false;
         delete row.standard_spm;
         if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
@@ -5995,8 +6260,15 @@ function renderMoldTable() {
     return;
   }
   list.forEach(function(m) {
+    const st = moldInspStatus(m);
+    const chip = (st.state === 'due' || st.state === 'soon')
+      ? '<span class="insp-chip ' + st.state + '">' + (st.state === 'due' ? '점검도래' : '점검임박') + '</span>' : '';
+    const shotLine = '<div class="mold-shot-sub">🔩 누적 <b>' + moldTotalShot(m).toLocaleString() + '</b>회' +
+      (st.cyc > 0
+        ? ' · 주기 ' + st.cyc.toLocaleString() + ' (' + (st.remain > 0 ? '남은 ' + st.remain.toLocaleString() : '초과 ' + Math.abs(st.remain).toLocaleString()) + ')'
+        : ' · 주기 미설정') + '</div>';
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td><b>' + m.mold_no + '</b></td>' +
+    tr.innerHTML = '<td><b>' + m.mold_no + '</b>' + chip + shotLine + '</td>' +
       '<td>' + (m.item_no || '-') + '<br><span style="font-size:10px;color:#94a3b8">' + (m.model_code || '') + (m.customer ? ' · ' + m.customer : '') + '</span></td>' +
       '<td>' + (m.mat_spec || '-') + '<br><span style="font-size:10px;color:#94a3b8">' +
       (m.unit_weight_g ? m.unit_weight_g + 'g/피치 · ' : '') +
