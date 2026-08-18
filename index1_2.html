@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.58</title>
+<title>프레스 생산관리 Rev.7.59</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -1086,7 +1086,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.58</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.59</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1115,7 +1115,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.58</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.59</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -2625,7 +2625,7 @@ async function saveMaterialOrderRemote(orderDate, vendor, lines, total) {
   } catch (e) {
     console.error(e);
     if (/pd_material_order|PGRST205|does not exist/i.test(e.message || '')) {
-      alert('소재발주 테이블이 없습니다.\nmaterial_order_ddl.sql 을 Supabase에서 실행하세요.');
+      alert('⚠ 소재발주 테이블이 아직 없습니다.\n\nSupabase SQL Editor 에서\n【 setup_all.sql 】 을 실행한 뒤 다시 시도하세요.');
     } else {
       alert('소재발주 저장 실패:\n' + e.message);
     }
@@ -6298,11 +6298,22 @@ let inspItems = [];       // 금형별 상태/개별설정
 let _moldShotDbWarned = false;
 
 function moldTotalShot(m) { return Math.max(0, Number(m && m.total_shot) || 0); }
+function isMissingTableErr(e) {
+  const m = String((e && e.message) || e || '');
+  return /PGRST205|Could not find the table|does not exist|42P01/i.test(m);
+}
+function inspDbAlert(e, what) {
+  if (isMissingTableErr(e)) {
+    alert('⚠ 금형 점검 테이블이 아직 없습니다.\n\nSupabase SQL Editor 에서\n【 setup_all.sql 】 을 실행한 뒤 다시 시도하세요.\n\n(누락 테이블: pd_insp_template / pd_mold_insp_item / pd_mold_inspection)');
+  } else {
+    alert((what || '처리') + ' 실패:\n' + ((e && e.message) || e));
+  }
+}
 function moldShotDbHint(e) {
   if (_moldShotDbWarned) return;
   _moldShotDbWarned = true;
   console.warn('금형 점검 스키마 미적용', e);
-  showHint('⚠ 금형 점검 테이블이 없습니다 · <b>mold_shot_ddl.sql</b>을 실행하세요');
+  showHint('⚠ 금형 점검 테이블이 없습니다 · <b>setup_all.sql</b>을 실행하세요');
 }
 
 async function loadInspMaster() {
@@ -6436,7 +6447,7 @@ async function saveInspTpl() {
     await loadInspMaster();
     renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); renderProdInfo(); updateUI();
     showHint('🔧 공통 점검항목 <b>' + escHtml(name) + '</b> 저장 · 전체 금형에 적용');
-  } catch (e) { moldShotDbHint(e); alert('저장 실패:\n' + e.message); }
+  } catch (e) { moldShotDbHint(e); inspDbAlert(e, '저장'); }
 }
 async function deleteInspTpl() {
   const id = document.getElementById('tplId').value;
@@ -6448,7 +6459,7 @@ async function deleteInspTpl() {
     await loadInspMaster();
     renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); renderProdInfo(); updateUI();
     showHint('🗑 공통 점검항목 삭제됨');
-  } catch (e) { alert('삭제 실패:\n' + e.message); }
+  } catch (e) { inspDbAlert(e, '삭제'); }
 }
 
 /* ----- 금형 모달: 점검항목 목록 ----- */
@@ -6549,7 +6560,7 @@ async function doInspComplete(key) {
     } catch (e2) { console.warn('점검이력 저장 실패', e2); }
     renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('🔧 <b>' + escHtml(m.mold_no) + '</b> · ' + escHtml(it.name) + ' 점검완료 (' + cur.toLocaleString() + '회)');
-  } catch (e) { moldShotDbHint(e); alert('점검 등록 실패:\n' + e.message); }
+  } catch (e) { moldShotDbHint(e); inspDbAlert(e, '점검 등록'); }
 }
 
 // 항목 추가 / 주기 개별 변경
@@ -6599,7 +6610,7 @@ async function saveInspItem() {
     await loadInspMaster();
     renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('✏️ 점검주기 저장 · <b>' + escHtml(m.mold_no) + '</b>');
-  } catch (e) { moldShotDbHint(e); alert('저장 실패:\n' + e.message); }
+  } catch (e) { moldShotDbHint(e); inspDbAlert(e, '저장'); }
 }
 async function resetInspItemCycle() {
   const m = currentMoldInModal();
@@ -6614,7 +6625,7 @@ async function resetInspItemCycle() {
     await loadInspMaster();
     renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('↩ 공통 주기로 복귀');
-  } catch (e) { alert('실패:\n' + e.message); }
+  } catch (e) { inspDbAlert(e, '처리'); }
 }
 async function excludeInspItem(key) {
   const m = currentMoldInModal();
@@ -6628,7 +6639,7 @@ async function excludeInspItem(key) {
     await loadInspMaster();
     renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('🚫 <b>' + escHtml(it.name) + '</b> 이 금형에서 제외');
-  } catch (e) { alert('실패:\n' + e.message); }
+  } catch (e) { inspDbAlert(e, '처리'); }
 }
 async function restoreInspItem(itemId) {
   const m = currentMoldInModal();
@@ -6637,7 +6648,7 @@ async function restoreInspItem(itemId) {
     await loadInspMaster();
     renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('↩ 공통 점검항목 복원');
-  } catch (e) { alert('실패:\n' + e.message); }
+  } catch (e) { inspDbAlert(e, '처리'); }
 }
 async function deleteInspItem(key) {
   const m = currentMoldInModal();
@@ -6650,7 +6661,7 @@ async function deleteInspItem(key) {
     await loadInspMaster();
     renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('🗑 전용 점검항목 삭제');
-  } catch (e) { alert('실패:\n' + e.message); }
+  } catch (e) { inspDbAlert(e, '처리'); }
 }
 
 // 누적 타발수 수동 보정
@@ -6666,7 +6677,7 @@ async function adjustMoldShot() {
     m.total_shot = n;
     renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('✏️ <b>' + escHtml(m.mold_no) + '</b> 누적 타발수 ' + n.toLocaleString() + '회로 보정');
-  } catch (e) { moldShotDbHint(e); alert('보정 실패:\n' + e.message); }
+  } catch (e) { moldShotDbHint(e); inspDbAlert(e, '누적 보정'); }
 }
 
 // 점검 이력
