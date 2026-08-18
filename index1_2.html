@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.43</title>
+<title>프레스 생산관리 Rev.7.44</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -685,7 +685,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.43</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.44</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -696,7 +696,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.43</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.44</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="drawer-sep">업무 절차</div>
@@ -1337,7 +1337,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 <script>
 /* ============================================================
-   ESP32 생산일보 Rev.7.22 — 비상용 독립 시스템
+   프레스 생산관리 (구 ESP32 생산일보) Rev.7.44 — 독립 시스템
    통합 DB : pllwltojbofjaftcemvn
      - 마스터 : pd_machine / pd_mold / pd_work_log / pd_material_lot
      - 카운팅 : shot_count (설정 탭에서 변경 가능)
