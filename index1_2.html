@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.41</title>
+<title>ESP32 생산일보 Rev.7.43</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -666,6 +666,8 @@
 
   /* [Rev.7.38] 소재발송 등록 임베드 */
   .md-embed { border-radius:14px; }
+  /* [Rev.7.43] 발송 도착 소재 표 보조문구 */
+  .mtable .sub { display:block; margin-top:2px; font-size:10px; font-weight:700; color:#94a3b8; }
   .order-status { padding:5px 7px; border:1px solid #cbd5e1; border-radius:7px; font-size:11px; font-family:inherit; background:#fff; color:#334155; max-width:105px; }
   .order-spec { font-weight:800; color:#1e3a8a; }
   .order-sub { font-size:10px; color:#64748b; margin-top:2px; }
@@ -683,7 +685,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.41</span></h1>
+  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.43</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -694,19 +696,18 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.41</small></span>
+    <span>📡 ESP32 생산일보 <small>Rev.7.43</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="drawer-sep">업무 절차</div>
   <div class="drawer-steps">
     <button class="tab-btn step" data-tab="t-mat-order" onclick="switchTab('t-mat-order', this)"><span class="step-no">1</span><span class="tab-ico">🧾</span>소재발주<span class="flow-badge" id="flowOrderBadge">0</span></button>
     <button class="tab-btn step" data-tab="t-mat-dispatch" onclick="switchTab('t-mat-dispatch', this)"><span class="step-no">2</span><span class="tab-ico">📤</span>소재발송<span class="step-sub">업체등록</span><span class="flow-badge" id="flowDispatchBadge">-</span></button>
-    <button class="tab-btn step" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="step-no">3</span><span class="tab-ico">🔎</span>수입검사<span class="flow-badge" id="flowIqcBadge">-</span></button>
-    <button class="tab-btn step active" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="step-no">4</span><span class="tab-ico">⚙️</span>생산작업<span class="tab-dot"></span></button>
-    <button class="tab-btn step last" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">5</span><span class="tab-ico">📝</span>생산일보</button>
+    <button class="tab-btn step" data-tab="t-material" onclick="switchTab('t-material', this)"><span class="step-no">3</span><span class="tab-ico">📦</span>소재입고<span class="step-sub">사내확인</span></button>
+    <button class="tab-btn step" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="step-no">4</span><span class="tab-ico">🔎</span>수입검사<span class="flow-badge" id="flowIqcBadge">-</span></button>
+    <button class="tab-btn step active" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="step-no">5</span><span class="tab-ico">⚙️</span>생산작업<span class="tab-dot"></span></button>
+    <button class="tab-btn step last" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">6</span><span class="tab-ico">📝</span>생산일보</button>
   </div>
-  <div class="drawer-sep">소재관리</div>
-  <button class="tab-btn" data-tab="t-material" onclick="switchTab('t-material', this)"><span class="tab-ico">📦</span>생산용 소재 LOT</button>
   <div class="drawer-sep">마스터</div>
   <button class="tab-btn" data-tab="t-master" onclick="switchTab('t-master', this)"><span class="tab-ico">🏭</span>호기설정</button>
   <button class="tab-btn" data-tab="t-mold" onclick="switchTab('t-mold', this)"><span class="tab-ico">🧩</span>금형설정</button>
@@ -911,6 +912,19 @@
 
 <!-- ===== 소재입고 ===== -->
 <div class="tab-panel" id="t-material">
+  <!-- [Rev.7.43] 소재발송(inspection_certs) → 소재입고 연동 -->
+  <div class="card" id="pendCertCard">
+    <div class="sec-title">📤 발송 도착 소재 <span class="right" id="pendCertCount">—</span></div>
+    <div class="sel-hint" style="margin-bottom:8px">소재업체가 발송 등록한 성적서입니다. 항목을 누르면 아래 입고 폼에 자동 입력됩니다.</div>
+    <div class="search-row"><input type="text" id="pendCertSearch" placeholder="업체 / 재질 / LOT / HEAT 검색" oninput="renderPendingCerts()"><button class="icon-btn" onclick="loadPendingCerts(true)">🔄</button></div>
+    <div class="tbl-wrap">
+      <table class="mtable" id="pendCertTable">
+        <thead><tr><th>발송일 / 업체</th><th>규격 / LOT</th><th>중량</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="card">
     <div class="sec-title">📦 소재입고 등록 <span class="right" id="matPresetCount">전체 —</span></div>
 
@@ -926,7 +940,9 @@
       <div class="fld"><label>폭(W)</label><input type="number" min="0" step="0.1" id="matWidth" inputmode="decimal" placeholder=""></div>
       <div class="fld full"><label>공급업체</label><input type="text" id="matVendor" placeholder=""></div>
       <div class="fld full"><label>비고</label><input type="text" id="matNote" placeholder=""></div>
+      <input type="hidden" id="matCertId">
     </div>
+    <div class="mat-match" id="matCertLink" style="display:none"></div>
     <button class="btn-primary" onclick="saveMaterialReceipt()">✅ 소재입고 저장</button>
     <div style="margin-top:6px"><button class="btn-gray" onclick="clearMaterialReceiptForm(true)">✚ 새로 입력</button></div>
   </div>
@@ -1456,7 +1472,7 @@ function setSyncStatus(level, text) {
   b.className = 'sync-badge ' + level;
   b.textContent = text;
 }
-const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-material': '생산용 소재 LOT', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
+const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerBg').classList.add('show');
@@ -1494,7 +1510,7 @@ function switchTab(id, btn) {
   if (id === 't-mat-order') { renderMaterialOrders(); refreshMaterialFlowStatus(false); }
   if (id === 't-mat-dispatch') { ensureMaterialFrame('matDispatchFrame'); refreshMaterialFlowStatus(false); }
   if (id === 't-iqc') { ensureMaterialFrame('matIqcFrame'); refreshMaterialFlowStatus(false); }
-  if (id === 't-material') { renderMaterialPresets(); loadMaterialReceipts(); }
+  if (id === 't-material') { renderMaterialPresets(); loadMaterialReceipts(); loadPendingCerts(false); }
   if (id === 't-master') renderMachineTable();
   if (id === 't-mold') renderMoldTable();
   if (id === 't-config') { updateLocalInfo(); ensureMaterialFrame('matCfgFrame'); }
@@ -3749,6 +3765,106 @@ function applyMaterialPreset(key) {
   const itemTxt = p.items.join(', ');
   document.getElementById('matMatchHint').innerHTML = '🧩 연결 금형 <b>' + escHtml(moldTxt || '-') + '</b><br>🏷 품번 <b>' + escHtml(itemTxt || '-') + '</b>';
 }
+/* ============================================================
+   [Rev.7.43] 발송 도착 소재 (inspection_certs) → 소재입고 연동
+   ============================================================ */
+let pendingCerts = [];
+let _pendCertLoadedAt = 0;
+
+async function loadPendingCerts(force) {
+  const box = document.getElementById('pendCertCard'); if (!box) return;
+  if (!force && Date.now() - _pendCertLoadedAt < 30000) { renderPendingCerts(); return; }
+  const cnt = document.getElementById('pendCertCount');
+  try {
+    const h = { 'apikey': MATERIAL_SB_KEY, 'Authorization': 'Bearer ' + MATERIAL_SB_KEY, 'Content-Type':'application/json' };
+    const url = MATERIAL_SB_URL + '/rest/v1/inspection_certs?select=id,supplier,material_type,thickness,width_mm,lot_no,heat_no,weight,coil_count,receipt_date,final_judge,received_at&received_at=is.null&order=receipt_date.desc,id.desc&limit=300';
+    const res = await fetch(url, { headers: h });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).substring(0,120));
+    pendingCerts = await res.json();
+    _pendCertLoadedAt = Date.now();
+  } catch (e) {
+    console.log('[PEND] 성적서 조회 실패', e);
+    pendingCerts = [];
+    if (cnt) cnt.textContent = '조회 실패';
+    /* received_at 컬럼 미생성 시 안내 */
+    const tb = document.querySelector('#pendCertTable tbody');
+    if (tb) tb.innerHTML = '<tr><td colspan="4" class="empty">조회 실패 — inspection_certs 에 received_at 컬럼이 있는지 확인하세요</td></tr>';
+    return;
+  }
+  renderPendingCerts();
+}
+
+function renderPendingCerts() {
+  const tb = document.querySelector('#pendCertTable tbody'); if (!tb) return;
+  const q = (document.getElementById('pendCertSearch').value || '').trim().toLowerCase();
+  const list = pendingCerts.filter(function(r) {
+    if (!q) return true;
+    return [r.supplier, r.material_type, r.lot_no, r.heat_no].join(' ').toLowerCase().indexOf(q) >= 0;
+  });
+  const cnt = document.getElementById('pendCertCount');
+  if (cnt) cnt.textContent = pendingCerts.length ? (list.length + ' / ' + pendingCerts.length + '건 미입고') : '미입고 없음';
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="4" class="empty">' + (pendingCerts.length ? '검색 결과 없음' : '발송 도착 대기 중인 소재가 없습니다') + '</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(function(r) {
+    const spec = [r.material_type || '-', (r.thickness != null ? r.thickness + 'T' : ''), (r.width_mm != null ? r.width_mm + 'W' : '')].filter(Boolean).join(' · ');
+    const judge = String(r.final_judge || '').trim();
+    const jTag = (judge && judge !== '대기') ? '<span class="flow-badge">' + escHtml(judge) + '</span>' : '';
+    return '<tr>' +
+      '<td><b>' + escHtml(r.receipt_date || '-') + '</b><br><span class="sub">' + escHtml(r.supplier || '-') + '</span></td>' +
+      '<td>' + escHtml(spec) + '<br><span class="sub">LOT ' + escHtml(r.lot_no || '-') + (r.heat_no ? ' / HEAT ' + escHtml(r.heat_no) : '') + '</span> ' + jTag + '</td>' +
+      '<td>' + (r.weight != null ? escHtml(String(r.weight)) + 'kg' : '-') + (r.coil_count > 1 ? '<br><span class="sub">' + r.coil_count + '코일</span>' : '') + '</td>' +
+      '<td><button class="icon-btn" onclick="pickPendingCert(' + r.id + ')">입고 →</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+/* 성적서 → 입고 폼 자동 입력 (규격은 두께·폭·재질로 프리셋 자동 매칭) */
+function pickPendingCert(certId) {
+  const r = pendingCerts.find(function(x) { return x.id === certId; }); if (!r) return;
+  const setv = function(id, v) { const el = document.getElementById(id); if (el) el.value = (v == null ? '' : v); };
+
+  const hit = materialPresets.find(function(p) {
+    const tOk = (p.thickness == null || r.thickness == null) ? false : Math.abs(Number(p.thickness) - Number(r.thickness)) < 0.001;
+    const wOk = (p.width == null || r.width_mm == null) ? false : Math.abs(Number(p.width) - Number(r.width_mm)) < 0.01;
+    return tOk && wOk;
+  });
+  if (hit) applyMaterialPreset(hit.key);
+
+  setv('matLotNo', r.lot_no || r.heat_no || '');
+  setv('matInDate', r.receipt_date || kstTodayStr());
+  setv('matMaterial', r.material_type || '');
+  setv('matThickness', r.thickness);
+  setv('matWidth', r.width_mm);
+  setv('matWeight', r.weight);
+  setv('matQty', Math.max(1, parseInt(r.coil_count) || 1));
+  setv('matVendor', r.supplier || '');
+  setv('matCertId', r.id);
+
+  const lk = document.getElementById('matCertLink');
+  if (lk) {
+    lk.style.display = '';
+    lk.innerHTML = '📤 발송 성적서 연결됨 — <b>' + escHtml(r.supplier || '-') + '</b> / LOT <b>' + escHtml(r.lot_no || '-') + '</b>' +
+                   (hit ? '' : '<br>⚠ 일치하는 금형 규격이 없습니다. 소재규격을 직접 선택하세요.');
+  }
+  const el = document.getElementById('matSpecSelect'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* 입고 저장 후 성적서에 입고 표시 */
+async function markCertReceived(certId) {
+  if (!certId) return;
+  try {
+    const h = { 'apikey': MATERIAL_SB_KEY, 'Authorization': 'Bearer ' + MATERIAL_SB_KEY, 'Content-Type':'application/json', 'Prefer':'return=minimal' };
+    const res = await fetch(MATERIAL_SB_URL + '/rest/v1/inspection_certs?id=eq.' + encodeURIComponent(certId), {
+      method: 'PATCH', headers: h, body: JSON.stringify({ received_at: kstNowISO() })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).substring(0,120));
+    pendingCerts = pendingCerts.filter(function(x) { return x.id !== Number(certId); });
+    renderPendingCerts();
+  } catch (e) { console.log('[PEND] 입고 표시 실패', e); }
+}
+
 function readMaterialReceipts() {
   try {
     const a = JSON.parse(localStorage.getItem(LS_MAT_RECEIPT) || '[]');
@@ -3928,9 +4044,10 @@ async function ensureFiveMaterialReceipts() {
   if (localChanged) writeMaterialReceipts(local);
 }
 function clearMaterialReceiptForm(keepDate) {
-  ['matLotNo','matMaterial','matWeight','matThickness','matWidth','matVendor','matNote'].forEach(function(id) {
+  ['matLotNo','matMaterial','matWeight','matThickness','matWidth','matVendor','matNote','matCertId'].forEach(function(id) {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  const lk = document.getElementById('matCertLink'); if (lk) { lk.style.display = 'none'; lk.innerHTML = ''; }
   const q = document.getElementById('matQty'); if (q) q.value = '1';
   const se = document.getElementById('matSpecSelect'); if (se) se.value = '';
   if (!keepDate || !document.getElementById('matInDate').value) document.getElementById('matInDate').value = kstTodayStr();
@@ -3976,6 +4093,9 @@ async function saveMaterialReceipt() {
     list.unshift(row);
     if (!writeMaterialReceipts(list)) { alert('DB 및 브라우저 저장공간에 저장하지 못했습니다'); return; }
   }
+
+  const certId = (document.getElementById('matCertId') || {}).value;
+  if (certId && savedRemote) await markCertReceived(certId);
 
   await loadMaterialReceipts();
   clearMaterialReceiptForm(true);
