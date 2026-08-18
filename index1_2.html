@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.54</title>
+<title>프레스 생산관리 Rev.7.55</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -280,21 +280,45 @@
   .shot-box { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 11px; margin-top: 2px; }
   .sb-row { display: flex; align-items: baseline; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
   .sb-l { font-weight: 800; color: #475569; }
-  .sb-v { font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; font-size: 14px; }
-  .sb-v.muted { color: #94a3b8; font-size: 12px; font-weight: 700; }
-  .sb-bar { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; margin: 8px 0 6px; }
-  .sb-bar i { display: block; width: 0; height: 100%; background: #16a34a; transition: width .3s; }
-  .sb-bar.warn i { background: #f59e0b; }
-  .sb-bar.due i { background: #dc2626; }
-  .sb-msg { font-size: 11.5px; font-weight: 800; color: #64748b; line-height: 1.5; }
-  .sb-msg.warn { color: #c2410c; }
-  .sb-msg.due { color: #b91c1c; }
-  .sb-acts { display: flex; gap: 6px; margin-top: 9px; }
-  .sb-btn { flex: 1; padding: 9px 4px; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; color: #fff; font-family: inherit; }
-  .sb-btn.insp { background: #0284c7; }
+  .sb-v { font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; font-size: 15px; }
+  .sb-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;
+    margin: 9px 0 7px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 12px; font-weight: 800; color: #475569; }
+  .sb-head b { color: #0369a1; }
+  .sb-head-acts { display: flex; gap: 5px; }
+  .sb-btn { padding: 7px 9px; border: none; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer; color: #fff; font-family: inherit; }
+  .sb-btn.add { background: #16a34a; }
   .sb-btn.hist { background: #64748b; }
   .sb-btn.adj { background: #f8fafc; color: #475569; border: 1.5px solid #cbd5e1; }
   .sb-btn:active { transform: scale(.97); }
+  .sb-empty { padding: 16px 10px; text-align: center; font-size: 11.5px; font-weight: 700; color: #94a3b8; line-height: 1.6; }
+
+  .ii-row { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 9px; padding: 9px 10px; margin-bottom: 7px; }
+  .ii-row.warn { border-color: #fdba74; background: #fffbf5; }
+  .ii-row.due { border-color: #f87171; background: #fef5f5; }
+  .ii-top { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .ii-name { font-size: 13px; font-weight: 800; color: #0f172a; }
+  .ii-scope { font-size: 9px; font-weight: 800; color: #fff; background: #94a3b8; border-radius: 20px; padding: 1px 6px; }
+  .ii-scope.own { background: #16a34a; }
+  .ii-msg { margin-left: auto; font-size: 11.5px; font-weight: 800; color: #475569; font-variant-numeric: tabular-nums; }
+  .ii-row.warn .ii-msg { color: #c2410c; }
+  .ii-row.due .ii-msg { color: #b91c1c; }
+  .ii-bar { height: 7px; border-radius: 4px; background: #e2e8f0; overflow: hidden; margin: 7px 0 5px; }
+  .ii-bar i { display: block; height: 100%; background: #16a34a; }
+  .ii-bar.warn i { background: #f59e0b; }
+  .ii-bar.due i { background: #dc2626; }
+  .ii-sub { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: -.2px; }
+  .ii-acts { display: flex; gap: 5px; margin-top: 7px; }
+  .ii-btn { flex: 1; padding: 7px 3px; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #475569;
+    border-radius: 7px; font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  .ii-btn.ok { background: #0284c7; border-color: #0284c7; color: #fff; }
+  .ii-btn.del { color: #dc2626; border-color: #fca5a5; }
+  .ii-btn:active { transform: scale(.97); }
+  .ii-exc { margin-top: 4px; font-size: 10.5px; font-weight: 700; color: #94a3b8; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+  .ii-exc-btn { padding: 4px 8px; border: 1px dashed #cbd5e1; background: #f8fafc; color: #64748b;
+    border-radius: 20px; font-size: 10px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  .tpl-note { font-size: 11px; font-weight: 700; color: #64748b; line-height: 1.55; margin: 8px 0 10px;
+    background: #f1f5f9; border-radius: 8px; padding: 8px 10px; }
+  .insp-chip.off { background: #94a3b8; }
   .mold-shot-sub { font-size: 10px; color: #94a3b8; font-weight: 700; }
   .mold-shot-sub b { color: #475569; }
   .insp-chip { display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 20px; font-size: 9px; font-weight: 800; color: #fff; }
@@ -1015,7 +1039,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.54</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.55</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1044,7 +1068,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.54</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.55</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1365,6 +1389,16 @@
 
 <!-- ===== 금형 마스터 ===== -->
 <div class="tab-panel" id="t-mold">
+  <div class="card">
+    <div class="sec-title">🔧 공통 점검항목 <span class="right" id="inspTplCount">—</span></div>
+    <div class="flow-guide">여기에 등록한 점검 유형·주기는 <b>모든 금형에 일괄 적용</b>됩니다. 금형별로 주기를 다르게 하거나 제외하려면 아래 금형 <b>수정</b> 화면에서 설정하세요.</div>
+    <div class="search-row" style="margin-top:8px">
+      <span class="sel-hint" style="flex:1">누적 타발수 기준으로 점검 도래를 판정합니다</span>
+      <button class="icon-btn" onclick="openInspTplEdit(null)">✚ 등록</button>
+    </div>
+    <table class="mtable" id="inspTplTable"><thead><tr><th>점검 유형</th><th>주기(타발)</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+
   <div class="card">
     <div class="sec-title">🧩 금형 마스터 <span class="right" id="moldCount">—</span></div>
     <div class="search-row">
@@ -1687,18 +1721,18 @@
       <div class="spec-pin" id="fSpecPin">📌 —</div>
       <div class="fld"><label>비중</label><input type="number" step="0.01" id="fGravity" placeholder="" oninput="calcMoldSpec()"></div>
       <div class="fld"><label>고객사</label><input type="text" id="fCustomer" placeholder=""></div>
-      <div class="fld"><label>점검주기 (타발수)</label><input type="number" id="fInspCycle" min="0" step="1000" placeholder="예: 100000" inputmode="numeric"></div>
       <div class="fld full"><label>QR 코드값 (미입력 시 금형제번)</label><input type="text" id="fQr" placeholder=""></div>
       <div class="shot-box full" id="fShotBox">
-        <div class="sb-row"><span class="sb-l">누적 타발수</span><span class="sb-v" id="sbTotal">0 회</span></div>
-        <div class="sb-row"><span class="sb-l">마지막 점검</span><span class="sb-v muted" id="sbLast">기록 없음</span></div>
-        <div class="sb-bar"><i id="sbBar"></i></div>
-        <div class="sb-msg" id="sbMsg">점검주기를 입력하면 도래 시점을 알려줍니다</div>
-        <div class="sb-acts">
-          <button type="button" class="sb-btn insp" onclick="registerMoldInspection()">🔧 점검완료 등록</button>
-          <button type="button" class="sb-btn hist" onclick="openMoldInspHistory()">📋 점검이력</button>
-          <button type="button" class="sb-btn adj" onclick="adjustMoldShot()">✏️ 누적 보정</button>
+        <div class="sb-row"><span class="sb-l">🔩 누적 타발수</span><span class="sb-v" id="sbTotal">0 회</span></div>
+        <div class="sb-head">
+          <span>🔧 점검 항목 <b id="sbItemCount">0</b></span>
+          <span class="sb-head-acts">
+            <button type="button" class="sb-btn add" onclick="openInspItemEdit(null)">✚ 항목추가</button>
+            <button type="button" class="sb-btn hist" onclick="openMoldInspHistory()">📋 이력</button>
+            <button type="button" class="sb-btn adj" onclick="adjustMoldShot()">✏️ 누적보정</button>
+          </span>
         </div>
+        <div id="sbItemList"><div class="sb-empty">등록된 점검 항목이 없습니다 · ✚ 항목추가</div></div>
       </div>
       <input type="hidden" id="fMoldId">
     </div>
@@ -1706,6 +1740,45 @@
     <div class="edit-actions">
       <button class="edit-cancel" onclick="closeMoldEdit()">닫기</button>
       <button class="edit-clear" id="btnMoldDelete" onclick="deleteMold()">🗑 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- [Rev.7.55] 공통 점검항목 편집 -->
+<div class="modal-bg" id="inspTplModal">
+  <div class="modal" style="border:2px solid #0284c7;max-width:420px">
+    <h2 id="inspTplTitle">🔧 공통 점검항목 <button class="x" onclick="closeInspTplEdit()" style="margin-left:auto">✕</button></h2>
+    <div class="form-grid">
+      <div class="fld full"><label>점검 유형명 *</label><input type="text" id="tplName" placeholder="예: 펀치·다이 연마"></div>
+      <div class="fld"><label>점검주기 (타발수) *</label><input type="number" id="tplCycle" min="1" step="1000" inputmode="numeric" placeholder="예: 300000"></div>
+      <div class="fld"><label>정렬순서</label><input type="number" id="tplOrder" min="0" step="1" inputmode="numeric" value="0"></div>
+      <div class="fld full"><label>비고</label><input type="text" id="tplNote" placeholder="점검 내용 / 기준"></div>
+      <div class="fld full"><label><input type="checkbox" id="tplActive" checked style="width:auto;margin-right:6px">사용</label></div>
+      <input type="hidden" id="tplId">
+    </div>
+    <div class="tpl-note">※ 공통 점검항목은 <b>모든 금형에 일괄 적용</b>됩니다. 특정 금형만 주기를 바꾸거나 제외하려면 금형 수정 화면에서 설정하세요.</div>
+    <button class="btn-primary" onclick="saveInspTpl()">✅ 저장</button>
+    <div class="edit-actions">
+      <button class="edit-cancel" onclick="closeInspTplEdit()">닫기</button>
+      <button class="edit-clear" id="btnTplDelete" onclick="deleteInspTpl()">🗑 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- [Rev.7.55] 금형별 점검항목 주기 -->
+<div class="modal-bg" id="inspItemModal">
+  <div class="modal" style="border:2px solid #16a34a;max-width:420px">
+    <h2 id="inspItemTitle">✚ 점검항목 <button class="x" onclick="closeInspItemEdit()" style="margin-left:auto">✕</button></h2>
+    <div class="form-grid">
+      <div class="fld full"><label>점검 유형명</label><input type="text" id="iiName" placeholder="예: 스프링 교체"></div>
+      <div class="fld full"><label>점검주기 (타발수) *</label><input type="number" id="iiCycle" min="1" step="1000" inputmode="numeric" placeholder="예: 200000"></div>
+      <input type="hidden" id="iiKey">
+    </div>
+    <div class="tpl-note" id="iiHint">—</div>
+    <button class="btn-primary" style="background:#16a34a" onclick="saveInspItem()">✅ 저장</button>
+    <div class="edit-actions">
+      <button class="edit-cancel" onclick="closeInspItemEdit()">닫기</button>
+      <button class="edit-clear" id="btnIiReset" onclick="resetInspItemCycle()" style="background:#64748b">↩ 공통주기로</button>
     </div>
   </div>
 </div>
@@ -2742,6 +2815,8 @@ async function loadMolds() {
   try {
     molds = await pd('GET', T_MOLD + '?select=*&order=mold_no.asc&limit=3000') || [];
   } catch (e) { molds = []; }
+  await loadInspMaster();
+  renderInspTemplates();
   molds.forEach(function(m) {
     if (!(Number(m.standard_spm) > 0)) {
       const localSpm = getMoldStandardSpm(m);
@@ -5967,26 +6042,80 @@ function calcUnitWeight() {
   if (!t || !w || !p || !sg) return 0;
   return (t / 10) * (w / 10) * (p / 10) * sg;
 }
-/* ===== [Rev.7.54] 금형 누적 타발수 · 점검주기 ===== */
+/* ===== [Rev.7.55] 금형 누적 타발수 · 점검항목 (공통 일괄 + 금형별 개별) ===== */
+const T_INSP_TPL  = 'pd_insp_template';
+const T_INSP_ITEM = 'pd_mold_insp_item';
 const T_MOLD_INSP = 'pd_mold_inspection';
+let inspTemplates = [];   // 공통 점검항목
+let inspItems = [];       // 금형별 상태/개별설정
 let _moldShotDbWarned = false;
 
 function moldTotalShot(m) { return Math.max(0, Number(m && m.total_shot) || 0); }
-function moldInspCycle(m) { return Math.max(0, Number(m && m.insp_cycle_shot) || 0); }
-function moldLastInspShot(m) { return Math.max(0, Number(m && m.last_insp_shot) || 0); }
-function moldInspStatus(m) {
-  const cyc = moldInspCycle(m);
-  const used = Math.max(0, moldTotalShot(m) - moldLastInspShot(m));
-  if (!(cyc > 0)) return { state: 'none', used: used, cyc: 0, remain: 0, pct: 0 };
-  const remain = cyc - used;
-  const pct = Math.max(0, Math.min(100, used / cyc * 100));
-  return { state: remain <= 0 ? 'due' : (pct >= 80 ? 'soon' : 'ok'), used: used, cyc: cyc, remain: remain, pct: pct };
-}
 function moldShotDbHint(e) {
   if (_moldShotDbWarned) return;
   _moldShotDbWarned = true;
-  console.warn('금형 타발수 컬럼 미적용', e);
-  showHint('⚠ 금형 누적 타발수 컬럼이 DB에 없습니다 · <b>mold_shot_ddl.sql</b>을 실행하세요');
+  console.warn('금형 점검 스키마 미적용', e);
+  showHint('⚠ 금형 점검 테이블이 없습니다 · <b>mold_shot_ddl.sql</b>을 실행하세요');
+}
+
+async function loadInspMaster() {
+  try {
+    inspTemplates = await pd('GET', T_INSP_TPL + '?select=*&order=sort_order,id') || [];
+  } catch (e) { inspTemplates = []; moldShotDbHint(e); }
+  try {
+    inspItems = await pd('GET', T_INSP_ITEM + '?select=*&order=id') || [];
+  } catch (e) { inspItems = []; }
+}
+
+// 금형에 적용되는 유효 점검항목 목록
+function effectiveInspItems(moldNo) {
+  if (!moldNo) return [];
+  const mine = inspItems.filter(function(x) { return x.mold_no === moldNo; });
+  const out = [];
+  inspTemplates.forEach(function(t) {
+    if (t.active === false) return;
+    const ov = mine.find(function(x) { return String(x.template_id) === String(t.id); });
+    if (ov && ov.excluded) return;
+    const cyc = (ov && Number(ov.cycle_shot) > 0) ? Number(ov.cycle_shot) : Number(t.cycle_shot) || 0;
+    out.push({
+      key: 'T' + t.id, template_id: t.id, item_id: ov ? ov.id : null,
+      name: (ov && ov.insp_name) || t.insp_name,
+      cycle: cyc, custom: !!(ov && Number(ov.cycle_shot) > 0),
+      last_shot: ov ? Math.max(0, Number(ov.last_insp_shot) || 0) : 0,
+      last_date: ov ? ov.last_insp_date : null,
+      scope: '공통', sort: Number(t.sort_order) || 0
+    });
+  });
+  mine.filter(function(x) { return !x.template_id; }).forEach(function(x) {
+    out.push({
+      key: 'I' + x.id, template_id: null, item_id: x.id,
+      name: x.insp_name || '(이름없음)', cycle: Math.max(0, Number(x.cycle_shot) || 0), custom: true,
+      last_shot: Math.max(0, Number(x.last_insp_shot) || 0), last_date: x.last_insp_date,
+      scope: '개별', sort: (Number(x.sort_order) || 0) + 1000
+    });
+  });
+  out.sort(function(a, b) { return a.sort - b.sort; });
+  return out;
+}
+
+function inspItemStatus(it, totalShot) {
+  const used = Math.max(0, totalShot - it.last_shot);
+  if (!(it.cycle > 0)) return { state: 'none', used: used, remain: 0, pct: 0 };
+  const remain = it.cycle - used;
+  const pct = Math.max(0, Math.min(100, used / it.cycle * 100));
+  return { state: remain <= 0 ? 'due' : (pct >= 80 ? 'soon' : 'ok'), used: used, remain: remain, pct: pct };
+}
+
+// 금형 전체 상태 = 가장 급한 항목
+function moldInspSummary(m) {
+  if (!m) return { state: 'none', due: [], soon: [], items: [] };
+  const tot = moldTotalShot(m);
+  const items = effectiveInspItems(m.mold_no).map(function(it) {
+    return Object.assign({}, it, { st: inspItemStatus(it, tot) });
+  });
+  const due = items.filter(function(x) { return x.st.state === 'due'; });
+  const soon = items.filter(function(x) { return x.st.state === 'soon'; });
+  return { state: due.length ? 'due' : (soon.length ? 'soon' : (items.length ? 'ok' : 'none')), due: due, soon: soon, items: items };
 }
 
 // 생산일보 저장 시 금형별 생산수량을 누적 타발수에 반영
@@ -6002,49 +6131,284 @@ async function addMoldShots(map) {
     try {
       await pd('PATCH', T_MOLD + '?id=eq.' + m.id, { total_shot: next }, { 'Prefer': 'return=minimal' });
       m.total_shot = next;
-      done.push({ mold_no: no, added: qty, total: next, st: moldInspStatus(m) });
+      done.push({ mold_no: no, added: qty, total: next, sum: moldInspSummary(m) });
     } catch (e) { moldShotDbHint(e); }
   }
   return done;
 }
 
-// 점검완료 등록
-async function registerMoldInspection() {
+/* ----- 공통 점검항목 마스터 (금형설정 탭) ----- */
+function renderInspTemplates() {
+  const tb = document.querySelector('#inspTplTable tbody');
+  if (!tb) return;
+  const cnt = document.getElementById('inspTplCount');
+  if (cnt) cnt.textContent = inspTemplates.length + '건';
+  if (!inspTemplates.length) {
+    tb.innerHTML = '<tr><td colspan="3"><div class="empty">공통 점검항목이 없습니다 · ✚ 등록</div></td></tr>';
+    return;
+  }
+  tb.innerHTML = inspTemplates.map(function(t) {
+    return '<tr' + (t.active === false ? ' style="opacity:.5"' : '') + '>' +
+      '<td><b>' + escHtml(t.insp_name) + '</b>' + (t.active === false ? ' <span class="insp-chip off">미사용</span>' : '') +
+      (t.note ? '<div class="mold-shot-sub">' + escHtml(t.note) + '</div>' : '') + '</td>' +
+      '<td class="num"><b>' + (Number(t.cycle_shot) || 0).toLocaleString() + '</b> 회</td>' +
+      '<td style="text-align:right"><button class="mini-btn edit" onclick="openInspTplEdit(' + t.id + ')">수정</button></td></tr>';
+  }).join('');
+}
+function openInspTplEdit(id) {
+  const t = id ? inspTemplates.find(function(x) { return String(x.id) === String(id); }) : null;
+  document.getElementById('inspTplTitle').innerHTML =
+    (t ? '🔧 공통 점검항목 수정' : '🔧 공통 점검항목 등록') +
+    ' <button class="x" onclick="closeInspTplEdit()" style="margin-left:auto">✕</button>';
+  document.getElementById('tplId').value = t ? t.id : '';
+  document.getElementById('tplName').value = t ? (t.insp_name || '') : '';
+  document.getElementById('tplCycle').value = t ? (t.cycle_shot || '') : '';
+  document.getElementById('tplOrder').value = t ? (t.sort_order || 0) : (inspTemplates.length + 1);
+  document.getElementById('tplNote').value = t ? (t.note || '') : '';
+  document.getElementById('tplActive').checked = t ? (t.active !== false) : true;
+  document.getElementById('btnTplDelete').style.display = t ? '' : 'none';
+  document.getElementById('inspTplModal').classList.add('show');
+}
+function closeInspTplEdit() { document.getElementById('inspTplModal').classList.remove('show'); }
+async function saveInspTpl() {
+  const name = document.getElementById('tplName').value.trim();
+  const cyc = Math.max(0, parseInt(document.getElementById('tplCycle').value, 10) || 0);
+  if (!name) { alert('점검 유형명을 입력하세요'); return; }
+  if (!(cyc > 0)) { alert('점검주기(타발수)를 입력하세요'); return; }
+  const row = {
+    insp_name: name, cycle_shot: cyc,
+    sort_order: parseInt(document.getElementById('tplOrder').value, 10) || 0,
+    note: document.getElementById('tplNote').value.trim() || null,
+    active: document.getElementById('tplActive').checked
+  };
+  const id = document.getElementById('tplId').value;
+  try {
+    if (id) await pd('PATCH', T_INSP_TPL + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
+    else await pd('POST', T_INSP_TPL, [row], { 'Prefer': 'return=minimal' });
+    closeInspTplEdit();
+    await loadInspMaster();
+    renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); updateUI();
+    showHint('🔧 공통 점검항목 <b>' + escHtml(name) + '</b> 저장 · 전체 금형에 적용');
+  } catch (e) { moldShotDbHint(e); alert('저장 실패:\n' + e.message); }
+}
+async function deleteInspTpl() {
+  const id = document.getElementById('tplId').value;
+  if (!id) return;
+  if (!confirm('이 공통 점검항목을 삭제할까요?\n(모든 금형에서 제거됩니다)')) return;
+  try {
+    await pd('DELETE', T_INSP_TPL + '?id=eq.' + id, null, { 'Prefer': 'return=minimal' });
+    closeInspTplEdit();
+    await loadInspMaster();
+    renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); updateUI();
+    showHint('🗑 공통 점검항목 삭제됨');
+  } catch (e) { alert('삭제 실패:\n' + e.message); }
+}
+
+/* ----- 금형 모달: 점검항목 목록 ----- */
+function currentMoldInModal() {
   const id = document.getElementById('fMoldId').value;
-  const m = molds.find(function(x) { return String(x.id) === String(id); });
-  if (!m) { alert('먼저 금형을 저장한 뒤 점검을 등록하세요'); return; }
+  return id ? molds.find(function(x) { return String(x.id) === String(id); }) : null;
+}
+function refreshMoldShotBox() { renderMoldShotBox(currentMoldInModal()); }
+function renderMoldShotBox(m) {
+  const tot = document.getElementById('sbTotal');
+  const box = document.getElementById('sbItemList');
+  const cnt = document.getElementById('sbItemCount');
+  if (!tot || !box) return;
+  tot.textContent = moldTotalShot(m).toLocaleString() + ' 회';
+  if (!m) {
+    if (cnt) cnt.textContent = '0';
+    box.innerHTML = '<div class="sb-empty">금형을 저장하면 점검항목이 적용됩니다</div>';
+    return;
+  }
+  const sum = moldInspSummary(m);
+  if (cnt) cnt.textContent = sum.items.length;
+  if (!sum.items.length) {
+    box.innerHTML = '<div class="sb-empty">적용된 점검항목이 없습니다 · 공통 점검항목을 등록하거나 ✚ 전용항목을 추가하세요</div>';
+    return;
+  }
+  const totalShot = moldTotalShot(m);
+  box.innerHTML = sum.items.map(function(it) {
+    const s = it.st;
+    const cls = s.state === 'due' ? 'due' : s.state === 'soon' ? 'warn' : '';
+    const msg = s.state === 'due'
+      ? '초과 ' + Math.abs(s.remain).toLocaleString() + '회'
+      : (it.cycle > 0 ? '남은 ' + s.remain.toLocaleString() + '회' : '주기 미설정');
+    return '<div class="ii-row ' + cls + '">' +
+      '<div class="ii-top">' +
+        '<span class="ii-name">' + escHtml(it.name) + '</span>' +
+        '<span class="ii-scope ' + (it.scope === '개별' ? 'own' : '') + '">' + it.scope + (it.custom && it.scope === '공통' ? '·개별주기' : '') + '</span>' +
+        '<span class="ii-msg">' + msg + '</span>' +
+      '</div>' +
+      '<div class="ii-bar ' + cls + '"><i style="width:' + s.pct.toFixed(1) + '%"></i></div>' +
+      '<div class="ii-sub">' + s.used.toLocaleString() + ' / ' + (it.cycle || 0).toLocaleString() + '회' +
+        ' · 최근점검 ' + (it.last_date ? escHtml(it.last_date) + ' (' + it.last_shot.toLocaleString() + '회)' : '없음') + '</div>' +
+      '<div class="ii-acts">' +
+        '<button type="button" class="ii-btn ok" onclick="doInspComplete(\'' + it.key + '\')">🔧 점검완료</button>' +
+        '<button type="button" class="ii-btn" onclick="openInspItemEdit(\'' + it.key + '\')">✏️ 주기</button>' +
+        (it.scope === '공통'
+          ? '<button type="button" class="ii-btn del" onclick="excludeInspItem(\'' + it.key + '\')">제외</button>'
+          : '<button type="button" class="ii-btn del" onclick="deleteInspItem(\'' + it.key + '\')">삭제</button>') +
+      '</div></div>';
+  }).join('') + (totalShot >= 0 ? '' : '');
+  renderExcludedList(m);
+}
+function renderExcludedList(m) {
+  const box = document.getElementById('sbItemList');
+  const ex = inspItems.filter(function(x) { return x.mold_no === m.mold_no && x.excluded && x.template_id; });
+  if (!ex.length) return;
+  box.innerHTML += '<div class="ii-exc">제외된 공통항목: ' + ex.map(function(x) {
+    const t = inspTemplates.find(function(y) { return String(y.id) === String(x.template_id); });
+    return '<button type="button" class="ii-exc-btn" onclick="restoreInspItem(' + x.id + ')">' +
+           escHtml(t ? t.insp_name : '항목') + ' ↩ 복원</button>';
+  }).join('') + '</div>';
+}
+
+// 금형별 상태행 확보(없으면 생성)
+async function ensureInspItemRow(m, it) {
+  if (it.item_id) return inspItems.find(function(x) { return String(x.id) === String(it.item_id); });
+  const row = { mold_no: m.mold_no, template_id: it.template_id, cycle_shot: null, last_insp_shot: 0, excluded: false };
+  const res = await pd('POST', T_INSP_ITEM, [row], { 'Prefer': 'return=representation' });
+  const created = (res && res[0]) ? res[0] : null;
+  if (created) inspItems.push(created);
+  return created;
+}
+
+async function doInspComplete(key) {
+  const m = currentMoldInModal();
+  if (!m) { alert('먼저 금형을 저장하세요'); return; }
+  const it = effectiveInspItems(m.mold_no).find(function(x) { return x.key === key; });
+  if (!it) return;
   const cur = moldTotalShot(m);
-  const prev = moldLastInspShot(m);
-  const result = prompt('🔧 점검 결과를 입력하세요 (양호 / 보수 / 교체)', '양호');
+  const result = prompt('🔧 [' + it.name + '] 점검 결과 (양호 / 보수 / 교체)', '양호');
   if (result === null) return;
   const note = prompt('비고 (선택)', '') || '';
-  if (!confirm('🔧 점검완료 등록\n\n금형: ' + m.mold_no +
-               '\n현재 누적 타발수: ' + cur.toLocaleString() + ' 회' +
-               '\n직전 점검 이후: ' + (cur - prev).toLocaleString() + ' 회' +
-               '\n결과: ' + (result || '-') +
-               '\n\n이 시점을 마지막 점검으로 기록할까요?')) return;
+  if (!confirm('🔧 점검완료 등록\n\n금형: ' + m.mold_no + '\n항목: ' + it.name +
+               '\n현재 누적: ' + cur.toLocaleString() + ' 회' +
+               '\n직전 점검 이후: ' + (cur - it.last_shot).toLocaleString() + ' 회' +
+               '\n결과: ' + (result || '-') + '\n\n등록할까요?')) return;
   try {
-    await pd('PATCH', T_MOLD + '?id=eq.' + m.id,
-      { last_insp_shot: cur, last_insp_date: kstTodayStr() }, { 'Prefer': 'return=minimal' });
-    m.last_insp_shot = cur; m.last_insp_date = kstTodayStr();
+    const row = await ensureInspItemRow(m, it);
+    if (!row) throw new Error('점검 항목 생성 실패');
+    await pd('PATCH', T_INSP_ITEM + '?id=eq.' + row.id,
+      { last_insp_shot: cur, last_insp_date: kstTodayStr(), updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
+    row.last_insp_shot = cur; row.last_insp_date = kstTodayStr();
     try {
       await pd('POST', T_MOLD_INSP, [{
-        mold_no: m.mold_no, insp_date: kstTodayStr(), shot_at: cur, prev_shot: prev,
-        cycle_shot: moldInspCycle(m) || null, worker: worker.name,
-        result: (result || '').trim() || null, note: note.trim() || null
+        mold_no: m.mold_no, item_id: row.id, insp_name: it.name, insp_date: kstTodayStr(),
+        shot_at: cur, prev_shot: it.last_shot, cycle_shot: it.cycle || null,
+        worker: worker.name, result: (result || '').trim() || null, note: note.trim() || null
       }], { 'Prefer': 'return=minimal' });
     } catch (e2) { console.warn('점검이력 저장 실패', e2); }
-    renderMoldShotBox(m);
-    renderMoldTable();
-    updateUI();
-    showHint('🔧 <b>' + escHtml(m.mold_no) + '</b> 점검완료 등록 · 누적 ' + cur.toLocaleString() + '회');
+    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    showHint('🔧 <b>' + escHtml(m.mold_no) + '</b> · ' + escHtml(it.name) + ' 점검완료 (' + cur.toLocaleString() + '회)');
   } catch (e) { moldShotDbHint(e); alert('점검 등록 실패:\n' + e.message); }
 }
 
-// 누적 타발수 수동 보정 (초기 이관 / 오차 정정)
+// 항목 추가 / 주기 개별 변경
+function openInspItemEdit(key) {
+  const m = currentMoldInModal();
+  if (!m) { alert('먼저 금형을 저장하세요'); return; }
+  const it = key ? effectiveInspItems(m.mold_no).find(function(x) { return x.key === key; }) : null;
+  document.getElementById('inspItemTitle').innerHTML =
+    (it ? '✏️ ' + escHtml(it.name) + ' 주기 설정' : '✚ 이 금형 전용 점검항목') +
+    ' <button class="x" onclick="closeInspItemEdit()" style="margin-left:auto">✕</button>';
+  document.getElementById('iiKey').value = key || '';
+  document.getElementById('iiName').value = it ? it.name : '';
+  document.getElementById('iiName').disabled = !!(it && it.scope === '공통');
+  document.getElementById('iiCycle').value = it ? (it.cycle || '') : '';
+  document.getElementById('iiHint').textContent = it
+    ? (it.scope === '공통'
+        ? '공통 항목입니다. 여기서 바꾸면 이 금형에만 개별 주기가 적용됩니다.'
+        : '이 금형 전용 항목입니다.')
+    : '이 금형에만 적용되는 전용 점검항목을 추가합니다.';
+  document.getElementById('btnIiReset').style.display = (it && it.scope === '공통' && it.custom) ? '' : 'none';
+  document.getElementById('inspItemModal').classList.add('show');
+}
+function closeInspItemEdit() { document.getElementById('inspItemModal').classList.remove('show'); }
+async function saveInspItem() {
+  const m = currentMoldInModal();
+  if (!m) return;
+  const key = document.getElementById('iiKey').value;
+  const name = document.getElementById('iiName').value.trim();
+  const cyc = Math.max(0, parseInt(document.getElementById('iiCycle').value, 10) || 0);
+  if (!(cyc > 0)) { alert('점검주기(타발수)를 입력하세요'); return; }
+  try {
+    if (!key) {
+      if (!name) { alert('점검 유형명을 입력하세요'); return; }
+      await pd('POST', T_INSP_ITEM, [{
+        mold_no: m.mold_no, template_id: null, insp_name: name, cycle_shot: cyc,
+        last_insp_shot: moldTotalShot(m), last_insp_date: null, excluded: false
+      }], { 'Prefer': 'return=minimal' });
+    } else {
+      const it = effectiveInspItems(m.mold_no).find(function(x) { return x.key === key; });
+      if (!it) return;
+      const row = await ensureInspItemRow(m, it);
+      const patch = { cycle_shot: cyc, updated_at: kstNowISO() };
+      if (it.scope === '개별' && name) patch.insp_name = name;
+      await pd('PATCH', T_INSP_ITEM + '?id=eq.' + row.id, patch, { 'Prefer': 'return=minimal' });
+    }
+    closeInspItemEdit();
+    await loadInspMaster();
+    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    showHint('✏️ 점검주기 저장 · <b>' + escHtml(m.mold_no) + '</b>');
+  } catch (e) { moldShotDbHint(e); alert('저장 실패:\n' + e.message); }
+}
+async function resetInspItemCycle() {
+  const m = currentMoldInModal();
+  const key = document.getElementById('iiKey').value;
+  if (!m || !key) return;
+  const it = effectiveInspItems(m.mold_no).find(function(x) { return x.key === key; });
+  if (!it || !it.item_id) return;
+  if (!confirm('개별 주기를 해제하고 공통 주기를 따르게 할까요?')) return;
+  try {
+    await pd('PATCH', T_INSP_ITEM + '?id=eq.' + it.item_id, { cycle_shot: null, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
+    closeInspItemEdit();
+    await loadInspMaster();
+    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    showHint('↩ 공통 주기로 복귀');
+  } catch (e) { alert('실패:\n' + e.message); }
+}
+async function excludeInspItem(key) {
+  const m = currentMoldInModal();
+  if (!m) return;
+  const it = effectiveInspItems(m.mold_no).find(function(x) { return x.key === key; });
+  if (!it) return;
+  if (!confirm('[' + it.name + '] 을(를) 이 금형에서 제외할까요?\n(다른 금형에는 그대로 적용됩니다)')) return;
+  try {
+    const row = await ensureInspItemRow(m, it);
+    await pd('PATCH', T_INSP_ITEM + '?id=eq.' + row.id, { excluded: true, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
+    await loadInspMaster();
+    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    showHint('🚫 <b>' + escHtml(it.name) + '</b> 이 금형에서 제외');
+  } catch (e) { alert('실패:\n' + e.message); }
+}
+async function restoreInspItem(itemId) {
+  const m = currentMoldInModal();
+  try {
+    await pd('PATCH', T_INSP_ITEM + '?id=eq.' + itemId, { excluded: false, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
+    await loadInspMaster();
+    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    showHint('↩ 공통 점검항목 복원');
+  } catch (e) { alert('실패:\n' + e.message); }
+}
+async function deleteInspItem(key) {
+  const m = currentMoldInModal();
+  if (!m) return;
+  const it = effectiveInspItems(m.mold_no).find(function(x) { return x.key === key; });
+  if (!it || !it.item_id) return;
+  if (!confirm('[' + it.name + '] 전용 점검항목을 삭제할까요?')) return;
+  try {
+    await pd('DELETE', T_INSP_ITEM + '?id=eq.' + it.item_id, null, { 'Prefer': 'return=minimal' });
+    await loadInspMaster();
+    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    showHint('🗑 전용 점검항목 삭제');
+  } catch (e) { alert('실패:\n' + e.message); }
+}
+
+// 누적 타발수 수동 보정
 async function adjustMoldShot() {
-  const id = document.getElementById('fMoldId').value;
-  const m = molds.find(function(x) { return String(x.id) === String(id); });
+  const m = currentMoldInModal();
   if (!m) { alert('먼저 금형을 저장한 뒤 보정하세요'); return; }
   const v = prompt('✏️ 누적 타발수를 직접 입력하세요 (현재 ' + moldTotalShot(m).toLocaleString() + ')', String(moldTotalShot(m)));
   if (v === null) return;
@@ -6058,48 +6422,9 @@ async function adjustMoldShot() {
   } catch (e) { moldShotDbHint(e); alert('보정 실패:\n' + e.message); }
 }
 
-// 금형 모달 내 누적/점검 박스
-function renderMoldShotBox(m) {
-  const tot = document.getElementById('sbTotal');
-  const last = document.getElementById('sbLast');
-  const bar = document.getElementById('sbBar');
-  const barWrap = bar ? bar.parentElement : null;
-  const msg = document.getElementById('sbMsg');
-  if (!tot) return;
-  if (!m) {
-    tot.textContent = '0 회'; last.textContent = '기록 없음'; last.className = 'sb-v muted';
-    if (bar) bar.style.width = '0%';
-    if (barWrap) barWrap.className = 'sb-bar';
-    msg.className = 'sb-msg'; msg.textContent = '금형 저장 후 누적 타발수가 집계됩니다';
-    return;
-  }
-  const st = moldInspStatus(m);
-  tot.textContent = moldTotalShot(m).toLocaleString() + ' 회';
-  last.textContent = m.last_insp_date
-    ? (m.last_insp_date + ' · ' + moldLastInspShot(m).toLocaleString() + '회 시점')
-    : '기록 없음';
-  last.className = 'sb-v' + (m.last_insp_date ? '' : ' muted');
-  if (st.state === 'none') {
-    if (bar) bar.style.width = '0%';
-    if (barWrap) barWrap.className = 'sb-bar';
-    msg.className = 'sb-msg';
-    msg.textContent = '점검주기(타발수)를 입력하면 도래 시점을 알려줍니다 · 직전 점검 이후 ' + st.used.toLocaleString() + '회';
-    return;
-  }
-  if (bar) bar.style.width = st.pct.toFixed(1) + '%';
-  const cls = st.state === 'due' ? 'due' : st.state === 'soon' ? 'warn' : '';
-  if (barWrap) barWrap.className = 'sb-bar ' + cls;
-  msg.className = 'sb-msg ' + cls;
-  msg.textContent = st.state === 'due'
-    ? '🔴 점검 도래 · 주기 ' + st.cyc.toLocaleString() + '회 초과 ' + Math.abs(st.remain).toLocaleString() + '회'
-    : (st.state === 'soon' ? '🟠 점검 임박 · ' : '🟢 정상 · ') +
-      st.used.toLocaleString() + ' / ' + st.cyc.toLocaleString() + '회 (남은 ' + st.remain.toLocaleString() + '회)';
-}
-
-// 점검 이력 모달
+// 점검 이력
 async function openMoldInspHistory() {
-  const id = document.getElementById('fMoldId').value;
-  const m = molds.find(function(x) { return String(x.id) === String(id); });
+  const m = currentMoldInModal();
   if (!m) { alert('먼저 금형을 저장하세요'); return; }
   document.getElementById('moldInspTitle').innerHTML =
     '📋 ' + escHtml(m.mold_no) + ' 점검이력 <button class="x" onclick="closeMoldInspHistory()" style="margin-left:auto">✕</button>';
@@ -6109,7 +6434,7 @@ async function openMoldInspHistory() {
   let rows = [];
   try {
     rows = await pd('GET', T_MOLD_INSP + '?select=*&mold_no=eq.' + encodeURIComponent(m.mold_no) +
-      '&order=insp_date.desc&limit=100') || [];
+      '&order=insp_date.desc,id.desc&limit=200') || [];
   } catch (e) {
     tb.innerHTML = '<tr><td colspan="4"><div class="empty">점검이력 테이블이 없습니다 (mold_shot_ddl.sql 실행)</div></td></tr>';
     return;
@@ -6117,8 +6442,9 @@ async function openMoldInspHistory() {
   if (!rows.length) { tb.innerHTML = '<tr><td colspan="4"><div class="empty">점검 이력이 없습니다</div></td></tr>'; return; }
   tb.innerHTML = rows.map(function(r) {
     const span = Math.max(0, (Number(r.shot_at) || 0) - (Number(r.prev_shot) || 0));
-    return '<tr><td>' + escHtml(r.insp_date || '-') + '</td>' +
-      '<td><b>' + (Number(r.shot_at) || 0).toLocaleString() + '</b>회' +
+    return '<tr><td>' + escHtml(r.insp_date || '-') +
+      '<div class="mold-shot-sub">' + escHtml(r.insp_name || '-') + '</div></td>' +
+      '<td class="num"><b>' + (Number(r.shot_at) || 0).toLocaleString() + '</b>회' +
       '<div class="mold-shot-sub">구간 ' + span.toLocaleString() + '회</div></td>' +
       '<td>' + escHtml(r.result || '-') + (r.note ? '<div class="mold-shot-sub">' + escHtml(r.note) + '</div>' : '') + '</td>' +
       '<td>' + escHtml(r.worker || '-') + '</td></tr>';
@@ -6131,14 +6457,18 @@ function renderInspWarn() {
   const el = document.getElementById('psInsp');
   if (!el) return;
   if (!sel.mold) { el.className = 'ps-insp'; el.innerHTML = ''; return; }
-  const st = moldInspStatus(sel.mold);
-  if (st.state !== 'due' && st.state !== 'soon') { el.className = 'ps-insp'; el.innerHTML = ''; return; }
-  el.className = 'ps-insp show ' + st.state;
-  el.innerHTML = st.state === 'due'
-    ? '🔧 <b>' + escHtml(sel.mold.mold_no) + '</b> 점검 도래 — 주기 ' + st.cyc.toLocaleString() +
-      '회 초과 ' + Math.abs(st.remain).toLocaleString() + '회 (누적 ' + moldTotalShot(sel.mold).toLocaleString() + ')'
-    : '🔧 <b>' + escHtml(sel.mold.mold_no) + '</b> 점검 임박 — 남은 ' + st.remain.toLocaleString() +
-      '회 / 주기 ' + st.cyc.toLocaleString() + '회';
+  const sum = moldInspSummary(sel.mold);
+  if (sum.state !== 'due' && sum.state !== 'soon') { el.className = 'ps-insp'; el.innerHTML = ''; return; }
+  const list = (sum.due.length ? sum.due : sum.soon).slice(0, 3);
+  const names = list.map(function(x) {
+    return escHtml(x.name) + (x.st.state === 'due'
+      ? '(초과 ' + Math.abs(x.st.remain).toLocaleString() + ')'
+      : '(남은 ' + x.st.remain.toLocaleString() + ')');
+  }).join(' · ');
+  el.className = 'ps-insp show ' + sum.state;
+  el.innerHTML = (sum.state === 'due' ? '🔧 점검 도래 — ' : '🔧 점검 임박 — ') +
+    '<b>' + escHtml(sel.mold.mold_no) + '</b> ' + names +
+    ' · 누적 ' + moldTotalShot(sel.mold).toLocaleString() + '회';
 }
 
 function openMoldEdit(id) {
@@ -6159,7 +6489,6 @@ function openMoldEdit(id) {
   v('fGravity', m ? m.specific_gravity : '');
   v('fCustomer', m ? m.customer : '');
   v('fQr', m ? m.qr_code : '');
-  v('fInspCycle', m ? (moldInspCycle(m) || '') : '');
   renderMoldShotBox(m);
   calcMoldSpec();
   document.getElementById('btnMoldDelete').style.display = m ? '' : 'none';
@@ -6192,7 +6521,6 @@ async function saveMold() {
     qr_code: document.getElementById('fQr').value.trim() || moldNo,
     standard_spm: standardSpm,
     spm: standardSpm,
-    insp_cycle_shot: numOrNull('fInspCycle'),
     active: true,
     updated_at: kstNowISO()
   };
@@ -6203,22 +6531,8 @@ async function saveMold() {
       if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
       else await pd('POST', T_MOLD, [row], { 'Prefer': 'return=minimal' });
     } catch (e1) {
-      // standard_spm / insp_cycle_shot 컬럼이 없는 구버전 DB → 해당 키만 제외하고 재시도 + 로컬 보관
-      if (/insp_cycle_shot/i.test(e1.message || '')) {
-        moldShotDbHint(e1);
-        delete row.insp_cycle_shot;
-        try {
-          if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
-          else await pd('POST', T_MOLD, [row], { 'Prefer': 'return=minimal' });
-        } catch (e3) {
-          if (/standard_spm/i.test(e3.message || '')) {
-            spmDbSaved = false;
-            delete row.standard_spm;
-            if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
-            else await pd('POST', T_MOLD, [row], { 'Prefer': 'return=minimal' });
-          } else throw e3;
-        }
-      } else if (/standard_spm/i.test(e1.message || '')) {
+      // standard_spm 컬럼이 없는 구버전 DB → 해당 키만 제외하고 재시도 + 로컬 보관
+      if (/standard_spm/i.test(e1.message || '')) {
         spmDbSaved = false;
         delete row.standard_spm;
         if (id) await pd('PATCH', T_MOLD + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
@@ -6260,13 +6574,17 @@ function renderMoldTable() {
     return;
   }
   list.forEach(function(m) {
-    const st = moldInspStatus(m);
-    const chip = (st.state === 'due' || st.state === 'soon')
-      ? '<span class="insp-chip ' + st.state + '">' + (st.state === 'due' ? '점검도래' : '점검임박') + '</span>' : '';
+    const sum = moldInspSummary(m);
+    const chip = (sum.state === 'due' || sum.state === 'soon')
+      ? '<span class="insp-chip ' + sum.state + '">' + (sum.state === 'due' ? '점검도래 ' + sum.due.length : '점검임박 ' + sum.soon.length) + '</span>' : '';
+    const near = sum.due[0] || sum.soon[0] || null;
     const shotLine = '<div class="mold-shot-sub">🔩 누적 <b>' + moldTotalShot(m).toLocaleString() + '</b>회' +
-      (st.cyc > 0
-        ? ' · 주기 ' + st.cyc.toLocaleString() + ' (' + (st.remain > 0 ? '남은 ' + st.remain.toLocaleString() : '초과 ' + Math.abs(st.remain).toLocaleString()) + ')'
-        : ' · 주기 미설정') + '</div>';
+      (sum.items.length
+        ? ' · 점검항목 ' + sum.items.length + '건' +
+          (near ? ' · ' + near.name + (near.st.state === 'due'
+              ? ' 초과 ' + Math.abs(near.st.remain).toLocaleString()
+              : ' 남은 ' + near.st.remain.toLocaleString()) : '')
+        : ' · 점검항목 없음') + '</div>';
     const tr = document.createElement('tr');
     tr.innerHTML = '<td><b>' + m.mold_no + '</b>' + chip + shotLine + '</td>' +
       '<td>' + (m.item_no || '-') + '<br><span style="font-size:10px;color:#94a3b8">' + (m.model_code || '') + (m.customer ? ' · ' + m.customer : '') + '</span></td>' +
