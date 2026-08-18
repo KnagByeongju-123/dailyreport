@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.27</title>
+<title>ESP32 생산일보 Rev.7.31</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -633,6 +633,33 @@
   .flow-actions .pri { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
   .flow-actions .green { background:#15803d; color:#fff; border-color:#15803d; }
   .embed-wrap { background:#fff; border:1px solid #cbd5e1; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(15,23,42,.08); }
+  /* ===== 소재발송/수입검사 서브탭 (Rev.7.28) : 내장화면 등록·설정 탭과 동일한 스타일 ===== */
+  .sub-tabs {
+    display:flex; background:#fff; border:1px solid #cbd5e1; border-bottom:none;
+    border-radius:12px 12px 0 0; overflow:hidden; margin-bottom:0;
+  }
+  .sub-tab {
+    flex:1; padding:13px 8px; border:none; background:#fff; cursor:pointer; font-family:inherit;
+    font-size:14px; font-weight:800; color:#94a3b8;
+    border-bottom:3px solid #e2e8f0; display:flex; align-items:center; justify-content:center; gap:7px;
+  }
+  .sub-tab.active { color:#1a3a6c; border-bottom-color:#1d4ed8; }
+  .sub-tab:active { background:#f8fafc; }
+  .sub-tab .flow-badge {
+    min-width:18px; padding:1px 6px; border-radius:9px; background:#f1f5f9; color:#64748b;
+    font-size:10px; font-weight:800;
+  }
+  .sub-tab.active .flow-badge { background:#dbeafe; color:#1d4ed8; }
+  .sub-pane { display:none; }
+  .sub-pane.active { display:block; }
+  .sub-pane .flow-kpis { margin-top:10px; }
+  .sub-body {
+    background:#fff; border:1px solid #cbd5e1; border-top:none; border-radius:0 0 12px 12px;
+    overflow:hidden; box-shadow:0 1px 4px rgba(15,23,42,.08);
+  }
+  .sub-body .embed-wrap { border:none; border-radius:0; box-shadow:none; }
+  .sub-body .sub-pane.pad { padding:12px; }
+  .sub-body .card { border:none; box-shadow:none; margin-bottom:0; padding-left:0; padding-right:0; }
   .embed-head { padding:9px 12px; display:flex; align-items:center; gap:8px; border-bottom:1px solid #e2e8f0; background:#f8fafc; font-size:12px; font-weight:800; color:#334155; }
   .embed-head span { margin-left:auto; color:#64748b; font-size:10px; font-weight:700; }
   .embed-frame { width:100%; height:calc(100vh - 155px); min-height:620px; border:0; display:block; background:#fff; }
@@ -653,7 +680,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.27</span></h1>
+  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.31</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -664,7 +691,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.27</small></span>
+    <span>📡 ESP32 생산일보 <small>Rev.7.31</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="drawer-sep">업무 절차</div>
@@ -799,47 +826,67 @@
 
 <!-- ===== 소재발송 (소재업체 등록) ===== -->
 <div class="tab-panel" id="t-mat-dispatch">
-  <div class="flow-kpis">
-    <div class="flow-kpi local"><div class="v" id="dispatchOrderOpen">0</div><div class="l">발주 진행</div></div>
-    <div class="flow-kpi"><div class="v" id="dispatchCoils">-</div><div class="l">발송 등록(코일)</div></div>
-    <div class="flow-kpi warn"><div class="v" id="dispatchWait">-</div><div class="l">수입검사 대기</div></div>
-    <div class="flow-kpi ok"><div class="v" id="dispatchLast">-</div><div class="l">최근 등록일</div></div>
+  <div class="sub-tabs">
+    <button class="sub-tab" id="mdTabStatus" onclick="switchSubTab('md','status')">📊 현황 <span class="flow-badge" id="mdStatusBadge">-</span></button>
+    <button class="sub-tab active" id="mdTabReg" onclick="switchSubTab('md','reg')">📤 등록</button>
   </div>
-  <div class="card" style="padding-bottom:10px">
-    <div class="sec-title">📤 소재발송 · 소재업체 등록</div>
-    <div class="flow-guide">소재업체가 <b>내장된 소재입고 등록화면</b>에서 템플릿을 업로드하면 <b>inspection_certs</b>에 등록되고 수입검사 대기 데이터가 생성됩니다. 이 시스템은 기존 MES 시스템과 <b>완전히 분리된 독립 DB</b>를 사용합니다.</div>
-    <div class="flow-actions">
-      <a class="pri" id="matUploadLink" href="#" onclick="openMatUploadWindow();return false;">↗ 업체 등록화면 새 창</a>
-      <button onclick="reloadMaterialFrame('matDispatchFrame')">🔄 등록화면 새로고침</button>
-      <button class="green" onclick="switchWorkTab('t-iqc')">다음 → 수입검사</button>
+  <div class="sub-body">
+    <div class="sub-pane pad" id="md-status">
+      <div class="flow-kpis" style="margin-top:0">
+        <div class="flow-kpi local"><div class="v" id="dispatchOrderOpen">0</div><div class="l">발주 진행</div></div>
+        <div class="flow-kpi"><div class="v" id="dispatchCoils">-</div><div class="l">발송 등록(코일)</div></div>
+        <div class="flow-kpi warn"><div class="v" id="dispatchWait">-</div><div class="l">수입검사 대기</div></div>
+        <div class="flow-kpi ok"><div class="v" id="dispatchLast">-</div><div class="l">최근 등록일</div></div>
+      </div>
+      <div class="card" style="padding-bottom:4px">
+        <div class="sec-title">📤 소재발송 · 소재업체 등록</div>
+        <div class="flow-guide">소재업체가 <b>내장된 소재입고 등록화면</b>(등록 탭)에서 템플릿을 업로드하면 <b>inspection_certs</b>에 등록되고 수입검사 대기 데이터가 생성됩니다. 이 시스템은 기존 MES 시스템과 <b>완전히 분리된 독립 DB</b>를 사용합니다.</div>
+        <div class="flow-actions">
+          <a class="pri" id="matUploadLink" href="#" onclick="openMatUploadWindow();return false;">↗ 업체 등록화면 새 창</a>
+          <button onclick="reloadMaterialFrame('matDispatchFrame')">🔄 등록화면 새로고침</button>
+          <button class="green" onclick="switchWorkTab('t-iqc')">다음 → 수입검사</button>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="embed-wrap">
-    <div class="embed-head">📤 업체용 소재발송 등록 화면 <span id="matUploadPathLabel">내장</span></div>
-    <iframe class="embed-frame" id="matDispatchFrame" title="소재업체 발송 등록"></iframe>
+    <div class="sub-pane active" id="md-reg">
+      <div class="embed-wrap">
+        <div class="embed-head">📤 업체용 소재발송 등록 화면 <span id="matUploadPathLabel">내장</span></div>
+        <iframe class="embed-frame" id="matDispatchFrame" title="소재업체 발송 등록"></iframe>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- ===== 수입검사 ===== -->
 <div class="tab-panel" id="t-iqc">
-  <div class="flow-kpis">
-    <div class="flow-kpi"><div class="v" id="iqcTotalCoils">-</div><div class="l">발송/입고 코일</div></div>
-    <div class="flow-kpi warn"><div class="v" id="iqcWaitGroups">-</div><div class="l">검사 대기</div></div>
-    <div class="flow-kpi ok"><div class="v" id="iqcDoneGroups">-</div><div class="l">검사 완료</div></div>
-    <div class="flow-kpi local"><div class="v" id="iqcNgGroups">-</div><div class="l">NG / 보류</div></div>
+  <div class="sub-tabs">
+    <button class="sub-tab" id="iqTabStatus" onclick="switchSubTab('iq','status')">📊 현황 <span class="flow-badge" id="iqStatusBadge">-</span></button>
+    <button class="sub-tab active" id="iqTabReg" onclick="switchSubTab('iq','reg')">🔎 검사</button>
   </div>
-  <div class="card" style="padding-bottom:10px">
-    <div class="sec-title">🔎 소재 수입검사</div>
-    <div class="flow-guide">업체가 등록한 소재를 공급자·재질·두께·폭 기준으로 묶어 검사하고, 결과는 <b>iqc_inspections</b>와 <b>inspection_certs</b> 판정에 반영됩니다. <b>내장 수입검사 화면(v3.5)</b>이 이 파일에 포함되어 있으며 독립 DB만 사용합니다.</div>
-    <div class="flow-actions">
-      <a class="green" id="matIqcLink" href="#" onclick="openMatIqcWindow();return false;">↗ 수입검사 새 창</a>
-      <button onclick="reloadMaterialFrame('matIqcFrame')">🔄 검사화면 새로고침</button>
-      <button class="pri" onclick="switchWorkTab('t-report')">다음 → 생산일보</button>
+  <div class="sub-body">
+    <div class="sub-pane pad" id="iq-status">
+      <div class="flow-kpis" style="margin-top:0">
+        <div class="flow-kpi"><div class="v" id="iqcTotalCoils">-</div><div class="l">발송/입고 코일</div></div>
+        <div class="flow-kpi warn"><div class="v" id="iqcWaitGroups">-</div><div class="l">검사 대기</div></div>
+        <div class="flow-kpi ok"><div class="v" id="iqcDoneGroups">-</div><div class="l">검사 완료</div></div>
+        <div class="flow-kpi local"><div class="v" id="iqcNgGroups">-</div><div class="l">NG / 보류</div></div>
+      </div>
+      <div class="card" style="padding-bottom:4px">
+        <div class="sec-title">🔎 소재 수입검사</div>
+        <div class="flow-guide">업체가 등록한 소재를 공급자·재질·두께·폭 기준으로 묶어 검사하고, 결과는 <b>iqc_inspections</b>와 <b>inspection_certs</b> 판정에 반영됩니다. <b>내장 수입검사 화면(v3.6)</b>(검사 탭)이 이 파일에 포함되어 있으며 독립 DB만 사용합니다.</div>
+        <div class="flow-actions">
+          <a class="green" id="matIqcLink" href="#" onclick="openMatIqcWindow();return false;">↗ 수입검사 새 창</a>
+          <button onclick="reloadMaterialFrame('matIqcFrame')">🔄 검사화면 새로고침</button>
+          <button class="pri" onclick="switchWorkTab('t-report')">다음 → 생산일보</button>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="embed-wrap">
-    <div class="embed-head">🔎 소재 수입검사 시스템 <span id="matIqcPathLabel">내장 · 수입검사 v3.5</span></div>
-    <iframe class="embed-frame" id="matIqcFrame" title="소재 수입검사"></iframe>
+    <div class="sub-pane active" id="iq-reg">
+      <div class="embed-wrap">
+        <div class="embed-head">🔎 소재 수입검사 시스템 <span id="matIqcPathLabel">내장 · 수입검사 v3.6</span></div>
+        <iframe class="embed-frame" id="matIqcFrame" title="소재 수입검사"></iframe>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1080,7 +1127,7 @@
       <div class="fld full" id="cfgIqcUrlRow"><label>외부 URL (수입검사)</label><input type="text" id="cfgIqcUrl" placeholder="https://xxx.github.io/repo/material_IQC.html"></div>
     </div>
     <button class="btn-primary" onclick="saveMatUploadUrl()">💾 저장</button>
-    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재입고 등록(Rev5.7)과 소재 수입검사(v3.5) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없고, 기존 MES 시스템과 완전히 분리되어 동작합니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
+    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재입고 등록(Rev6.0)과 소재 수입검사(v3.6) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없고, 기존 MES 시스템과 완전히 분리되어 동작합니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
   </div>
 
   <div class="card">
@@ -1437,6 +1484,19 @@ function closeDrawer() {
 function switchWorkTab(id) {
   switchTab(id, null);
 }
+/* 소재발송/수입검사 서브탭 (Rev.7.28) */
+function switchSubTab(prefix, key) {
+  const map = { md: { status: 'md-status', reg: 'md-reg', tabS: 'mdTabStatus', tabR: 'mdTabReg', frame: 'matDispatchFrame' },
+                iq: { status: 'iq-status', reg: 'iq-reg', tabS: 'iqTabStatus', tabR: 'iqTabReg', frame: 'matIqcFrame' } };
+  const m = map[prefix]; if (!m) return;
+  const isReg = (key === 'reg');
+  document.getElementById(m.status).classList.toggle('active', !isReg);
+  document.getElementById(m.reg).classList.toggle('active', isReg);
+  document.getElementById(m.tabS).classList.toggle('active', !isReg);
+  document.getElementById(m.tabR).classList.toggle('active', isReg);
+  if (isReg) ensureMaterialFrame(m.frame);
+  else refreshMaterialFlowStatus(false);
+}
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.toggle('active', p.id === id); });
   document.querySelectorAll('.drawer .tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1608,6 +1668,7 @@ function applyMaterialFlowStatus(certs, insps) {
   const lastDate = certs.length ? (certs[0].receipt_date || (certs[0].created_at||'').slice(0,10) || '-') : '-';
   const vals = {
     flowDispatchBadge: certs.length, flowIqcBadge: wait,
+    mdStatusBadge: certs.length, iqStatusBadge: wait,
     flowKpiDispatch: certs.length, flowKpiWait: wait, flowKpiDone: doneKeys.size,
     dispatchCoils: certs.length, dispatchWait: wait, dispatchLast: lastDate,
     iqcTotalCoils: certs.length, iqcWaitGroups: wait, iqcDoneGroups: doneKeys.size, iqcNgGroups: ng
@@ -1670,9 +1731,9 @@ function onMatModeChange() {
 function applyMatUploadUrl() {
   const mode = getMatMode();
   const lb = document.getElementById('matUploadPathLabel');
-  if (lb) lb.textContent = (mode === 'embed') ? '내장 · 소재입고 등록 Rev5.7' : (getMatUploadUrl().split('/').pop() || getMatUploadUrl());
+  if (lb) lb.textContent = (mode === 'embed') ? '내장 · 소재입고 등록 Rev6.0' : (getMatUploadUrl().split('/').pop() || getMatUploadUrl());
   const lb2 = document.getElementById('matIqcPathLabel');
-  if (lb2) lb2.textContent = (mode === 'embed') ? '내장 · 수입검사 v3.5' : (getMatIqcUrl().split('/').pop() || getMatIqcUrl());
+  if (lb2) lb2.textContent = (mode === 'embed') ? '내장 · 수입검사 v3.6' : (getMatIqcUrl().split('/').pop() || getMatIqcUrl());
   const sel = document.getElementById('cfgMatMode');
   if (sel) sel.value = mode;
   const inp = document.getElementById('cfgMatUrl');
@@ -5016,7 +5077,7 @@ window.addEventListener('DOMContentLoaded', function() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재입고 등록 (Rev5.7)</title>
+  <title>소재입고 등록 (Rev6.0)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -5115,8 +5176,8 @@ window.addEventListener('DOMContentLoaded', function() {
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재입고 등록 (Rev5.7)</h1>
-  <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서, 밀시트 첨부 가능</span></p>
+  <h1>📤 소재입고 등록 (Rev6.0)</h1>
+  <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
   <div class="tab on" onclick="swMainTab(0)">📤 등록</div>
@@ -5287,22 +5348,6 @@ window.addEventListener('DOMContentLoaded', function() {
     <div id="ntfyStatus" style="font-size:11px;margin-top:4px;color:#888"></div>
   </div>
   <div class="card">
-    <div class="card-tit">📧 메일 알림 설정</div>
-    <div class="info-box blue" style="font-size:10px">GAS 웹앱 URL은 Supabase common_code 테이블에 저장됩니다 (code_group: mail_gas)<br>수신자는 code_group: mat_mail에 저장됩니다.</div>
-    <div class="fg"><label>GAS 메일 웹앱 URL</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••••••••••••</div></div>
-    <div class="btn-row"><button class="btn btn-sm btn-gray" onclick="testMailGas()">🔌 연결 테스트</button></div>
-    <div id="mailGasStatus" style="font-size:11px;color:#888;margin-top:4px"></div>
-    <hr style="border:none;border-top:1px solid #eee;margin:12px 0">
-    <div class="fg"><label>📬 메일 수신자</label>
-      <div id="mailRecipList"></div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <input type="email" id="mailNewAddr" placeholder="example@company.com" style="flex:1;padding:8px;font-size:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
-        <button class="btn btn-sm btn-blue" onclick="addMailRecip()" style="flex-shrink:0">+</button>
-      </div>
-    </div>
-    <div id="mailRecipStatus" style="font-size:11px;color:#888;margin-top:4px"></div>
-  </div>
-  <div class="card">
     <div class="card-tit">🔧 Supabase 설정</div>
     <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
     <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:14px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
@@ -5407,25 +5452,10 @@ function kstISOString(d){
   return y+'-'+mo+'-'+da+'T'+h+':'+mi+':'+s+'.'+ms+'+09:00';
 }
 
-const SB_LS_KEY='MATERIAL_SB_CFG';
+const SB_LS_KEY='PD_MATERIAL_SB_CFG'; /* Rev5.9 : 기존 시스템과 localStorage 완전 분리 */
 /* Rev5.7 : 통합 DB 이전 (omngtyewdaqpphnzeate -> pllwltojbofjaftcemvn) */
 const SB_DEFAULT_URL='https://pllwltojbofjaftcemvn.supabase.co';
 const SB_DEFAULT_KEY='sb_publishable_9dYJzdz472b888EcqdBBaA_Ncwk0yvT';
-/* 이 목록에 있는 옛 주소가 localStorage 에 남아 있으면 자동으로 새 기본값으로 덮어씁니다. */
-const SB_LEGACY_URLS=['omngtyewdaqpphnzeate.supabase.co','jgvikmakenpllwxwdugk.supabase.co'];
-(function migrateSbCfg(){
-  try{
-    const c=JSON.parse(localStorage.getItem(SB_LS_KEY)||'{}');
-    const u=(c.url||'').trim();
-    if(!u){return}
-    if(SB_LEGACY_URLS.some(function(l){return u.indexOf(l)>=0})){
-      c.url=SB_DEFAULT_URL; c.key=SB_DEFAULT_KEY;
-      localStorage.setItem(SB_LS_KEY,JSON.stringify(c));
-      console.log('[Rev5.7] Supabase 설정을 통합 DB로 자동 전환했습니다.');
-    }
-  }catch(e){}
-})();
-
 function getSbCfg(){try{return JSON.parse(localStorage.getItem(SB_LS_KEY)||'{}')}catch(e){return{}}}
 function getSbUrl(){return(getSbCfg().url||SB_DEFAULT_URL).replace(/\/$/,'')}
 function getSbKey(){return getSbCfg().key||SB_DEFAULT_KEY}
@@ -5437,7 +5467,7 @@ let _pinBusy=false;
 let _pinLockTimer=null;
 const _PIN_MAX_FAIL=5;
 const _PIN_LOCKOUT_SEC=60;
-const _PIN_LK_FAIL='material_pin_fail';
+const _PIN_LK_FAIL='PD_material_pin_fail';
 
 async function _sha256hex(s){
   const b=new TextEncoder().encode(s);
@@ -5568,10 +5598,8 @@ function openPinLock(){
 }
 
 function swMainTab(n){
-  if(n===1&&!_settingsUnlocked){
-    openPinLock();
-    return;
-  }
+  /* Rev5.8 : 설정 탭 PIN 잠금 해제 (마스터 비번 제거) */
+  if(n===1){_settingsUnlocked=true;_settingsUnlockedBy='';}
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===n));
   document.querySelectorAll('.main-pnl').forEach((p,i)=>p.classList.toggle('on',i===n));
   if(n===1)loadSettingsUI();
@@ -5579,166 +5607,6 @@ function swMainTab(n){
 
 async function sbSelect(table,filters,selectCols){const SB_URL=getSbUrl(),SB_KEY=getSbKey();let url=SB_URL+'/rest/v1/'+table+'?select='+(selectCols||'*')+'&';Object.entries(filters).forEach(([k,v])=>{url+=k+'='+encodeURIComponent(v)+'&'});const res=await fetch(url,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});if(!res.ok)return[];return await res.json()}
 
-loadMailRecipients();
-
-let _mailRecipients=[];
-async function loadMailRecipients(){try{const data=await sbSelect('common_code',{code_group:'eq.mat_mail',order:'sort_order.asc'},'id,code_value,sort_order');if(data&&data.length){_mailRecipCache=data.map(r=>({id:r.id,email:String(r.code_value||'').trim(),sort:r.sort_order||0}));_mailRecipients=_mailRecipCache.map(r=>r.email).filter(v=>v&&v.includes('@'))}}catch(e){console.log('메일 수신자 로드 실패:',e)}renderMailRecipList()}
-let _mailRecipCache=[];
-function renderMailRecipList(){const c=document.getElementById('mailRecipList');if(!c)return;if(!_mailRecipCache.length){c.innerHTML='<div style="font-size:11px;color:#999;padding:8px 0;text-align:center">등록된 수신자 없음</div>';return}c.innerHTML=_mailRecipCache.map((r,i)=>'<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f5f5f5;border-radius:8px;margin-bottom:4px;font-size:12px"><span style="color:#888;min-width:20px">'+(i+1)+'</span><span style="flex:1;font-weight:500">'+r.email+'</span><button onclick="delMailRecip('+i+')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700">✕</button></div>').join('')}
-async function addMailRecip(){const inp=document.getElementById('mailNewAddr');const email=inp.value.trim();const st=document.getElementById('mailRecipStatus');if(!email||!email.includes('@')){st.textContent='⚠ 올바른 이메일 입력';st.style.color='#e65100';return}if(_mailRecipCache.find(r=>r.email===email)){st.textContent='⚠ 이미 존재';st.style.color='#e65100';return}const ns=_mailRecipCache.length?Math.max(..._mailRecipCache.map(r=>r.sort))+1:1;try{const SB_URL=getSbUrl(),SB_KEY=getSbKey();const res=await fetch(SB_URL+'/rest/v1/common_code',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},body:JSON.stringify({code_group:'mat_mail',code_value:email,sort_order:ns})});if(res.ok){const saved=await res.json();if(saved&&saved.length)_mailRecipCache.push({id:saved[0].id,email,sort:ns})}_mailRecipients=_mailRecipCache.map(r=>r.email);inp.value='';renderMailRecipList();st.textContent='✅ '+email;st.style.color='#2e7d32'}catch(e){st.textContent='❌ '+e.message;st.style.color='#c62828'}}
-async function delMailRecip(idx){const r=_mailRecipCache[idx];if(!r)return;if(!confirm(r.email+' 삭제?'))return;if(r.id){try{await fetch(getSbUrl()+'/rest/v1/common_code?id=eq.'+r.id,{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}catch(e){}}_mailRecipCache.splice(idx,1);_mailRecipients=_mailRecipCache.map(r=>r.email);renderMailRecipList()}
-
-async function sendEmail(info){
-  const gasUrl=_mailGasUrl||localStorage.getItem('MATERIAL_MAIL_GAS_URL')||'';
-  if(!gasUrl)return;
-  if(!_mailRecipients.length)await loadMailRecipients();
-  if(_mailRecipients.length)info.recipients=_mailRecipients;
-
-  const matRows=info.rows.map(r=>{
-    const m=r.material_info||'-';
-    const w=r.weight?r.weight+'kg':'';
-    const l=r.lot||'';
-    return '<tr><td style="padding:6px 10px;border:1px solid #e0e0e0">'+m+'</td>'
-      +'<td style="padding:6px 10px;border:1px solid #e0e0e0">'+l+'</td>'
-      +'<td style="padding:6px 10px;border:1px solid #e0e0e0;text-align:right">'+w+'</td></tr>';
-  }).join('');
-
-  /* [Rev4.9] 성적서 상세 + 밀시트 첨부 모으기 (모든 _certBatch 카드 전체 표시) */
-  const attachments=[];
-  let certSummaryHtml='';
-  if(typeof _certBatch!=='undefined' && Array.isArray(_certBatch) && _certBatch.length){
-    const cards=[];
-    _certBatch.forEach((c, idx)=>{
-      const ms=_certMillsheets&&_certMillsheets[idx];
-      const cd=c.certData||{};
-      const finalJ=cd.finalJ||'-';
-      const judgeColor=finalJ==='NG'?'#c62828':(finalJ==='OK'?'#2e7d32':'#888');
-      const headerBg=finalJ==='NG'?'#ffebee':(finalJ==='OK'?'#e8f5e9':'#f5f5f5');
-      const headerColor=finalJ==='NG'?'#c62828':(finalJ==='OK'?'#1b5e20':'#555');
-      const msTag=ms?'<span style="background:#0ea5e9;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:700">📎 밀시트</span>':'';
-      const charge=cd.charge||'-';
-      const sign=cd.sign||'-';
-      
-      // 측정 행 4개 (r1=결함/r2=재질/r3=폭/r4=두께)
-      const rowDef=[
-        {k:'r1', label:'표면'},
-        {k:'r2', label:'재질'},
-        {k:'r3', label:'폭(W)'},
-        {k:'r4', label:'두께(T)'}
-      ];
-      const measRows=rowDef.map(rd=>{
-        const r=cd[rd.k]||{};
-        const spec=r.spec||'-';
-        const x1=(r.x1!==undefined&&r.x1!=='')?r.x1:'-';
-        const x2=(r.x2!==undefined&&r.x2!=='')?r.x2:'-';
-        const x3=(r.x3!==undefined&&r.x3!=='')?r.x3:'-';
-        const j=r.j||'-';
-        const jColor=j==='NG'?'#c62828':(j==='OK'?'#2e7d32':'#888');
-        return '<tr>'+
-          '<td style="padding:4px 6px;border:1px solid #e0e0e0;background:#f9fafb;font-weight:700">'+rd.label+'</td>'+
-          '<td style="padding:4px 6px;border:1px solid #e0e0e0">'+spec+'</td>'+
-          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center">'+x1+'</td>'+
-          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center">'+x2+'</td>'+
-          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center">'+x3+'</td>'+
-          '<td style="padding:4px 6px;border:1px solid #e0e0e0;text-align:center;font-weight:700;color:'+jColor+'">'+j+'</td>'+
-        '</tr>';
-      }).join('');
-      
-      const totalWeight=c.weight?(Math.round(c.weight*100)/100).toLocaleString():'-';
-      const coilLine=(c.coil_count&&c.coil_count>1)?(' / 코일 '+c.coil_count+'개'):'';
-      const lotsLine=(c.lots_all&&c.lots_all.length>1)?
-        ('<div style="font-size:10px;color:#1565c0;margin-top:3px">개별 LOT: '+c.lots_all.join(', ')+'</div>'):'';
-      
-      cards.push(
-        '<div style="border:1px solid #cbd5e1;border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff">'+
-          '<div style="background:'+headerBg+';padding:8px 12px;border-bottom:1px solid #cbd5e1;display:flex;justify-content:space-between;align-items:center">'+
-            '<div style="font-weight:700;color:'+headerColor+';font-size:12px">'+
-              '#'+(idx+1)+'. '+(c.supplier||'-')+' / '+(c.material_type||'-')+' '+(c.thickness||'')+'t × '+(c.width||'')+'mm'+
-              msTag+
-            '</div>'+
-            '<div style="font-weight:700;font-size:12px;color:'+judgeColor+'">최종판정 '+finalJ+'</div>'+
-          '</div>'+
-          '<div style="padding:8px 12px">'+
-            '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:6px">'+
-              '<tr><td style="padding:2px 6px;color:#888;width:60px">LOT</td><td style="font-weight:700">'+(c.lot||'-')+'</td>'+
-                  '<td style="padding:2px 6px;color:#888;width:60px">HEAT</td><td style="font-weight:700">'+(c.heat_no||'-')+'</td></tr>'+
-              '<tr><td style="padding:2px 6px;color:#888">중량</td><td><b>'+totalWeight+' KG</b>'+coilLine+'</td>'+
-                  '<td style="padding:2px 6px;color:#888">입고일</td><td>'+(c.receipt_date||'-')+'</td></tr>'+
-            '</table>'+
-            lotsLine+
-            '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-top:6px">'+
-              '<thead><tr style="background:#fff3e0">'+
-                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:left;width:60px">항목</th>'+
-                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:left">규격</th>'+
-                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:50px">X1</th>'+
-                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:50px">X2</th>'+
-                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:50px">X3</th>'+
-                '<th style="padding:4px 6px;border:1px solid #ffe0b2;text-align:center;width:45px">판정</th>'+
-              '</tr></thead>'+
-              '<tbody>'+measRows+'</tbody>'+
-            '</table>'+
-          '</div>'+
-        '</div>'
-      );
-
-      /* 밀시트가 있으면 첨부 추가 */
-      if(ms){
-        const dataUrl=(typeof ms==='string')?ms:ms.dataUrl;
-        const mimeType=(typeof ms==='string')?(dataUrl.match(/data:([^;]+)/)?.[1]||'image/jpeg'):(ms.mimeType||'application/octet-stream');
-        const orig=(typeof ms==='string')?('millsheet'+(mimeType==='application/pdf'?'.pdf':'.jpg')):(ms.originalName||'millsheet');
-        const m=orig.match(/^(.+?)(\.[^.]+)?$/);
-        const baseName=(m&&m[1])||orig;
-        const ext=(m&&m[2])||(mimeType==='application/pdf'?'.pdf':(mimeType==='image/png'?'.png':'.jpg'));
-        const meta=((c.supplier||'')+'_'+(c.material_type||'')+'_'+(c.thickness||'')+'t'+(c.width||'')+'_LOT'+(c.lot||'')+'_'+(c.heat_no||''))
-          .replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_').slice(0,80);
-        const filename=('밀시트_'+meta+'_'+baseName+ext).replace(/[\\/:*?"<>|]/g,'_');
-        const base64Data=(dataUrl||'').split(',')[1]||dataUrl||'';
-        if(base64Data){
-          attachments.push({name:filename, base64:base64Data, mimeType:mimeType});
-        }
-      }
-    });
-    if(cards.length){
-      certSummaryHtml=
-        '<div style="font-size:13px;font-weight:700;color:#555;margin:18px 0 8px">📋 성적서 상세 ('+cards.length+'건 전체 / 밀시트 첨부 '+attachments.length+'개)</div>'+
-        cards.join('');
-    }
-  }
-
-  const html='<div style="font-family:sans-serif;max-width:600px">'
-    +'<div style="background:#1a237e;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0">'
-    +'<h2 style="margin:0;font-size:18px">📤 소재입고 등록 완료</h2></div>'
-    +'<div style="padding:20px;background:#f8f9fa;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px">'
-    +'<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px">'
-    +'<tr><td style="padding:6px 0;color:#888;width:90px">업체</td><td style="font-weight:700">'+info.company+'</td></tr>'
-    +'<tr><td style="padding:6px 0;color:#888">입고일</td><td style="font-weight:700">'+info.date+'</td></tr>'
-    +'<tr><td style="padding:6px 0;color:#888">등록건수</td><td style="font-weight:700;color:#1a237e">'+info.count+'건</td></tr>'
-    +'<tr><td style="padding:6px 0;color:#888">출발지</td><td>'+info.from+'</td></tr>'
-    +'<tr><td style="padding:6px 0;color:#888">도착지</td><td>'+info.to+'</td></tr>'
-    +(info.worker?'<tr><td style="padding:6px 0;color:#888">담당자</td><td>'+info.worker+'</td></tr>':'')
-    +'</table>'
-    +'<div style="font-size:13px;font-weight:700;color:#555;margin-bottom:6px">📋 소재정보 ('+info.rows.length+'건)</div>'
-    +'<table style="width:100%;border-collapse:collapse;font-size:12px;background:#fff">'
-    +'<tr style="background:#e8eaf6"><th style="padding:6px 10px;border:1px solid #c5cae9;text-align:left">소재</th>'
-    +'<th style="padding:6px 10px;border:1px solid #c5cae9;text-align:left">로트</th>'
-    +'<th style="padding:6px 10px;border:1px solid #c5cae9;text-align:right">중량</th></tr>'
-    +matRows
-    +'</table>'
-    +certSummaryHtml
-    +'<div style="margin-top:16px;font-size:11px;color:#aaa;text-align:center">Smart Factory Platform · 소재입고 자동알림 (밀시트 통합)</div>'
-    +'</div></div>';
-
-  const subjectSuffix=attachments.length?(' / 밀시트 '+attachments.length+'개 첨부'):'';
-  const subject='📤 소재입고 '+info.count+'건 — '+info.company+' ('+info.date+')'+subjectSuffix;
-
-  try{
-    await fetch(gasUrl,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action:'sendMail',subject:subject,html:html,text:subject,recipients:info.recipients||[],attachments:attachments})
-    });
-  }catch(e){console.log('메일 발송 실패:',e)}
-}
 
 const COL_MAP={'재질':'_material_type','material_type':'_material_type','두께':'_thickness','thickness':'_thickness','폭':'_width','width_mm':'_width','피치':'_pitch','pitch':'_pitch','로트':'lot','lot':'lot','로트번호':'lot','소재중량':'weight','중량':'weight','weight':'weight','입고일자':'incoming_date','소재입고일자':'incoming_date','incoming_date':'incoming_date','비고':'note','note':'note','메모':'note','업체명':'_customer','고객사':'_customer','customer':'_customer'};
 
@@ -5997,7 +5865,6 @@ async function doRegister(){
 
     await Promise.all([
       sendNtfyUploadComplete(ntfyMsg).catch(e=>console.log('ntfy 실패:',e)),
-      sendEmail({company:_batchCompany||cfg.from||'-',date:_batchDate||todayStr,count:ok,from:cfg.from,to:cfg.to,worker:cfg.worker,rows:rows}).catch(e=>console.log('메일 실패:',e))
     ]);
 
     if(ntfyEl){
@@ -6049,11 +5916,6 @@ function resetAll(){
 
 let _tt;function showToast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2000)}
 
-let _mailGasUrl='';
-const DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbyE1464Xfo8zo9JIOjNK-bHy6-9qeKndvEXhBPUdPhUvNRWB-eLP2rsTjb6ydhw8hqIQQ/exec';
-async function loadMailGasCfg(){try{const data=await sbSelect('common_code',{code_group:'eq.mail_gas',order:'sort_order.asc'},'code_value,sort_order');if(data&&data.length){const r=data.find(x=>x.sort_order===0);if(r&&r.code_value)_mailGasUrl=String(r.code_value).trim()}}catch(e){console.log('메일 설정 로드 실패:',e)}if(!_mailGasUrl){const lv=localStorage.getItem('MATERIAL_MAIL_GAS_URL')||'';if(lv)_mailGasUrl=lv}if(!_mailGasUrl){_mailGasUrl=DEFAULT_GAS_URL;localStorage.setItem('MATERIAL_MAIL_GAS_URL',_mailGasUrl)}}
-async function saveMailGas(){const st=document.getElementById('mailGasStatus');if(!_mailGasUrl){st.textContent='⚠ 서버에 GAS URL 미등록';st.style.color='#e65100';return}st.textContent='✅ GAS URL: 서버 설정됨';st.style.color='#2e7d32'}
-async function testMailGas(){const st=document.getElementById('mailGasStatus');if(!_mailGasUrl){st.textContent='❌ 서버에 GAS URL 미등록';st.style.color='#c62828';return}st.textContent='테스트 중...';st.style.color='#1565c0';try{const res=await fetch(_mailGasUrl+'?action=ping');const data=await res.json();if(data.success){st.textContent='✅ 연결 성공 (잔여 발송: '+data.quota+'통/일)';st.style.color='#2e7d32'}else{st.textContent='❌ '+data.message;st.style.color='#c62828'}}catch(e){st.textContent='❌ 연결 실패: '+e.message;st.style.color='#c62828'}}
 
 function getHHMM(){const n=new Date();return String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')}
 function initHistDates(){const t=new Date(),m=new Date();m.setMonth(m.getMonth()-1);document.getElementById('histEnd').value=t.toISOString().split('T')[0];document.getElementById('histStart').value=m.toISOString().split('T')[0]}
@@ -6062,7 +5924,7 @@ async function histQuery(){const pw=prompt('암호를 입력하세요:');if(!pw|
 async function histExcel(){const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}const hd=['일자','시간','공정','출발지','도착지','LOT','수량','소재정보','작업자','비고'];const rows=r.data.map(d=>[d.move_date,d.move_time,d.process,d.departure,d.destination,d.lot,d.qty,d.material_info,d.worker,d.note]);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([hd,...rows]),'소재입고');XLSX.writeFile(wb,'소재입고_'+document.getElementById('histStart').value.replace(/-/g,'')+'_'+document.getElementById('histEnd').value.replace(/-/g,'')+'.xlsx');showToast('📥 다운로드 완료')}
 async function histDelete(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}if(!confirm(r.data.length+'건 삭제?'))return;const ids=r.data.map(d=>d.id);for(let i=0;i<ids.length;i+=50){await fetch(getSbUrl()+'/rest/v1/move_history_tj?id=in.('+ids.slice(i,i+50).join(',')+')',{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}document.getElementById('histStatus').textContent='✅ 삭제 완료';document.getElementById('histArea').innerHTML=''}
 
-const NTFY_LS='MAT_NTFY_RULES';const NTFY_SV='https://ntfy.sh';
+const NTFY_LS='PD_MAT_NTFY_RULES';const NTFY_SV='https://ntfy.sh';
 function getNtfyRules(){try{return JSON.parse(localStorage.getItem(NTFY_LS)||'[]')}catch(e){return[]}}
 function saveNtfyRules(r){localStorage.setItem(NTFY_LS,JSON.stringify(r))}
 function renderNtfyRules(){const rules=getNtfyRules();const c=document.getElementById('ntfyRuleList');if(!c)return;if(!rules.length){c.innerHTML='<div style="font-size:11px;color:#999;padding:8px 0;text-align:center">등록된 방 없음</div>';return}c.innerHTML=rules.map((r,i)=>'<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f5f5f5;border-radius:8px;margin-bottom:4px;font-size:12px"><span style="color:#888;min-width:20px">'+(i+1)+'</span><span style="flex:1;color:#1565c0;font-family:monospace;font-size:12px;font-weight:600">#'+r.topic+'</span><button onclick="delNtfyRule('+i+')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-weight:700">✕</button></div>').join('')}
@@ -6099,7 +5961,7 @@ function loadSettingsUI(){
     un.textContent=_settingsUnlockedBy;
     bar.style.display='block';
   }
-  loadMailGasCfg();loadMailRecipients();initHistDates();_loadAllRulesFromServer();renderNtfyRules();loadVendorsAndRender();updateConnStatus();
+  initHistDates();_loadAllRulesFromServer();renderNtfyRules();loadVendorsAndRender();updateConnStatus();
 }
 
 let _vendorCache=[];
@@ -6289,7 +6151,7 @@ async function moveVendor(idx,dir){
     showToast('❌ 순서변경 실패: '+e.message);
   }
 }
-function updateConnStatus(){const c=document.getElementById('connStatusInfo');if(!c)return;const sbOk=!!(getSbUrl()&&getSbKey());const mailOk=!!_mailGasUrl;const ntfyCnt=getNtfyRules().length;c.innerHTML=(sbOk?'🟢':'🔴')+' Supabase: '+(sbOk?'설정됨':'미설정')+'<br>'+(mailOk?'🟢':'🔴')+' 메일 알림: '+(mailOk?'서버 설정됨':'미설정')+'<br>'+(ntfyCnt?'🟢':'🔴')+' ntfy: '+ntfyCnt+'개 방'+'<br>'+(_mailRecipients.length?'🟢':'🔴')+' 메일 수신자: '+(_mailRecipients.length?_mailRecipients.length+'명':'미설정')}
+function updateConnStatus(){const c=document.getElementById('connStatusInfo');if(!c)return;const sbOk=!!(getSbUrl()&&getSbKey());const ntfyCnt=getNtfyRules().length;c.innerHTML=(sbOk?'🟢':'🔴')+' Supabase: '+(sbOk?'설정됨':'미설정')+'<br>'+(ntfyCnt?'🟢':'🔴')+' ntfy: '+ntfyCnt+'개 방'}
 
 document.addEventListener('DOMContentLoaded',()=>{
   try{
@@ -6302,7 +6164,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   }catch(e){
     localStorage.setItem(SB_LS_KEY,JSON.stringify({url:SB_DEFAULT_URL,key:SB_DEFAULT_KEY}));
   }
-  loadMailGasCfg();
   _loadAllRulesFromServer();
   loadVendorsAndRender();
   loadNoticeAndShow();  // [공지] 페이지 로드 시 공지 자동 팝업
@@ -6311,10 +6172,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 async function _saveRulesToServer(cg,rules){const json=JSON.stringify(rules);try{await fetch(getSbUrl()+'/rest/v1/common_code?code_group=eq.'+cg,{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(rules.length){await fetch(getSbUrl()+'/rest/v1/common_code',{method:'POST',headers:{'Content-Type':'application/json','apikey':getSbKey(),'Authorization':'Bearer '+getSbKey(),'Prefer':'return=representation'},body:JSON.stringify({code_group:cg,code_value:json,sort_order:0})})}}catch(e){console.log('서버 저장 실패('+cg+'):',e)}}
 async function _loadRulesFromServer(cg,lsKey,renderFn){try{const res=await fetch(getSbUrl()+'/rest/v1/common_code?select=*&code_group=eq.'+cg+'&limit=1',{headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(res.ok){const data=await res.json();if(data&&data.length&&data[0].code_value){localStorage.setItem(lsKey,data[0].code_value);if(renderFn)renderFn()}}}catch(e){console.log('서버 로드 실패('+cg+'):',e)}}
 async function _saveAllRulesToServer(){await _saveRulesToServer('mat_chk_ntfy',getNtfyRules())}
-async function _loadAllRulesFromServer(){await _loadRulesFromServer('mat_chk_ntfy','MAT_NTFY_RULES',renderNtfyRules)}
+async function _loadAllRulesFromServer(){await _loadRulesFromServer('mat_chk_ntfy',NTFY_LS,renderNtfyRules)}
 
 /* ===== 공지사항 (mat_notice) ===== */
-const NOTICE_HIDE_LS = 'MAT_NOTICE_HIDE';  // 오늘 하루 안보기 (날짜 + 공지해시 저장)
+const NOTICE_HIDE_LS = 'PD_MAT_NOTICE_HIDE';  // 오늘 하루 안보기 (날짜 + 공지해시 저장)
 
 function _kstTodayStr(){
   const d=new Date(Date.now()+9*3600*1000);
@@ -6448,7 +6309,7 @@ let _certBatch=[];
 let _certCurrentIdx=0;
 let _certMillsheets={};
 
-const SPEC_HIST_KEY='MATERIAL_CERT_SPEC_HISTORY';
+const SPEC_HIST_KEY='PD_MATERIAL_CERT_SPEC_HISTORY';
 const SPEC_HIST_MAX=20;
 
 const SPEC_DEFAULTS={
@@ -6688,9 +6549,9 @@ function renderCertModal(){
     const fname=ms.originalName||'밀시트';
     const sizeKB=ms.fileSize?(ms.fileSize/1024).toFixed(0)+' KB':'';
     if((ms.mimeType||'').startsWith('image/')){
-      preview.innerHTML=`<div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><img src="${ms.dataUrl}" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"><div style="margin-top:8px;font-size:12px;color:#16a34a;font-weight:600">✅ ${fname} ${sizeKB?'('+sizeKB+')':''} 첨부됨</div></div>`;
+      preview.innerHTML=`<div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><img src="${ms.dataUrl}" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"><div style="margin-top:8px;font-size:12px;color:#16a34a;font-weight:600">✅ ${fname} ${sizeKB?'('+sizeKB+')':''} 압축 완료 · 서버 저장 예정</div></div>`;
     }else if((ms.mimeType||'')==='application/pdf'){
-      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;text-align:center"><div style="font-size:48px;margin-bottom:8px">📄</div><div style="font-size:14px;font-weight:700;color:#991b1b">${fname}</div><div style="margin-top:4px;font-size:12px;color:#7f1d1d">PDF · ${sizeKB}</div><div style="margin-top:10px;font-size:12px;color:#16a34a;font-weight:600">✅ 원본 그대로 메일 첨부됩니다</div></div>`;
+      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;text-align:center"><div style="font-size:48px;margin-bottom:8px">📄</div><div style="font-size:14px;font-weight:700;color:#991b1b">${fname}</div><div style="margin-top:4px;font-size:12px;color:#7f1d1d">PDF · ${sizeKB}</div><div style="margin-top:10px;font-size:12px;color:#16a34a;font-weight:600">✅ 서버에 저장됩니다 (수입검사에서 확인 가능)</div></div>`;
     }else{
       preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><div style="font-size:14px;font-weight:700">${fname}</div><div style="margin-top:4px;font-size:12px;color:#64748b">${ms.mimeType||''} · ${sizeKB}</div><div style="margin-top:8px;font-size:12px;color:#16a34a;font-weight:600">✅ 첨부됨</div></div>`;
     }
@@ -6796,29 +6657,70 @@ function readCertModalData(){
   c.certData=data;
 }
 
+/* [Rev6.0] 밀시트 서버 저장용 이미지 압축 : 50KB 이하 JPEG */
+const MS_MAX_BYTES=50*1024;
+function _b64Bytes(dataUrl){const i=dataUrl.indexOf(',');return Math.ceil((dataUrl.length-i-1)*3/4)}
+function compressImageForServer(file,maxBytes){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      let dim=1400,best=null;
+      while(dim>=420){
+        const scale=Math.min(1,dim/Math.max(img.width,img.height));
+        const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
+        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+        for(let q=0.8;q>=0.34;q-=0.1){
+          const d=cv.toDataURL('image/jpeg',q);
+          const size=_b64Bytes(d);
+          if(!best||size<best.size)best={dataUrl:d,size};
+          if(size<=maxBytes){resolve({dataUrl:d,size});return}
+        }
+        dim=Math.round(dim*0.72);
+      }
+      if(best)resolve(best);else reject(new Error('압축 실패'));
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('이미지 로드 실패'))};
+    img.src=url;
+  });
+}
 function certMillsheetUpload(input){
   const f=input.files[0];if(!f)return;
-  const MAX=10*1024*1024;
-  if(f.size>MAX){
-    alert(`⚠ 파일 용량 초과: ${(f.size/1024/1024).toFixed(1)} MB\n10 MB 이하 파일만 첨부 가능합니다.\nPDF는 압축하거나, 사진은 해상도를 낮춰서 다시 첨부해 주세요.`);
-    input.value='';return;
-  }
-  const r=new FileReader();
-  r.onload=e=>{
-    /* [Rev4.9 핵심수정] 밀시트 첨부 시점에 사용자가 입력한 X1/X2/X3 값 먼저 보존 */
-    readCertModalData();
-    _certMillsheets[_certCurrentIdx]={
-      dataUrl:e.target.result,
-      originalName:f.name,
-      mimeType:f.type||(/\.pdf$/i.test(f.name)?'application/pdf':'image/jpeg'),
-      fileSize:f.size
-    };
-    renderCertModal();
-    showToast(`✅ 밀시트 첨부: ${f.name}`);
-  };
-  r.onerror=()=>{showToast('⚠ 파일 읽기 실패');};
-  r.readAsDataURL(f);
   input.value='';
+  const isImg=(f.type||'').startsWith('image/')||/\.(jpe?g|png|webp|bmp|gif)$/i.test(f.name);
+  const isPdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name);
+  if(isImg){
+    readCertModalData();
+    showToast('⏳ 이미지 압축 중...');
+    compressImageForServer(f,MS_MAX_BYTES).then(res=>{
+      _certMillsheets[_certCurrentIdx]={
+        dataUrl:res.dataUrl,
+        originalName:f.name.replace(/\.[^.]+$/,'')+'.jpg',
+        mimeType:'image/jpeg',
+        fileSize:res.size
+      };
+      renderCertModal();
+      showToast('✅ 밀시트 첨부: '+(res.size/1024).toFixed(0)+'KB로 압축 완료');
+    }).catch(e=>{showToast('⚠ 이미지 압축 실패: '+e.message)});
+  }else if(isPdf){
+    if(f.size>MS_MAX_BYTES){
+      alert('⚠ PDF는 50KB 이하만 서버 저장이 가능합니다. (현재 '+(f.size/1024).toFixed(0)+'KB)\n\n밀시트를 사진으로 촬영해 첨부해 주세요.\n사진은 자동으로 50KB 이하로 압축됩니다.');
+      return;
+    }
+    const r=new FileReader();
+    r.onload=e=>{
+      readCertModalData();
+      _certMillsheets[_certCurrentIdx]={dataUrl:e.target.result,originalName:f.name,mimeType:'application/pdf',fileSize:f.size};
+      renderCertModal();
+      showToast('✅ 밀시트 첨부: '+f.name);
+    };
+    r.onerror=()=>{showToast('⚠ 파일 읽기 실패')};
+    r.readAsDataURL(f);
+  }else{
+    alert('이미지 또는 PDF 파일만 첨부할 수 있습니다.');
+  }
 }
 
 function certNavPrev(){
@@ -6937,6 +6839,7 @@ async function certSaveCurrent(){
     c.done=true;
     /* ★ 저장 직후 즉시 GET으로 검증 (return=representation으로 응답에 id가 있어야 함) */
     let verifyMsg='';
+    let savedCertId=null;
     try{
       let savedId=null;
       try{
@@ -6945,6 +6848,7 @@ async function certSaveCurrent(){
       }catch(_){}
       
       if(savedId){
+        savedCertId=savedId;
         /* id로 GET 검증 */
         const vRes=await fetch(SB_URL+'/rest/v1/inspection_certs?id=eq.'+savedId+'&select=id,supplier,lot_no,created_at',{
           headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
@@ -6967,6 +6871,7 @@ async function certSaveCurrent(){
         if(vRes.ok){
           const vData=await vRes.json();
           if(vData&&vData.length>0){
+            savedCertId=vData[0].id;
             verifyMsg=`✅ 검증 OK (id=${vData[0].id})`;
             console.log('[CERT] DB 검증 성공 (lot+heat):',vData[0]);
           }else{
@@ -6981,6 +6886,16 @@ async function certSaveCurrent(){
       verifyMsg='⚠ 검증 단계 오류';
     }
     showToast('✅ 성적서 저장 완료 '+verifyMsg);
+    /* [Rev6.0] 밀시트 서버 저장 (millsheet_files) */
+    if(millsheetImg){
+      try{
+        await saveMillsheetToServer(c,millsheetImg,savedCertId);
+        showToast('📎 밀시트 서버 저장 완료 ('+((millsheetImg.fileSize||0)/1024).toFixed(0)+'KB)');
+      }catch(e){
+        console.error('[MS] 밀시트 저장 실패:',e);
+        alert('⚠ 성적서는 저장되었지만 밀시트 서버 저장에 실패했습니다.\n'+(e.message||e)+'\n\n밀시트를 다시 첨부해 [저장 후 다음]을 누르면 재시도됩니다.');
+      }
+    }
   }else{
     /* 실패 시 done 표시 안 함 → 재시도 가능 */
     /* 큰 모달로 에러 표시 (alert는 모바일에서 작아서 안 보일 수 있음) */
@@ -6990,16 +6905,33 @@ async function certSaveCurrent(){
     return;  /* 실패하면 다음 카드로 안 넘어감 */
   }
   
-  /* [Rev4.9] 밀시트는 개별 메일 발송 안 함 — 최종등록(doRegister)에서 통합 메일로 발송됨
-     단, Storage 업로드는 별도 (IQC가 자동으로 PDF 첨부 표시) */
-  // if(millsheetImg){
-  //   sendMillsheetMail(c,millsheetImg).catch(e=>console.error('밀시트 메일 발송 실패:',e));
-  // }
-  
   updateCertBadge();
   const next=_certBatch.findIndex(x=>!x.done);
   if(next>=0){_certCurrentIdx=next;renderCertModal()}
   else{alert('🎉 모든 성적서 작성 완료!');closeCertModal()}
+}
+
+/* [Rev6.0] 밀시트 → Supabase millsheet_files 테이블 저장 */
+async function saveMillsheetToServer(c,ms,certId){
+  const SB_URL=getSbUrl(),SB_KEY=getSbKey();
+  const payload={
+    cert_id:certId||null,
+    supplier:c.supplier||'',
+    lot_no:c.lot||'',
+    heat_no:c.heat_no||'',
+    receipt_date:c.receipt_date||null,
+    file_name:ms.originalName||'millsheet.jpg',
+    mime:ms.mimeType||'image/jpeg',
+    size_bytes:ms.fileSize||null,
+    data_b64:ms.dataUrl,
+    created_at:kstISOString(new Date())
+  };
+  const res=await fetch(SB_URL+'/rest/v1/millsheet_files',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify(payload)
+  });
+  if(!res.ok){const t=await res.text().catch(()=>'');throw new Error('HTTP '+res.status+' '+t.substring(0,200))}
 }
 
 function certSkipCurrent(){
@@ -7007,85 +6939,6 @@ function certSkipCurrent(){
   certNavNext();
 }
 
-async function sendMillsheetMail(c,millsheet){
-  if(!_mailGasUrl){console.log('GAS URL 미설정 - 밀시트 메일 발송 스킵');return}
-  const recipients=(_mailRecipients||[]).filter(v=>v&&v.includes('@'));
-  if(!recipients.length){console.log('수신자 없음 - 밀시트 메일 발송 스킵');return}
-  
-  let dataUrl,originalName,mimeType;
-  if(typeof millsheet==='string'){
-    dataUrl=millsheet;
-    mimeType=dataUrl.match(/data:([^;]+)/)?.[1]||'image/jpeg';
-    originalName='millsheet.'+(mimeType==='application/pdf'?'pdf':(mimeType==='image/png'?'png':'jpg'));
-  }else{
-    dataUrl=millsheet.dataUrl;
-    mimeType=millsheet.mimeType||'application/octet-stream';
-    originalName=millsheet.originalName||'millsheet';
-  }
-  
-  const m=originalName.match(/^(.+?)(\.[^.]+)?$/);
-  const baseName=(m&&m[1])||originalName;
-  const ext=(m&&m[2])||(mimeType==='application/pdf'?'.pdf':(mimeType==='image/png'?'.png':'.jpg'));
-  const meta=`${c.supplier||''}_${c.material_type||''}_${c.thickness||''}t${c.width||''}_LOT${c.lot||''}_${c.heat_no||''}`.replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_').slice(0,80);
-  const filename=`밀시트_${meta}_${baseName}${ext}`.replace(/[\\/:*?"<>|]/g,'_');
-  
-  const subject=`📎 밀시트 — ${c.supplier} / ${c.material_type} ${c.thickness}t × ${c.width}mm / LOT ${c.lot}`;
-  const totalWeightDisp=c.weight?(Math.round(c.weight*100)/100).toLocaleString():'-';
-  const coilLine=(c.coil_count&&c.coil_count>1)?
-    `<tr><td style="padding:5px 0;color:#888">코일수</td><td><b>${c.coil_count}개</b></td></tr>`:'';
-  const lotsLine=(c.lots_all&&c.lots_all.length>1)?
-    `<tr><td style="padding:5px 0;color:#888">개별 LOT</td><td style="font-size:11px;color:#1565c0">${c.lots_all.join(', ')}</td></tr>`:'';
-  const fileTypeLabel=mimeType==='application/pdf'?'PDF':(mimeType.startsWith('image/')?'이미지':mimeType);
-  const html=`
-<div style="font-family:sans-serif;max-width:600px">
-  <div style="background:#1a237e;color:#fff;padding:14px 20px;border-radius:8px 8px 0 0">
-    <h2 style="margin:0;font-size:16px">📎 밀시트 첨부 — 성적서 등록 완료</h2>
-  </div>
-  <div style="padding:18px 20px;background:#f8f9fa;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px">
-    <table style="width:100%;font-size:13px;border-collapse:collapse">
-      <tr><td style="padding:5px 0;color:#888;width:90px">공급자</td><td style="font-weight:700">${c.supplier}</td></tr>
-      <tr><td style="padding:5px 0;color:#888">재질</td><td>${c.material_type}</td></tr>
-      <tr><td style="padding:5px 0;color:#888">규격</td><td>${c.thickness}t × ${c.width}mm</td></tr>
-      <tr><td style="padding:5px 0;color:#888">LOT NO</td><td>${c.lot}</td></tr>
-      ${lotsLine}
-      <tr><td style="padding:5px 0;color:#888">HEAT NO</td><td>${c.heat_no}</td></tr>
-      ${coilLine}
-      <tr><td style="padding:5px 0;color:#888">합계 중량</td><td><b>${totalWeightDisp} KG</b></td></tr>
-      <tr><td style="padding:5px 0;color:#888">입고일</td><td>${c.receipt_date}</td></tr>
-      <tr><td style="padding:5px 0;color:#888">최종판정</td><td style="font-weight:700;color:${(c.certData?.finalJ==='NG')?'#c62828':'#2e7d32'}">${c.certData?.finalJ||'OK'}</td></tr>
-      <tr><td style="padding:5px 0;color:#888">첨부파일</td><td>${filename} <span style="color:#64748b">(${fileTypeLabel})</span></td></tr>
-    </table>
-    <div style="margin-top:12px;padding:10px;background:#fff3e0;border-radius:4px;font-size:12px;color:#e65100">
-      📌 첨부파일: 밀시트 원본 (${fileTypeLabel}) — 업로드한 파일이 그대로 첨부됩니다<br>
-      📌 성적서 데이터는 시스템에 자동 등록되어 있습니다 (material_IQC.html)
-    </div>
-  </div>
-</div>`;
-  const base64Data=dataUrl.split(',')[1]||dataUrl;
-  try{
-    const res=await fetch(_mailGasUrl,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({
-        action:'sendMail',
-        subject:subject,
-        html:html,
-        text:subject,
-        recipients:recipients,
-        attachments:[{name:filename,base64:base64Data,mimeType:mimeType}]
-      })
-    });
-    if(res.ok){
-      showToast(`📧 밀시트 메일 발송 (${fileTypeLabel})`);
-    }else{
-      console.error('GAS 메일 실패 status:',res.status);
-      showToast('⚠ 메일 발송 실패 (HTTP '+res.status+')');
-    }
-  }catch(e){
-    console.error('GAS 메일 실패:',e);
-    showToast('⚠ 메일 발송 실패');
-  }
-}
 
 (function(){
   const _origGoStep=window.goStep;
@@ -7346,7 +7199,7 @@ document.getElementById('certModal').addEventListener('click',e=>{if(e.target.id
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>소재 수입검사 v3.5 | (주)태진다이텍</title>
+<title>소재 수입검사 v3.6 | (주)태진다이텍</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Malgun Gothic','맑은 고딕','Segoe UI',sans-serif;background:#f4f6f9;color:#222;font-size:14px;line-height:1.5}
@@ -7486,7 +7339,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 
 <div class="hdr">
   <div>
-    <h1>📋 소재 수입검사 시스템 v3.5</h1>
+    <h1>📋 소재 수입검사 시스템 v3.6</h1>
     <div class="sub">(주)태진다이텍 · 품질관리팀 · 그룹 자동 통합 (공급자+재질+두께+폭)</div>
   </div>
   <div class="user-info" id="userInfoBar">검사자: <b id="loginUser">로그인 필요</b></div>
@@ -7788,6 +7641,26 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 
 <div class="toast" id="toast"></div>
 
+<style>
+.btn-ms{border:none;background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:800;padding:5px 8px;border-radius:8px;cursor:pointer;margin-right:4px}
+.btn-ms:active{background:#bae6fd}
+#msModalBg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.75);z-index:9000;overflow-y:auto;padding:16px}
+#msModalBg.show{display:block}
+#msModal{max-width:760px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden}
+#msModalHead{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#0f172a;color:#fff;font-size:14px;font-weight:800}
+#msModalHead .x{margin-left:auto;width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-weight:800;cursor:pointer}
+#msModalBody{padding:14px}
+.ms-item{margin-bottom:16px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.ms-item .meta{padding:8px 10px;background:#f8fafc;font-size:11px;font-weight:700;color:#475569;display:flex;gap:10px;flex-wrap:wrap}
+.ms-item img{display:block;width:100%;background:#fff}
+.ms-item iframe{display:block;width:100%;height:520px;border:none}
+</style>
+<div id="msModalBg" onclick="if(event.target===this)closeMsModal()">
+  <div id="msModal">
+    <div id="msModalHead">📎 밀시트 <span id="msModalSub" style="font-size:11px;font-weight:600;color:#94a3b8"></span><button class="x" onclick="closeMsModal()">✕</button></div>
+    <div id="msModalBody"></div>
+  </div>
+</div>
 <script>
 /* ============================================================
    소재 수입검사 시스템 v3.1.4
@@ -8265,6 +8138,7 @@ function computeWaitGroups(){
       g._weightByLot['_' + g._rowCount] = wgt;
     }
     if(r.id) g.certIds.push(r.id);
+    if(r.has_millsheet) g.msCount = (g.msCount||0) + 1;
     if((r.receipt_date||'') > (g.recvDate||'')) g.recvDate = r.receipt_date;
   });
 
@@ -8288,6 +8162,53 @@ function computeWaitGroups(){
 }
 
 /* ================ 검사 대기 렌더 ================ */
+/* ===== [v3.6] 밀시트 뷰어 (millsheet_files) ===== */
+function closeMsModal(){document.getElementById('msModalBg').classList.remove('show')}
+async function fetchMillsheets(certIds){
+  if(!certIds||!certIds.length)return[];
+  const ids=certIds.filter(x=>x!=null).join(',');
+  if(!ids)return[];
+  const url=SB_URL+'/rest/v1/millsheet_files?cert_id=in.('+ids+')&select=id,cert_id,file_name,mime,size_bytes,lot_no,heat_no,receipt_date,data_b64,created_at&order=id.asc';
+  const res=await fetch(url,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  return await res.json();
+}
+function showMillsheets(rows,subTitle){
+  const body=document.getElementById('msModalBody');
+  document.getElementById('msModalSub').textContent=subTitle||'';
+  if(!rows.length){
+    body.innerHTML='<div style="padding:36px 12px;text-align:center;color:#94a3b8;font-size:13px">등록된 밀시트가 없습니다.<br><span style="font-size:11px">소재발송 단계에서 성적서 작성 시 밀시트를 첨부하면 여기에 표시됩니다.</span></div>';
+  }else{
+    body.innerHTML=rows.map(r=>{
+      const kb=r.size_bytes?(r.size_bytes/1024).toFixed(0)+'KB':'';
+      const meta='<div class="meta"><span>LOT '+(r.lot_no||'-')+'</span><span>HEAT '+(r.heat_no||'-')+'</span><span>'+(r.receipt_date||'')+'</span><span>'+(r.file_name||'')+' '+kb+'</span></div>';
+      if((r.mime||'')==='application/pdf'){
+        return '<div class="ms-item">'+meta+'<iframe src="'+r.data_b64+'"></iframe></div>';
+      }
+      return '<div class="ms-item">'+meta+'<img src="'+r.data_b64+'" alt="millsheet"></div>';
+    }).join('');
+  }
+  document.getElementById('msModalBg').classList.add('show');
+}
+async function viewMillsheetsByGroup(groupKey){
+  const g=computeWaitGroups().find(x=>x.groupKey===groupKey);
+  if(!g){showToast('❌ 그룹을 찾을 수 없습니다');return}
+  showToast('⏳ 밀시트 조회 중...');
+  try{
+    const rows=await fetchMillsheets(g.certIds||[]);
+    showMillsheets(rows,(g.supplier||'')+' · '+(g.material||'')+' '+(g.thickness??'')+'T×'+(g.width??'')+'W');
+  }catch(e){showToast('❌ 밀시트 조회 실패: '+e.message)}
+}
+async function viewMillsheetsByInsp(idx){
+  const d=inspections[idx];
+  if(!d){showToast('❌ 검사 데이터를 찾을 수 없습니다');return}
+  showToast('⏳ 밀시트 조회 중...');
+  try{
+    const rows=await fetchMillsheets(d.certIds||[]);
+    showMillsheets(rows,(d.supplier||'')+' · '+(d.certNo||''));
+  }catch(e){showToast('❌ 밀시트 조회 실패: '+e.message)}
+}
+
 function renderWait(){
   const groups = computeWaitGroups();
 
@@ -8344,7 +8265,8 @@ function renderWait(){
       <td style="text-align:right;padding-right:10px">${(g.weight||0).toLocaleString()}</td>
       <td>${g.recvDate||'-'}</td>
       <td><span class="badge badge-wait">대기</span></td>
-      <td onclick="event.stopPropagation()" style="padding:4px">
+      <td onclick="event.stopPropagation()" style="padding:4px;white-space:nowrap">
+        ${g.msCount?`<button class="btn-ms" onclick="event.stopPropagation();viewMillsheetsByGroup('${safeKey}')" title="밀시트 보기 (${g.msCount}건)">📎${g.msCount}</button>`:''}
         <button class="btn-del-wait" onclick="event.stopPropagation();deleteWaitGroup('${safeKey}')" title="이 입고 그룹 삭제">🗑</button>
       </td>
     </tr>`;
@@ -8503,6 +8425,7 @@ function renderDone(){
       <td><span class="badge ${judClass}">${d.finalJudge||'-'}</span></td>
       <td>
         <button class="btn btn-pri btn-sm" onclick="viewCert(${idx})">📄 성적서</button>
+        <button class="btn btn-sec btn-sm" onclick="viewMillsheetsByInsp(${idx})" title="밀시트 보기">📎</button>
         <button class="btn btn-warn btn-sm" onclick="reEditInsp(${idx})">수정</button>
         <button class="btn btn-dng btn-sm" onclick="deleteInsp(${idx})">삭제</button>
       </td>
