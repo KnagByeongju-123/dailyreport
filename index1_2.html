@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.55</title>
+<title>프레스 생산관리 Rev.7.56</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -484,6 +484,22 @@
   }
   .sub-title.lot { background: #f2f9ee; color: #3f6b28; }
   .sub-title.run { background: #eff6ff; color: #1d4ed8; }
+  .sub-title.insp { background: #f0f9ff; color: #0369a1; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .sub-title.insp .st-shot { font-size: 11px; font-weight: 800; color: #0284c7; font-variant-numeric: tabular-nums; }
+
+  /* 생산정보 내 금형 점검 진행 */
+  .pi-row { padding: 6px 2px 7px; border-bottom: 1px dashed #e2e8f0; }
+  .pi-row:last-child { border-bottom: none; }
+  .pi-top { display: flex; align-items: baseline; gap: 6px; }
+  .pi-name { font-size: 12px; font-weight: 800; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pi-msg { margin-left: auto; flex-shrink: 0; font-size: 11px; font-weight: 800; color: #64748b; font-variant-numeric: tabular-nums; }
+  .pi-msg.warn { color: #c2410c; }
+  .pi-msg.due { color: #b91c1c; }
+  .pi-bar { height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; margin: 4px 0 3px; }
+  .pi-bar i { display: block; height: 100%; background: #16a34a; }
+  .pi-bar.warn i { background: #f59e0b; }
+  .pi-bar.due i { background: #dc2626; }
+  .pi-sub { font-size: 10px; font-weight: 700; color: #94a3b8; font-variant-numeric: tabular-nums; }
   .sec-title2 {
     font-size: 13px; font-weight: 800; color: #334155; padding: 6px 2px; margin: 4px 0 8px;
     display: flex; align-items: center;
@@ -1039,7 +1055,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.55</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.56</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1068,7 +1084,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.55</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.56</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1183,6 +1199,8 @@
       <div id="prodLotList"><div class="empty" style="padding:8px">등록된 로트 없음</div></div>
       <div class="sub-title run">🧾 작업 이력 (오늘)</div>
       <div id="prodRunList"><div class="empty" style="padding:8px">작업 이력 없음</div></div>
+      <div class="sub-title insp">🔧 금형 점검 <span class="st-shot" id="pvShotTotal">누적 — 회</span></div>
+      <div id="prodInspList"><div class="empty" style="padding:8px">금형을 선택하세요</div></div>
       <div class="pred-row"><span class="pl">계획 가동시간</span><span class="pv muted" id="predPlanned">08:00 ~ 19:00 (11:00:00)</span></div>
       <div class="pred-row"><span class="pl">실제 가동시간</span><span class="pv" id="predWorkTime">00:00:00</span></div>
       <div class="pred-row"><span class="pl">예상 생산수량</span><span class="pv" id="predQty">— EA</span></div>
@@ -3402,6 +3420,7 @@ function renderProdInfo() {
 
   renderLotLists();
   renderRunList();
+  renderProdInspList();
 
   const fs = document.getElementById('prodFoldSub');
   if (fs) fs.textContent = sel.mold
@@ -6187,7 +6206,7 @@ async function saveInspTpl() {
     else await pd('POST', T_INSP_TPL, [row], { 'Prefer': 'return=minimal' });
     closeInspTplEdit();
     await loadInspMaster();
-    renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); updateUI();
+    renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); renderProdInfo(); updateUI();
     showHint('🔧 공통 점검항목 <b>' + escHtml(name) + '</b> 저장 · 전체 금형에 적용');
   } catch (e) { moldShotDbHint(e); alert('저장 실패:\n' + e.message); }
 }
@@ -6199,7 +6218,7 @@ async function deleteInspTpl() {
     await pd('DELETE', T_INSP_TPL + '?id=eq.' + id, null, { 'Prefer': 'return=minimal' });
     closeInspTplEdit();
     await loadInspMaster();
-    renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); updateUI();
+    renderInspTemplates(); renderMoldTable(); refreshMoldShotBox(); renderProdInfo(); updateUI();
     showHint('🗑 공통 점검항목 삭제됨');
   } catch (e) { alert('삭제 실패:\n' + e.message); }
 }
@@ -6300,7 +6319,7 @@ async function doInspComplete(key) {
         worker: worker.name, result: (result || '').trim() || null, note: note.trim() || null
       }], { 'Prefer': 'return=minimal' });
     } catch (e2) { console.warn('점검이력 저장 실패', e2); }
-    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('🔧 <b>' + escHtml(m.mold_no) + '</b> · ' + escHtml(it.name) + ' 점검완료 (' + cur.toLocaleString() + '회)');
   } catch (e) { moldShotDbHint(e); alert('점검 등록 실패:\n' + e.message); }
 }
@@ -6350,7 +6369,7 @@ async function saveInspItem() {
     }
     closeInspItemEdit();
     await loadInspMaster();
-    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('✏️ 점검주기 저장 · <b>' + escHtml(m.mold_no) + '</b>');
   } catch (e) { moldShotDbHint(e); alert('저장 실패:\n' + e.message); }
 }
@@ -6365,7 +6384,7 @@ async function resetInspItemCycle() {
     await pd('PATCH', T_INSP_ITEM + '?id=eq.' + it.item_id, { cycle_shot: null, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
     closeInspItemEdit();
     await loadInspMaster();
-    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('↩ 공통 주기로 복귀');
   } catch (e) { alert('실패:\n' + e.message); }
 }
@@ -6379,7 +6398,7 @@ async function excludeInspItem(key) {
     const row = await ensureInspItemRow(m, it);
     await pd('PATCH', T_INSP_ITEM + '?id=eq.' + row.id, { excluded: true, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
     await loadInspMaster();
-    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('🚫 <b>' + escHtml(it.name) + '</b> 이 금형에서 제외');
   } catch (e) { alert('실패:\n' + e.message); }
 }
@@ -6388,7 +6407,7 @@ async function restoreInspItem(itemId) {
   try {
     await pd('PATCH', T_INSP_ITEM + '?id=eq.' + itemId, { excluded: false, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
     await loadInspMaster();
-    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('↩ 공통 점검항목 복원');
   } catch (e) { alert('실패:\n' + e.message); }
 }
@@ -6401,7 +6420,7 @@ async function deleteInspItem(key) {
   try {
     await pd('DELETE', T_INSP_ITEM + '?id=eq.' + it.item_id, null, { 'Prefer': 'return=minimal' });
     await loadInspMaster();
-    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('🗑 전용 점검항목 삭제');
   } catch (e) { alert('실패:\n' + e.message); }
 }
@@ -6417,7 +6436,7 @@ async function adjustMoldShot() {
   try {
     await pd('PATCH', T_MOLD + '?id=eq.' + m.id, { total_shot: n }, { 'Prefer': 'return=minimal' });
     m.total_shot = n;
-    renderMoldShotBox(m); renderMoldTable(); updateUI();
+    renderMoldShotBox(m); renderMoldTable(); renderProdInfo(); updateUI();
     showHint('✏️ <b>' + escHtml(m.mold_no) + '</b> 누적 타발수 ' + n.toLocaleString() + '회로 보정');
   } catch (e) { moldShotDbHint(e); alert('보정 실패:\n' + e.message); }
 }
@@ -6451,6 +6470,41 @@ async function openMoldInspHistory() {
   }).join('');
 }
 function closeMoldInspHistory() { document.getElementById('moldInspModal').classList.remove('show'); }
+
+// 생산정보 카드의 금형 점검 진행 목록
+function renderProdInspList() {
+  const box = document.getElementById('prodInspList');
+  const tot = document.getElementById('pvShotTotal');
+  if (!box) return;
+  if (!sel.mold) {
+    if (tot) tot.textContent = '누적 — 회';
+    box.innerHTML = '<div class="empty" style="padding:8px">금형을 선택하세요</div>';
+    return;
+  }
+  const shot = moldTotalShot(sel.mold);
+  if (tot) tot.textContent = '누적 ' + shot.toLocaleString() + ' 회';
+  const sum = moldInspSummary(sel.mold);
+  if (!sum.items.length) {
+    box.innerHTML = '<div class="empty" style="padding:8px">적용된 점검항목 없음 (금형설정에서 등록)</div>';
+    return;
+  }
+  box.innerHTML = sum.items.map(function(it) {
+    const s = it.st;
+    const cls = s.state === 'due' ? 'due' : s.state === 'soon' ? 'warn' : '';
+    const msg = s.state === 'due'
+      ? '🔴 초과 ' + Math.abs(s.remain).toLocaleString()
+      : (it.cycle > 0
+          ? (s.state === 'soon' ? '🟠 남은 ' : '남은 ') + s.remain.toLocaleString()
+          : '주기 미설정');
+    return '<div class="pi-row">' +
+      '<div class="pi-top"><span class="pi-name">' + escHtml(it.name) + '</span>' +
+      '<span class="pi-msg ' + cls + '">' + msg + '</span></div>' +
+      '<div class="pi-bar ' + cls + '"><i style="width:' + s.pct.toFixed(1) + '%"></i></div>' +
+      '<div class="pi-sub">' + s.used.toLocaleString() + ' / ' + (it.cycle || 0).toLocaleString() + '회' +
+      (it.last_date ? ' · 최근 ' + escHtml(it.last_date) : ' · 점검이력 없음') + '</div>' +
+      '</div>';
+  }).join('');
+}
 
 // 생산작업 다이어그램의 점검 경고
 function renderInspWarn() {
