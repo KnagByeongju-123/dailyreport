@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.61</title>
+<title>프레스 생산관리 Rev.7.62</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -1022,6 +1022,52 @@
     .q-history{min-width:720px}
   }
 
+  /* ===== [Rev.7.62] 프레스 작업지시 ===== */
+  .wo-guide {
+    padding:10px 12px; border:1px solid #c4b5fd; border-radius:10px; background:#f5f3ff;
+    color:#5b21b6; font-size:12px; font-weight:700; line-height:1.55; margin-bottom:10px;
+  }
+  .wo-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:10px; }
+  .wo-kpi { background:#fff; border:1px solid #e2e8f0; border-radius:11px; padding:10px 12px; box-shadow:0 1px 3px rgba(15,23,42,.05); }
+  .wo-kpi .v { font-size:22px; line-height:1; font-weight:900; color:#334155; font-variant-numeric:tabular-nums; }
+  .wo-kpi .l { margin-top:4px; font-size:10px; font-weight:800; color:#64748b; }
+  .wo-kpi.wait { border-left:4px solid #f59e0b; }.wo-kpi.wait .v{color:#d97706}
+  .wo-kpi.run { border-left:4px solid #16a34a; }.wo-kpi.run .v{color:#15803d}
+  .wo-kpi.done { border-left:4px solid #64748b; }.wo-kpi.done .v{color:#475569}
+  .wo-kpi.urgent { border-left:4px solid #dc2626; }.wo-kpi.urgent .v{color:#b91c1c}
+  .wo-actions { display:flex; gap:8px; margin-top:10px; }
+  .wo-save { flex:1; padding:12px 14px; border:0; border-radius:9px; background:#6d28d9; color:#fff; font-size:14px; font-weight:900; cursor:pointer; font-family:inherit; }
+  .wo-clear { padding:12px 16px; border:1px solid #cbd5e1; border-radius:9px; background:#fff; color:#475569; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .wo-filter { display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-bottom:8px; }
+  .wo-filter input,.wo-filter select { min-height:34px; padding:6px 9px; border:1px solid #cbd5e1; border-radius:7px; background:#fff; font-size:12px; font-family:inherit; }
+  .wo-filter input{flex:1;min-width:180px}
+  .wo-table { min-width:940px; }
+  .wo-table td { vertical-align:top; }
+  .wo-sub { display:block; margin-top:2px; font-size:10px; color:#64748b; line-height:1.35; }
+  .wo-no { font-weight:900; color:#5b21b6; }
+  .wo-pri { display:inline-block; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:900; }
+  .wo-pri.NORMAL { background:#e2e8f0; color:#475569; }
+  .wo-pri.URGENT { background:#fee2e2; color:#b91c1c; }
+  .wo-status { display:inline-block; min-width:54px; text-align:center; padding:3px 8px; border-radius:11px; font-size:10px; font-weight:900; }
+  .wo-status.WAIT { background:#fef3c7; color:#92400e; }
+  .wo-status.RUN { background:#dcfce7; color:#15803d; }
+  .wo-status.DONE { background:#e2e8f0; color:#475569; }
+  .wo-mini { padding:5px 8px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:10px; font-weight:900; cursor:pointer; font-family:inherit; margin:1px; white-space:nowrap; }
+  .wo-mini.start { border-color:#86efac; background:#f0fdf4; color:#15803d; }
+  .wo-mini.done { border-color:#cbd5e1; background:#f8fafc; color:#475569; }
+  .wo-mini.edit { border-color:#bfdbfe; background:#eff6ff; color:#1d4ed8; }
+  .wo-mini.del { border-color:#fecaca; background:#fef2f2; color:#b91c1c; }
+  .drawer-steps .wo-flow-badge { margin-left:auto; min-width:22px; padding:2px 7px; border-radius:10px; background:#ede9fe; color:#6d28d9; font-size:10px; font-weight:900; text-align:center; }
+  .drawer-steps .tab-btn.active .wo-flow-badge { background:rgba(255,255,255,.22); color:#fff; }
+  .wo-prod-banner { display:flex; align-items:center; gap:8px; padding:9px 10px; margin:8px 0 2px; border:1.5px solid #c4b5fd; border-radius:10px; background:#f5f3ff; min-width:0; }
+  .wo-prod-banner .main { min-width:0; flex:1; }
+  .wo-prod-banner .main b { display:block; color:#5b21b6; font-size:12px; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wo-prod-banner .main span { display:block; margin-top:2px; color:#64748b; font-size:10px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wo-prod-target { flex-shrink:0; padding:4px 8px; border-radius:12px; background:#6d28d9; color:#fff; font-size:10px; font-weight:900; }
+  .wo-prod-done { flex-shrink:0; padding:6px 8px; border:1px solid #c4b5fd; border-radius:7px; background:#fff; color:#6d28d9; font-size:10px; font-weight:900; cursor:pointer; font-family:inherit; }
+  @media (max-width:700px){ .wo-kpis{grid-template-columns:repeat(2,1fr)} .wo-actions{flex-direction:column}.wo-clear{width:100%} }
+  @media (max-width:560px){ .wo-prod-banner{flex-wrap:wrap}.wo-prod-banner .main{flex-basis:100%}.wo-table{min-width:900px} }
+
   /* ===== PC 화면별 폭 조절 + 햄버거 메뉴 순서 편집 ===== */
   .menuordbtn{
     width:30px;height:30px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;color:#475569;
@@ -1122,7 +1168,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.61</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.62</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1151,7 +1197,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.61</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.62</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1161,8 +1207,9 @@
     <button class="tab-btn step" data-menu-id="mat-dispatch" data-tab="t-mat-dispatch" onclick="switchTab('t-mat-dispatch', this)"><span class="step-no">2</span><span class="tab-ico">📤</span>소재발송<span class="step-sub">업체등록</span><span class="flow-badge" id="flowDispatchBadge">-</span></button>
     <!-- [Rev.7.47] 소재입고(t-material)는 메뉴에서 숨김 — 패널은 생산작업 LOT 선택용으로 유지 -->
     <button class="tab-btn step" data-menu-id="iqc" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="step-no">3</span><span class="tab-ico">🔎</span>수입검사<span class="flow-badge" id="flowIqcBadge">-</span></button>
-    <button class="tab-btn step active" data-menu-id="prod" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="step-no">4</span><span class="tab-ico">⚙️</span>생산작업<span class="tab-dot"></span></button>
-    <button class="tab-btn step last" data-menu-id="report" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">5</span><span class="tab-ico">📝</span>생산일보</button>
+    <button class="tab-btn step" data-menu-id="work-order" data-tab="t-work-order" onclick="switchTab('t-work-order', this)"><span class="step-no">4</span><span class="tab-ico">📋</span>작업지시<span class="wo-flow-badge" id="woMenuBadge">0</span></button>
+    <button class="tab-btn step active" data-menu-id="prod" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="step-no">5</span><span class="tab-ico">⚙️</span>생산작업<span class="tab-dot"></span></button>
+    <button class="tab-btn step last" data-menu-id="report" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">6</span><span class="tab-ico">📝</span>생산일보</button>
   </div>
   <div class="drawer-sep">품질검사</div>
   <div class="drawer-menu-group" data-menu-group="quality">
@@ -1188,6 +1235,55 @@
 
 <div class="layout-toast" id="layoutToast"></div>
 
+<!-- ===== [Rev.7.62] 프레스 작업지시 ===== -->
+<div class="tab-panel" id="t-work-order">
+  <div class="wo-kpis">
+    <div class="wo-kpi wait"><div class="v" id="woKpiWait">0</div><div class="l">대기 지시</div></div>
+    <div class="wo-kpi run"><div class="v" id="woKpiRun">0</div><div class="l">작업중</div></div>
+    <div class="wo-kpi done"><div class="v" id="woKpiDone">0</div><div class="l">완료</div></div>
+    <div class="wo-kpi urgent"><div class="v" id="woKpiUrgent">0</div><div class="l">긴급 미완료</div></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">📋 프레스 작업지시 <span class="right">작업지시 → 생산작업 자동 연결</span></div>
+    <div class="wo-guide">호기 · 금형 · 품번 · LOT · 지시수량만 지정해 두면 됩니다. 목록에서 <b>▶ 작업시작</b>을 누르면 생산작업 화면에 조건을 자동 적용하며, 실제 설비가동은 생산작업의 <b>설비가동</b> 버튼으로 시작합니다.</div>
+    <input type="hidden" id="woEditId">
+    <div class="form-grid">
+      <div class="fld"><label>작업일 *</label><input type="date" id="woDate"></div>
+      <div class="fld"><label>납기일</label><input type="date" id="woDue"></div>
+      <div class="fld"><label>호기 *</label><select id="woMachine"><option value="">— 호기 선택 —</option></select></div>
+      <div class="fld"><label>금형 *</label><select id="woMold" onchange="workOrderMoldChanged()"><option value="">— 금형 선택 —</option></select></div>
+      <div class="fld"><label>품번 *</label><input type="text" id="woItem" list="woItemList" placeholder="품번"></div>
+      <div class="fld"><label>소재 LOT</label><input type="text" id="woLot" list="woLotList" placeholder="입고 전이면 비워도 됨"></div>
+      <div class="fld"><label>지시수량(EA) *</label><input type="number" id="woQty" min="1" step="1" inputmode="numeric" placeholder="예: 5000"></div>
+      <div class="fld"><label>우선순위</label><select id="woPriority"><option value="NORMAL">보통</option><option value="URGENT">🔴 긴급</option></select></div>
+      <div class="fld"><label>지시자</label><input type="text" id="woDirector" placeholder="지시자"></div>
+      <div class="fld"><label>작업자</label><input type="text" id="woAssignee" placeholder="미정 가능"></div>
+      <div class="fld full"><label>작업지시 / 주의사항</label><input type="text" id="woNote" placeholder="포장방법, 검사주기, 주의사항 등"></div>
+    </div>
+    <div class="wo-actions">
+      <button class="wo-save" id="woSaveBtn" onclick="savePressWorkOrder()">✅ 작업지시 등록</button>
+      <button class="wo-clear" onclick="clearWorkOrderForm()">↺ 입력 초기화</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-section-title">📚 작업지시 목록 <span id="woCount">0건</span></div>
+    <div class="wo-filter">
+      <select id="woStatusFilter" onchange="renderPressWorkOrders()"><option value="OPEN">미완료</option><option value="">전체</option><option value="WAIT">대기</option><option value="RUN">작업중</option><option value="DONE">완료</option></select>
+      <input type="text" id="woSearch" oninput="renderPressWorkOrders()" placeholder="지시번호 / 호기 / 금형 / 품번 / LOT 검색">
+    </div>
+    <div style="overflow-x:auto">
+      <table class="mtable wo-table">
+        <thead><tr><th>작업지시</th><th>생산조건</th><th>LOT / 수량</th><th>담당</th><th>상태</th><th style="min-width:190px">처리</th></tr></thead>
+        <tbody id="woHistory"></tbody>
+      </table>
+    </div>
+  </div>
+  <datalist id="woItemList"></datalist>
+  <datalist id="woLotList"></datalist>
+</div>
+
 <!-- ===== 가동 ===== -->
 <div class="tab-panel active" id="t-prod">
 <div class="card sel-header">
@@ -1204,6 +1300,11 @@
   <div class="sel-row">
     <span class="sel-label">품번</span>
     <select class="sel-input" id="itemSelect" disabled><option value="">로딩중...</option></select>
+  </div>
+  <div class="wo-prod-banner" id="woProdBanner" style="display:none">
+    <div class="main"><b id="woProdNo">📋 작업지시</b><span id="woProdInfo">—</span></div>
+    <span class="wo-prod-target" id="woProdTarget">목표 — EA</span>
+    <button class="wo-prod-done" type="button" onclick="completeActiveWorkOrder()">지시완료</button>
   </div>
   <!-- [Rev.7.49] 로트 선택 박스 제거 → 아래 소재 코일 이미지를 눌러 QR/직접입력으로 선택 -->
   <!-- [Rev.7.48] 소재(코일) → 프레스 → 배출 흐름에 맞춰 조작 버튼 배치 -->
@@ -2147,7 +2248,7 @@ function setSyncStatus(level, text) {
   b.className = 'sync-badge ' + level;
   b.textContent = text;
 }
-const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-measure': '측정검사', 't-visual': '외관검사', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
+const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-work-order': '프레스 작업지시', 't-measure': '측정검사', 't-visual': '외관검사', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerBg').classList.add('show');
@@ -2209,6 +2310,10 @@ function saveMenuOrder(){
 function loadMenuOrder(){
   let saved={};
   try{saved=JSON.parse(localStorage.getItem(PD_MENU_ORDER_KEY)||'{}')||{}}catch(e){saved={}}
+  // [Rev.7.62] 기존 사용자 저장 순서에도 신규 작업지시를 생산작업 바로 앞에 자동 삽입
+  if(Array.isArray(saved.work) && saved.work.indexOf('work-order')<0){
+    const i=saved.work.indexOf('prod'); saved.work.splice(i>=0?i:3,0,'work-order');
+  }
   applyMenuOrder(saved);
 }
 function addMenuDragHandles(){
@@ -2393,7 +2498,7 @@ const PD_PCW_KEY='pd_pc_width_v1';
 const PD_PCW_MIN=720,PD_PCW_MAX=1400,PD_PCW_STEP=20;
 const PD_PCW_DEFAULT={
   't-prod':1020,'t-report':1020,'t-mat-order':1200,'t-mat-dispatch':1200,'t-iqc':1200,
-  't-measure':1100,'t-visual':1100,'t-material':1100,'t-master':1020,'t-mold':1020,'t-help':1020,'t-config':1020
+  't-work-order':1180,'t-measure':1100,'t-visual':1100,'t-material':1100,'t-master':1020,'t-mold':1020,'t-help':1020,'t-config':1020
 };
 let PD_PCW_VIEW='t-prod',PD_PCW_DATA={};
 function pcwClamp(v){
@@ -2503,6 +2608,7 @@ function switchTab(id, btn) {
   if (id === 't-mat-order') { if (!ordLines.length) resetOrderLines(); fetchMaterialOrders(); refreshMaterialFlowStatus(false); }
   if (id === 't-mat-dispatch') { ensureMaterialFrame('matDispatchFrame'); refreshMaterialFlowStatus(false); }
   if (id === 't-iqc') { ensureMaterialFrame('matIqcFrame'); refreshMaterialFlowStatus(false); }
+  if (id === 't-work-order') prepareWorkOrderView();
   if (id === 't-measure') prepareQualityView('measure');
   if (id === 't-visual') prepareQualityView('visual');
   if (id === 't-material') { renderMaterialPresets(); loadMaterialReceipts(); loadPendingCerts(false); }
@@ -6116,6 +6222,9 @@ async function endProduction() {
     updateReportSummary();
     setSyncStatus('ok', '✓ 생산종료');
 
+    // [Rev.7.62] 생산종료와 연결된 프레스 작업지시는 자동 완료 처리
+    if (activeWorkOrderId) finishPressWorkOrder(activeWorkOrderId, true);
+
     const reportBtn = document.querySelector('.drawer .tab-btn[data-tab="t-report"]');
     switchTab('t-report', reportBtn);
     alert('✅ 생산종료 완료\\n\\n실제 가동시간 ' + fmtTime(snap.actual_ms) +
@@ -7014,6 +7123,238 @@ function renderMoldTable() {
   document.getElementById('moldCount').textContent = list.length + ' / ' + molds.length + '건';
 }
 
+/* ===== [Rev.7.62] 프레스 작업지시 ===== */
+const LS_PRESS_WORK_ORDERS = 'pdPressWorkOrders_v1';
+const LS_ACTIVE_WORK_ORDER = 'pdActiveWorkOrder_v1';
+let pressWorkOrders = loadPressWorkOrders();
+let activeWorkOrderId = '';
+try{ activeWorkOrderId = localStorage.getItem(LS_ACTIVE_WORK_ORDER) || ''; }catch(e){}
+
+function loadPressWorkOrders(){
+  try{
+    const a=JSON.parse(localStorage.getItem(LS_PRESS_WORK_ORDERS)||'[]');
+    return Array.isArray(a)?a:[];
+  }catch(e){ return []; }
+}
+function savePressWorkOrders(){
+  try{ localStorage.setItem(LS_PRESS_WORK_ORDERS,JSON.stringify(pressWorkOrders)); }catch(e){}
+  updateWorkOrderBadges();
+  workOrderRefreshProdBanner();
+}
+function workOrderVal(id){ const e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+function workOrderStatusText(s){ return s==='RUN'?'작업중':(s==='DONE'?'완료':'대기'); }
+function workOrderPriText(p){ return p==='URGENT'?'긴급':'보통'; }
+function workOrderGenerateNo(date){
+  const d=String(date||kstTodayStr()).replace(/-/g,'');
+  const prefix='WO-'+d+'-';
+  let max=0;
+  pressWorkOrders.forEach(function(r){
+    const n=String(r.order_no||'');
+    if(n.indexOf(prefix)===0) max=Math.max(max,parseInt(n.slice(prefix.length),10)||0);
+  });
+  return prefix+String(max+1).padStart(3,'0');
+}
+function workOrderKnownLots(){
+  const out=[]; const add=v=>{v=String(v||'').trim();if(v&&out.indexOf(v)<0)out.push(v)};
+  try{materialReceipts.forEach(r=>add(r.lot_no))}catch(e){}
+  try{lots.forEach(r=>add(r.lot_no))}catch(e){}
+  try{pressWorkOrders.forEach(r=>add(r.lot))}catch(e){}
+  return out.sort((a,b)=>b.localeCompare(a,'ko',{numeric:true}));
+}
+function prepareWorkOrderSelects(){
+  const ms=document.getElementById('woMachine');
+  if(ms){
+    const cur=ms.value;
+    ms.innerHTML='<option value="">— 호기 선택 —</option>'+machines.filter(m=>m.active!==false).map(m=>'<option value="'+escHtml(m.machine_code)+'">'+escHtml(m.machine_code)+' · '+escHtml(m.machine_name||'')+'</option>').join('');
+    if(cur)ms.value=cur;
+  }
+  const md=document.getElementById('woMold');
+  if(md){
+    const cur=md.value;
+    md.innerHTML='<option value="">— 금형 선택 —</option>'+molds.filter(m=>m.active!==false).map(m=>'<option value="'+escHtml(String(m.id))+'">'+escHtml(m.mold_no||'')+' · '+escHtml(m.item_no||'')+'</option>').join('');
+    if(cur)md.value=cur;
+  }
+  const items=[];
+  molds.filter(m=>m.active!==false).forEach(m=>String(m.item_no||'').split(',').forEach(x=>{x=x.trim();if(x&&items.indexOf(x)<0)items.push(x)}));
+  items.sort();
+  const idl=document.getElementById('woItemList'); if(idl)idl.innerHTML=items.map(x=>'<option value="'+escHtml(x)+'"></option>').join('');
+  const ldl=document.getElementById('woLotList'); if(ldl)ldl.innerHTML=workOrderKnownLots().map(x=>'<option value="'+escHtml(x)+'"></option>').join('');
+}
+function prepareWorkOrderView(){
+  prepareWorkOrderSelects();
+  const d=document.getElementById('woDate'); if(d&&!d.value)d.value=kstTodayStr();
+  const dir=document.getElementById('woDirector'); if(dir&&!dir.value&&worker&&worker.name)dir.value=worker.name;
+  renderPressWorkOrders(); updateWorkOrderBadges(); workOrderRefreshProdBanner();
+}
+function workOrderMoldChanged(){
+  const id=workOrderVal('woMold');
+  const m=molds.find(x=>String(x.id)===String(id));
+  const item=document.getElementById('woItem');
+  if(m&&item){
+    const valid=String(m.item_no||'').split(',').map(x=>x.trim()).filter(Boolean);
+    if(!item.value||valid.indexOf(item.value)<0)item.value=valid[0]||'';
+  }
+}
+function clearWorkOrderForm(){
+  ['woEditId','woDue','woItem','woLot','woQty','woAssignee','woNote'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  const d=document.getElementById('woDate');if(d)d.value=kstTodayStr();
+  const ms=document.getElementById('woMachine');if(ms)ms.value='';
+  const md=document.getElementById('woMold');if(md)md.value='';
+  const pr=document.getElementById('woPriority');if(pr)pr.value='NORMAL';
+  const dir=document.getElementById('woDirector');if(dir)dir.value=(worker&&worker.name)||'';
+  const b=document.getElementById('woSaveBtn');if(b)b.textContent='✅ 작업지시 등록';
+}
+function savePressWorkOrder(){
+  const date=workOrderVal('woDate'), machine=workOrderVal('woMachine'), moldId=workOrderVal('woMold'), item=workOrderVal('woItem');
+  const qty=Math.max(0,parseInt(workOrderVal('woQty'),10)||0);
+  if(!date){alert('작업일을 입력하세요');return}
+  if(!machine){alert('호기를 선택하세요');return}
+  if(!moldId){alert('금형을 선택하세요');return}
+  if(!item){alert('품번을 입력하세요');return}
+  if(!(qty>0)){alert('지시수량을 입력하세요');return}
+  const m=molds.find(x=>String(x.id)===String(moldId));
+  if(!m){alert('금형 정보를 찾지 못했습니다');return}
+  const editId=workOrderVal('woEditId');
+  let row=editId?pressWorkOrders.find(x=>x.id===editId):null;
+  if(row&&row.status==='RUN'&&activeWorkOrderId===row.id&&session.active){alert('설비가동 중인 작업지시는 수정할 수 없습니다');return}
+  const base={
+    work_date:date,due_date:workOrderVal('woDue'),machine_code:machine,mold_id:String(m.id),mold_no:m.mold_no||'',item:item,
+    lot:workOrderVal('woLot'),target_qty:qty,priority:workOrderVal('woPriority')||'NORMAL',director:workOrderVal('woDirector'),
+    assignee:workOrderVal('woAssignee'),note:workOrderVal('woNote'),updated_at:kstNowISO()
+  };
+  if(row){ Object.assign(row,base); }
+  else{
+    row=Object.assign({id:'WO'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),order_no:workOrderGenerateNo(date),status:'WAIT',created_at:kstNowISO(),started_at:'',completed_at:''},base);
+    pressWorkOrders.unshift(row);
+  }
+  if(pressWorkOrders.length>2000)pressWorkOrders=pressWorkOrders.slice(0,2000);
+  savePressWorkOrders(); prepareWorkOrderSelects(); renderPressWorkOrders();
+  layoutToast((editId?'✏️ 수정 ':'✅ 등록 ')+row.order_no);
+  clearWorkOrderForm();
+}
+function editPressWorkOrder(id){
+  const r=pressWorkOrders.find(x=>x.id===id); if(!r)return;
+  prepareWorkOrderSelects();
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v==null?'':v};
+  set('woEditId',r.id);set('woDate',r.work_date);set('woDue',r.due_date);set('woMachine',r.machine_code);set('woMold',r.mold_id);set('woItem',r.item);set('woLot',r.lot);set('woQty',r.target_qty);set('woPriority',r.priority||'NORMAL');set('woDirector',r.director);set('woAssignee',r.assignee);set('woNote',r.note);
+  const b=document.getElementById('woSaveBtn');if(b)b.textContent='💾 작업지시 수정 저장';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function deletePressWorkOrder(id){
+  const r=pressWorkOrders.find(x=>x.id===id); if(!r)return;
+  if(r.status==='RUN'&&activeWorkOrderId===id){alert('현재 작업중인 지시는 삭제할 수 없습니다. 먼저 지시완료 처리하세요.');return}
+  if(!confirm('작업지시를 삭제할까요?\n'+r.order_no))return;
+  pressWorkOrders=pressWorkOrders.filter(x=>x.id!==id); savePressWorkOrders(); renderPressWorkOrders();
+}
+function renderPressWorkOrders(){
+  const tb=document.getElementById('woHistory'); if(!tb)return;
+  const status=workOrderVal('woStatusFilter'), q=workOrderVal('woSearch').toLowerCase();
+  let list=pressWorkOrders.filter(function(r){
+    if(status==='OPEN'&&r.status==='DONE')return false;
+    if(status&&status!=='OPEN'&&r.status!==status)return false;
+    if(q&&[r.order_no,r.machine_code,r.mold_no,r.item,r.lot,r.director,r.assignee,r.note].join(' ').toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+  list=list.slice().sort(function(a,b){
+    const sr={RUN:0,WAIT:1,DONE:2}, pa={URGENT:0,NORMAL:1};
+    return (sr[a.status]??9)-(sr[b.status]??9)||(pa[a.priority]??9)-(pa[b.priority]??9)||String(b.work_date||'').localeCompare(String(a.work_date||''))||String(b.order_no||'').localeCompare(String(a.order_no||''));
+  });
+  const cnt=document.getElementById('woCount');if(cnt)cnt.textContent=list.length+'건';
+  if(!list.length){tb.innerHTML='<tr><td colspan="6"><div class="q-empty">조건에 맞는 작업지시가 없습니다</div></td></tr>';updateWorkOrderBadges();return}
+  tb.innerHTML=list.slice(0,500).map(function(r){
+    const actions=[];
+    if(r.status!=='DONE')actions.push('<button class="wo-mini start" onclick="startPressWorkOrder(\''+r.id+'\')">▶ 작업시작</button>');
+    if(r.status!=='DONE')actions.push('<button class="wo-mini done" onclick="finishPressWorkOrder(\''+r.id+'\',false)">✓ 완료</button>');
+    if(r.status==='DONE')actions.push('<button class="wo-mini done" onclick="reopenPressWorkOrder(\''+r.id+'\')">↺ 재대기</button>');
+    actions.push('<button class="wo-mini edit" onclick="editPressWorkOrder(\''+r.id+'\')">수정</button>');
+    actions.push('<button class="wo-mini del" onclick="deletePressWorkOrder(\''+r.id+'\')">삭제</button>');
+    return '<tr>'+ 
+      '<td><span class="wo-no">'+escHtml(r.order_no||'-')+'</span><span class="wo-sub">작업 '+escHtml(r.work_date||'-')+(r.due_date?' · 납기 '+escHtml(r.due_date):'')+'</span><span class="wo-pri '+escHtml(r.priority||'NORMAL')+'">'+workOrderPriText(r.priority)+'</span></td>'+ 
+      '<td><b>'+escHtml(r.machine_code||'-')+' · '+escHtml(r.mold_no||'-')+'</b><span class="wo-sub">품번 '+escHtml(r.item||'-')+'</span></td>'+ 
+      '<td><b>LOT '+escHtml(r.lot||'미지정')+'</b><span class="wo-sub">지시 '+Number(r.target_qty||0).toLocaleString()+' EA</span></td>'+ 
+      '<td>'+escHtml(r.assignee||'미정')+'<span class="wo-sub">지시 '+escHtml(r.director||'-')+(r.note?' · '+escHtml(r.note):'')+'</span></td>'+ 
+      '<td><span class="wo-status '+escHtml(r.status||'WAIT')+'">'+workOrderStatusText(r.status)+'</span>'+(r.started_at?'<span class="wo-sub">'+escHtml(String(r.started_at).slice(5,16).replace('T',' '))+'</span>':'')+'</td>'+ 
+      '<td>'+actions.join('')+'</td></tr>';
+  }).join('');
+  updateWorkOrderBadges();
+}
+function updateWorkOrderBadges(){
+  const w=pressWorkOrders.filter(r=>r.status==='WAIT').length, run=pressWorkOrders.filter(r=>r.status==='RUN').length, done=pressWorkOrders.filter(r=>r.status==='DONE').length;
+  const urgent=pressWorkOrders.filter(r=>r.status!=='DONE'&&r.priority==='URGENT').length;
+  [['woKpiWait',w],['woKpiRun',run],['woKpiDone',done],['woKpiUrgent',urgent],['woMenuBadge',w+run]].forEach(x=>{const e=document.getElementById(x[0]);if(e)e.textContent=x[1]});
+}
+async function startPressWorkOrder(id){
+  const r=pressWorkOrders.find(x=>x.id===id); if(!r)return;
+  if(session.active){alert('현재 설비가동 중입니다.\n생산종료 후 다른 작업지시를 시작하세요.');return}
+  const mc=machines.find(x=>String(x.machine_code)===String(r.machine_code));
+  const md=molds.find(x=>String(x.id)===String(r.mold_id))||molds.find(x=>String(x.mold_no)===String(r.mold_no));
+  if(!mc){alert('작업지시의 호기 정보가 현재 마스터에 없습니다.');return}
+  if(!md){alert('작업지시의 금형 정보가 현재 마스터에 없습니다.');return}
+  if(activeWorkOrderId&&activeWorkOrderId!==id){
+    const prev=pressWorkOrders.find(x=>x.id===activeWorkOrderId&&x.status==='RUN');
+    if(prev&&!confirm('다른 작업지시가 작업중 상태입니다.\n기존 지시를 대기로 돌리고 이 작업을 시작할까요?'))return;
+    if(prev){prev.status='WAIT';prev.started_at='';prev.updated_at=kstNowISO()}
+  }
+  // 생산 선택조건 적용
+  sel.machine=mc; document.getElementById('machineSelect').value=mc.machine_code; setSpm(loadSpm(mc.machine_code));
+  sel.item=r.item||firstItemOf(md); applyMold(md,true); document.getElementById('itemSelect').value=sel.item||'';
+  // 선택 호기 기준 오늘 LOT를 다시 읽어 다른 호기의 이전 LOT가 잘못 적용되지 않게 한다.
+  await loadLots();
+  let lotApplied=false, lotMessage='';
+  if(r.lot){
+    const receipt=materialReceipts.find(x=>String(x.lot_no)===String(r.lot));
+    if(receipt){
+      if(receipt.completed_at){ lotMessage='지시 LOT는 이미 소재완료 처리됨'; }
+      else if(!materialReceiptMatchesMold(receipt,md)){ alert('작업지시 LOT의 소재규격이 금형과 일치하지 않습니다.\nLOT: '+r.lot+'\n금형: '+md.mold_no); return; }
+      else{ lotApplied=await registerMaterialReceiptUse(receipt); }
+    }else if(lots.some(x=>String(x.lot_no)===String(r.lot))){ sel.lot=r.lot;lotApplied=true; }
+    else lotMessage='지시 LOT가 아직 입고/등록되지 않아 LOT 선택은 보류됨';
+  }else lotMessage='작업지시에 LOT 미지정 · 생산작업에서 LOT 선택 필요';
+  if(!lotApplied&&!r.lot)sel.lot='';
+  if(!lotApplied&&r.lot)sel.lot='';
+  saveSelection(); renderProdInfo(); updateUI();
+
+  r.status='RUN'; r.started_at=kstNowISO(); r.completed_at=''; r.updated_at=kstNowISO();
+  activeWorkOrderId=r.id; try{localStorage.setItem(LS_ACTIVE_WORK_ORDER,activeWorkOrderId)}catch(e){}
+  savePressWorkOrders(); renderPressWorkOrders();
+  const prodBtn=document.querySelector('.drawer .tab-btn[data-tab="t-prod"]'); switchTab('t-prod',prodBtn);
+  workOrderRefreshProdBanner();
+  showHint('📋 작업지시 <b>'+escHtml(r.order_no)+'</b> 적용 · '+escHtml(r.machine_code)+' · '+escHtml(r.mold_no)+' · '+escHtml(r.item)+(lotApplied?' · LOT <b>'+escHtml(r.lot)+'</b>':'')+(lotMessage?' · '+escHtml(lotMessage):''));
+  layoutToast('▶ '+r.order_no+' 작업 준비 완료');
+}
+function finishPressWorkOrder(id,auto){
+  const r=pressWorkOrders.find(x=>x.id===id); if(!r)return false;
+  if(!auto&&activeWorkOrderId===id&&session.active){alert('설비가동 중입니다.\n생산종료 후 작업지시가 자동 완료됩니다.');return false}
+  if(!auto&&!confirm('작업지시를 완료 처리할까요?\n'+r.order_no))return false;
+  r.status='DONE'; r.completed_at=kstNowISO(); r.updated_at=kstNowISO();
+  if(activeWorkOrderId===id){activeWorkOrderId='';try{localStorage.removeItem(LS_ACTIVE_WORK_ORDER)}catch(e){}}
+  savePressWorkOrders(); renderPressWorkOrders();
+  if(!auto)layoutToast('✓ '+r.order_no+' 완료');
+  return true;
+}
+function completeActiveWorkOrder(){
+  if(!activeWorkOrderId){alert('현재 연결된 작업지시가 없습니다');return}
+  finishPressWorkOrder(activeWorkOrderId,false);
+}
+function reopenPressWorkOrder(id){
+  const r=pressWorkOrders.find(x=>x.id===id);if(!r)return;
+  r.status='WAIT';r.started_at='';r.completed_at='';r.updated_at=kstNowISO();savePressWorkOrders();renderPressWorkOrders();
+}
+function workOrderRefreshProdBanner(){
+  const box=document.getElementById('woProdBanner');if(!box)return;
+  const r=activeWorkOrderId?pressWorkOrders.find(x=>x.id===activeWorkOrderId&&x.status==='RUN'):null;
+  if(!r){
+    box.style.display='none';
+    if(activeWorkOrderId){activeWorkOrderId='';try{localStorage.removeItem(LS_ACTIVE_WORK_ORDER)}catch(e){}}
+    return;
+  }
+  box.style.display='flex';
+  const no=document.getElementById('woProdNo'),info=document.getElementById('woProdInfo'),target=document.getElementById('woProdTarget');
+  if(no)no.textContent='📋 '+(r.order_no||'작업지시');
+  if(info)info.textContent=(r.machine_code||'-')+' · '+(r.mold_no||'-')+' · '+(r.item||'-')+' · LOT '+(r.lot||'미지정')+(r.assignee?' · '+r.assignee:'');
+  if(target)target.textContent='목표 '+Number(r.target_qty||0).toLocaleString()+' EA';
+}
+
 /* ===== [Rev.7.61] LOT 품질검사 : 측정 / 외관 ===== */
 const LS_QUALITY_INSPECTION = 'pdQualityInspection_v1';
 let qualityRecords = loadQualityRecords();
@@ -7255,6 +7596,9 @@ window.addEventListener('DOMContentLoaded', function() {
     refreshMaterialFlowStatus(false);
     updateQualityBadges();
     renderQualityLotOptions();
+    updateWorkOrderBadges();
+    workOrderRefreshProdBanner();
+    const wd=document.getElementById('woDate'); if(wd&&!wd.value)wd.value=kstTodayStr();
     ['qmDate','qvDate'].forEach(function(id){ const e=document.getElementById(id); if(e&&!e.value)e.value=kstTodayStr(); });
   } catch (e) { console.warn('[material flow init]', e); }
 });
@@ -7263,7 +7607,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- ============================================================
-     [Rev.7.61] 소재발송(material_upload.html) · 수입검사(material_IQC.html)
+     [Rev.7.62] 소재발송(material_upload.html) · 수입검사(material_IQC.html)
      화면은 별도 파일로 분리 — 같은 폴더에 두 파일을 함께 배포하세요.
      ============================================================ -->
 
