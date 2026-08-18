@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.52</title>
+<title>프레스 생산관리 Rev.7.53</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -983,7 +983,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.52</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.53</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1012,7 +1012,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.52</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.53</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1158,8 +1158,7 @@
       <div class="fld"><label>재질 *</label><input type="text" id="ordMaterial" placeholder="예: SPCC"></div>
       <div class="fld"><label>두께(T)</label><input type="number" id="ordThickness" min="0" step="0.001" inputmode="decimal"></div>
       <div class="fld"><label>폭(W)</label><input type="number" id="ordWidth" min="0" step="0.01" inputmode="decimal"></div>
-      <div class="fld"><label>수량(코일)</label><input type="number" id="ordQty" min="1" step="1" value="1" inputmode="numeric"></div>
-      <div class="fld"><label>예상중량(kg)</label><input type="number" id="ordWeight" min="0" step="0.1" inputmode="decimal"></div>
+      <div class="fld"><label>발주중량(kg) *</label><input type="number" id="ordWeight" min="0" step="0.1" inputmode="decimal"></div>
       <div class="fld full"><label>요청사항 / 비고</label><input type="text" id="ordNote" placeholder="납기, 포장, 성적서 요청 등"></div>
     </div>
     <button class="btn-primary" onclick="saveMaterialOrder()">✅ 소재발주 등록</button>
@@ -1177,7 +1176,7 @@
     <div class="search-row" style="margin-top:8px"><input type="text" id="ordSearch" placeholder="발주번호 / 업체 / 재질 / 규격 검색" oninput="renderMaterialOrders()"></div>
     <div class="tbl-wrap">
       <table class="mtable" id="ordTable">
-        <thead><tr><th>발주 / 납기</th><th>업체 / 규격</th><th>수량</th><th>상태</th><th></th></tr></thead>
+        <thead><tr><th>발주 / 납기</th><th>업체 / 규격</th><th>중량</th><th>상태</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -2246,7 +2245,6 @@ function clearMaterialOrderForm(keepDate) {
   ['ordVendor','ordMaterial','ordThickness','ordWidth','ordWeight','ordNote'].forEach(function(id) {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  const q = document.getElementById('ordQty'); if (q) q.value = '1';
   const d = document.getElementById('ordDate'); if (d && (!keepDate || !d.value)) d.value = kstTodayStr();
   const due = document.getElementById('ordDueDate'); if (due && !keepDate) due.value = '';
 }
@@ -2266,12 +2264,13 @@ function saveMaterialOrder() {
   const material = document.getElementById('ordMaterial').value.trim();
   if (!vendor) { alert('공급업체를 입력하세요'); return; }
   if (!material) { alert('재질을 입력하세요'); return; }
+  const weight = document.getElementById('ordWeight').value;
+  if (!(Number(weight) > 0)) { alert('발주중량(kg)을 입력하세요'); return; }
   const row = {
     id: 'ORD-' + Date.now(), order_no: nextMaterialOrderNo(orderDate), order_date: orderDate,
     due_date: document.getElementById('ordDueDate').value || '', vendor: vendor, material: material,
     thickness: document.getElementById('ordThickness').value || '', width: document.getElementById('ordWidth').value || '',
-    qty: parseInt(document.getElementById('ordQty').value,10) || 1,
-    weight: document.getElementById('ordWeight').value || '', note: document.getElementById('ordNote').value.trim(),
+    weight: weight || '', note: document.getElementById('ordNote').value.trim(),
     status: '발주완료', created_at: kstNowISO()
   };
   materialOrders.unshift(row);
@@ -2323,7 +2322,7 @@ function renderMaterialOrders() {
     return '<tr>'+
       '<td><b>'+escHtml(o.order_no||'-')+'</b><div class="order-sub">발주 '+escHtml(o.order_date||'-')+' · 납기 '+escHtml(o.due_date||'-')+'</div></td>'+
       '<td><b>'+escHtml(o.vendor||'-')+'</b><div class="order-spec">'+escHtml(materialOrderSpec(o))+'</div></td>'+
-      '<td class="num"><b>'+escHtml(String(o.qty||1))+'</b> coil'+(o.weight?' <div class="order-sub">'+escHtml(String(o.weight))+' kg</div>':'')+'</td>'+
+      '<td class="num">'+(o.weight?'<b>'+escHtml(String(o.weight))+'</b> kg':'-')+'</td>'+
       '<td><select class="order-status" onchange="setMaterialOrderStatus(\''+escHtml(o.id)+'\',this.value)">'+opts+'</select></td>'+
       '<td style="text-align:right"><button class="btn-link-mini" onclick="deleteMaterialOrder(\''+escHtml(o.id)+'\')">삭제</button></td>'+
       '</tr>';
