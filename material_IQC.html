@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>소재 수입검사 v3.6 | (주)태진다이텍</title>
+<title>소재 수입검사 v3.7 | (주)태진다이텍</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Malgun Gothic','맑은 고딕','Segoe UI',sans-serif;background:#f4f6f9;color:#222;font-size:14px;line-height:1.5}
@@ -143,7 +143,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 
 <div class="hdr">
   <div>
-    <h1>📋 소재 수입검사 시스템 v3.6</h1>
+    <h1>📋 소재 수입검사 시스템 v3.7</h1>
     <div class="sub">(주)태진다이텍 · 품질관리팀 · 그룹 자동 통합 (공급자+재질+두께+폭)</div>
   </div>
   <div class="user-info" id="userInfoBar">검사자: <b id="loginUser">로그인 필요</b></div>
@@ -776,7 +776,7 @@ async function pushInspToSupabase(insp){
     heat_no: insp.heat,
     coil_count: insp.coilCount,
     total_weight: insp.weight,
-    receipt_date: insp.recvDate,
+    receipt_date: insp.recvDate || insp.inspDate || todayKST(),  /* [v3.7] 빈 문자열 방지 : date 컬럼 22007 오류 */
     insp_date: insp.inspDate,
     inspector: insp.inspector,
     inspector_dept: insp.inspectorDept,

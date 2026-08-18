@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재입고 등록 (Rev6.0)</title>
+  <title>소재입고 등록 (Rev6.1)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -102,7 +102,7 @@
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재입고 등록 (Rev6.0)</h1>
+  <h1>📤 소재입고 등록 (Rev6.1)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
@@ -723,18 +723,28 @@ async function doRegister(){
       }));
       if(emptyPayloads.length){
         const postCerts=async(payloads)=>{
-          const res=await fetch(SB_URL+'/rest/v1/inspection_certs',{
-            method:'POST',
-            headers:{
-              'Content-Type':'application/json',
-              'apikey':SB_KEY,
-              'Authorization':'Bearer '+SB_KEY,
-              'Prefer':'return=minimal'
-            },
-            body:JSON.stringify(payloads)
-          });
-          const txt=res.ok?'':await res.text().catch(()=>'');
-          return {ok:res.ok,status:res.status,text:txt};
+          /* [Rev6.1] 중복 입고 방지 : lot_no+heat_no+receipt_date 기준 upsert */
+          const doPost=async(useConflict)=>{
+            const res=await fetch(SB_URL+'/rest/v1/inspection_certs'+(useConflict?CERT_CONFLICT:''),{
+              method:'POST',
+              headers:{
+                'Content-Type':'application/json',
+                'apikey':SB_KEY,
+                'Authorization':'Bearer '+SB_KEY,
+                'Prefer':useConflict?'resolution=merge-duplicates,return=minimal':'return=minimal'
+              },
+              body:JSON.stringify(payloads)
+            });
+            const txt=res.ok?'':await res.text().catch(()=>'');
+            return {ok:res.ok,status:res.status,text:txt};
+          };
+          let r=await doPost(!_certConflictOff);
+          if(!r.ok&&!_certConflictOff&&CERT_NOCONSTRAINT.test(r.text)){
+            console.warn('[CERT] UNIQUE 제약 없음 - 일반 INSERT 로 폴백');
+            _certConflictOff=true;
+            r=await doPost(false);
+          }
+          return r;
         };
         try{
           /* 1차: 풀 페이로드 */
@@ -1583,6 +1593,13 @@ function readCertModalData(){
   c.certData=data;
 }
 
+/* [Rev6.1] inspection_certs 중복 방지 upsert 설정
+   DB 전제 : ALTER TABLE inspection_certs ADD CONSTRAINT uq_cert_lot UNIQUE (lot_no,heat_no,receipt_date);
+   제약이 없으면 42P10 응답 → 자동으로 일반 INSERT 폴백 */
+const CERT_CONFLICT='?on_conflict=lot_no,heat_no,receipt_date';
+const CERT_NOCONSTRAINT=/42P10|no unique or exclusion constraint|ON CONFLICT/i;
+let _certConflictOff=false;
+
 /* [Rev6.0] 밀시트 서버 저장용 이미지 압축 : 50KB 이하 JPEG */
 const MS_MAX_BYTES=50*1024;
 function _b64Bytes(dataUrl){const i=dataUrl.indexOf(',');return Math.ceil((dataUrl.length-i-1)*3/4)}
@@ -1725,13 +1742,24 @@ async function certSaveCurrent(){
   };
   
   async function tryInsert(payload){
-    const res=await fetch(SB_URL+'/rest/v1/inspection_certs',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
-      body:JSON.stringify(payload)
-    });
-    const txt=await res.text().catch(()=>'');
-    return {ok:res.ok, status:res.status, text:txt};
+    /* [Rev6.1] 중복 입고 방지 : lot_no+heat_no+receipt_date 기준 upsert */
+    const doPost=async(useConflict)=>{
+      const res=await fetch(SB_URL+'/rest/v1/inspection_certs'+(useConflict?CERT_CONFLICT:''),{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
+                 'Prefer':useConflict?'resolution=merge-duplicates,return=representation':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+      const txt=await res.text().catch(()=>'');
+      return {ok:res.ok, status:res.status, text:txt};
+    };
+    let r=await doPost(!_certConflictOff);
+    if(!r.ok&&!_certConflictOff&&CERT_NOCONSTRAINT.test(r.text)){
+      console.warn('[CERT] UNIQUE 제약 없음 - 일반 INSERT 로 폴백');
+      _certConflictOff=true;
+      r=await doPost(false);
+    }
+    return r;
   }
   
   let lastResp=null;

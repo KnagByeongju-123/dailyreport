@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 생산일보 Rev.7.31</title>
+<title>ESP32 생산일보 Rev.7.33</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -680,7 +680,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.31</span></h1>
+  <h1>📡 ESP32 생산일보 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.33</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -691,7 +691,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>📡 ESP32 생산일보 <small>Rev.7.31</small></span>
+    <span>📡 ESP32 생산일보 <small>Rev.7.33</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="drawer-sep">업무 절차</div>
@@ -873,7 +873,7 @@
       </div>
       <div class="card" style="padding-bottom:4px">
         <div class="sec-title">🔎 소재 수입검사</div>
-        <div class="flow-guide">업체가 등록한 소재를 공급자·재질·두께·폭 기준으로 묶어 검사하고, 결과는 <b>iqc_inspections</b>와 <b>inspection_certs</b> 판정에 반영됩니다. <b>내장 수입검사 화면(v3.6)</b>(검사 탭)이 이 파일에 포함되어 있으며 독립 DB만 사용합니다.</div>
+        <div class="flow-guide">업체가 등록한 소재를 공급자·재질·두께·폭 기준으로 묶어 검사하고, 결과는 <b>iqc_inspections</b>와 <b>inspection_certs</b> 판정에 반영됩니다. <b>내장 수입검사 화면(v3.7)</b>(검사 탭)이 이 파일에 포함되어 있으며 독립 DB만 사용합니다.</div>
         <div class="flow-actions">
           <a class="green" id="matIqcLink" href="#" onclick="openMatIqcWindow();return false;">↗ 수입검사 새 창</a>
           <button onclick="reloadMaterialFrame('matIqcFrame')">🔄 검사화면 새로고침</button>
@@ -883,7 +883,7 @@
     </div>
     <div class="sub-pane active" id="iq-reg">
       <div class="embed-wrap">
-        <div class="embed-head">🔎 소재 수입검사 시스템 <span id="matIqcPathLabel">내장 · 수입검사 v3.6</span></div>
+        <div class="embed-head">🔎 소재 수입검사 시스템 <span id="matIqcPathLabel">내장 · 수입검사 v3.7</span></div>
         <iframe class="embed-frame" id="matIqcFrame" title="소재 수입검사"></iframe>
       </div>
     </div>
@@ -1127,7 +1127,7 @@
       <div class="fld full" id="cfgIqcUrlRow"><label>외부 URL (수입검사)</label><input type="text" id="cfgIqcUrl" placeholder="https://xxx.github.io/repo/material_IQC.html"></div>
     </div>
     <button class="btn-primary" onclick="saveMatUploadUrl()">💾 저장</button>
-    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재입고 등록(Rev6.0)과 소재 수입검사(v3.6) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없고, 기존 MES 시스템과 완전히 분리되어 동작합니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
+    <div class="sel-hint" style="margin-top:8px"><b>내장 화면</b>은 소재입고 등록(Rev6.1)과 소재 수입검사(v3.7) 전체가 이 파일 안에 포함되어 있어 별도 배포가 필요 없고, 기존 MES 시스템과 완전히 분리되어 동작합니다.<br>외부 URL 방식은 다른 서버에 배포된 화면을 불러올 때만 사용하세요.</div>
   </div>
 
   <div class="card">
@@ -1338,7 +1338,7 @@
 /* ============================================================
    ESP32 생산일보 Rev.7.22 — 비상용 독립 시스템
    통합 DB : pllwltojbofjaftcemvn
-     - 마스터 : pd_machine / pd_mold / pd_work_log / pd_lot
+     - 마스터 : pd_machine / pd_mold / pd_work_log / pd_material_lot
      - 카운팅 : shot_count (설정 탭에서 변경 가능)
      - 소재   : inspection_certs / iqc_inspections
    ============================================================ */
@@ -1633,8 +1633,14 @@ function renderMaterialOrders() {
       '</tr>';
   }).join('');
 }
+/* [Rev.7.32] material_IQC.html 의 groupKeyOf() 와 동일 규칙으로 통일
+   - 정규화 : trim + 대문자 + 공백제거
+   - 재질 : material_type 없으면 spec 사용
+   - 입고일은 키에서 제외 (완료 판정 시 시각 비교로 처리) */
+function matNorm(v) { return String(v == null ? '' : v).trim().toUpperCase().replace(/\s+/g, ''); }
+function matNum(v) { const n = parseFloat(v); return isFinite(n) ? String(n) : ''; }
 function matGroupKey(r) {
-  return [r.supplier||'', r.material_type||'', r.thickness==null?'':String(r.thickness), r.width_mm==null?'':String(r.width_mm), r.receipt_date||''].join('|');
+  return [matNorm(r.supplier), matNorm(r.material_type || r.spec || ''), matNum(r.thickness), matNum(r.width_mm != null ? r.width_mm : r.width)].join('|');
 }
 async function refreshMaterialFlowStatus(force) {
   updateMaterialOrderBadges();
@@ -1644,7 +1650,7 @@ async function refreshMaterialFlowStatus(force) {
   try {
     const h = { 'apikey': MATERIAL_SB_KEY, 'Authorization': 'Bearer ' + MATERIAL_SB_KEY, 'Content-Type':'application/json' };
     const certUrl = MATERIAL_SB_URL + '/rest/v1/inspection_certs?select=supplier,material_type,thickness,width_mm,lot_no,receipt_date,final_judge,created_at&order=created_at.desc&limit=1000';
-    const inspUrl = MATERIAL_SB_URL + '/rest/v1/iqc_inspections?select=supplier,material_type,thickness,width_mm,receipt_date,final_judge,updated_at&order=updated_at.desc&limit=1000';
+    const inspUrl = MATERIAL_SB_URL + '/rest/v1/iqc_inspections?select=supplier,material_type,thickness,width_mm,receipt_date,final_judge,insp_date,updated_at&order=updated_at.desc&limit=1000';
     const rr = await Promise.all([fetch(certUrl,{headers:h}), fetch(inspUrl,{headers:h}).catch(function(){return null;})]);
     if (!rr[0].ok) throw new Error('발송자료 조회 HTTP ' + rr[0].status);
     const certs = await rr[0].json();
@@ -1657,14 +1663,41 @@ async function refreshMaterialFlowStatus(force) {
     ['flowDispatchBadge','flowIqcBadge'].forEach(function(id){ const el=document.getElementById(id); if(el) el.textContent='!'; });
   }
 }
+/* [Rev.7.32] IQC computeWaitGroups() 와 동일한 완료 판정
+   완료 = 수요자 검사 발행(iqc_inspections) 존재 + 발행시각 이후 신규 성적서 없음 */
+var MAT_V33_CUTOFF = new Date('2026-07-27T00:00:00+09:00').getTime();
 function applyMaterialFlowStatus(certs, insps) {
   certs = Array.isArray(certs) ? certs : [];
   insps = Array.isArray(insps) ? insps : [];
-  const rawKeys = new Set(certs.map(matGroupKey));
-  const done = insps.filter(function(x){ const j=String(x.final_judge||'').trim(); return j && j!=='대기' && j!=='미검사'; });
-  const doneKeys = new Set(done.map(matGroupKey));
-  let wait = 0; rawKeys.forEach(function(k){ if (!doneKeys.has(k)) wait++; });
-  const ng = done.filter(function(x){ return x.final_judge === 'NG' || x.final_judge === '보류'; }).length;
+
+  var lastDoneAt = new Map();   // groupKey → 최종 검사발행 시각(ms)
+  var lastJudge  = new Map();   // groupKey → 최종 판정
+  insps.filter(function(x){ var j=String(x.final_judge||'').trim(); return j==='OK'||j==='NG'||j==='보류'; })
+       .forEach(function(x){
+    var t = new Date(x.updated_at || 0).getTime();
+    if (!t && x.insp_date) t = new Date(x.insp_date + 'T23:59:59+09:00').getTime();
+    if (!t) t = 0;
+    var k = matGroupKey(x);
+    if (t >= (lastDoneAt.get(k) || 0)) { lastDoneAt.set(k, t); lastJudge.set(k, String(x.final_judge||'').trim()); }
+  });
+
+  var rawKeys = new Set(certs.map(matGroupKey));
+  var doneKeys = new Set();
+  rawKeys.forEach(function(k){
+    var doneAt = lastDoneAt.get(k) || 0;
+    var hasPending = certs.some(function(r){
+      if (matGroupKey(r) !== k) return false;
+      var ct = new Date(r.created_at || 0).getTime();
+      if (ct <= doneAt) return false;                       // 검사발행이 커버한 성적서
+      var fj = String(r.final_judge || '').trim();
+      if (!fj || fj === '대기' || fj === '미검사') return true;  // 미검사 신규 입고
+      return ct >= MAT_V33_CUTOFF;                          // 공급자 판정 → 수요자 검사 필요
+    });
+    if (!hasPending) doneKeys.add(k);
+  });
+
+  var wait = 0; rawKeys.forEach(function(k){ if (!doneKeys.has(k)) wait++; });
+  var ng = 0; doneKeys.forEach(function(k){ var j = lastJudge.get(k); if (j === 'NG' || j === '보류') ng++; });
   const lastDate = certs.length ? (certs[0].receipt_date || (certs[0].created_at||'').slice(0,10) || '-') : '-';
   const vals = {
     flowDispatchBadge: certs.length, flowIqcBadge: wait,
@@ -1733,7 +1766,7 @@ function applyMatUploadUrl() {
   const lb = document.getElementById('matUploadPathLabel');
   if (lb) lb.textContent = (mode === 'embed') ? '내장 · 소재입고 등록 Rev6.0' : (getMatUploadUrl().split('/').pop() || getMatUploadUrl());
   const lb2 = document.getElementById('matIqcPathLabel');
-  if (lb2) lb2.textContent = (mode === 'embed') ? '내장 · 수입검사 v3.6' : (getMatIqcUrl().split('/').pop() || getMatIqcUrl());
+  if (lb2) lb2.textContent = (mode === 'embed') ? '내장 · 수입검사 v3.7' : (getMatIqcUrl().split('/').pop() || getMatIqcUrl());
   const sel = document.getElementById('cfgMatMode');
   if (sel) sel.value = mode;
   const inp = document.getElementById('cfgMatUrl');
@@ -5069,7 +5102,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- ============================================================
-     내장 소재입고 등록화면 (material_upload.html Rev5.7)
+     내장 소재입고 등록화면 (material_upload.html Rev6.1)
      @@ENDSCRIPT@@ 토큰은 런타임에 </scr+ipt 로 복원됩니다.
      ============================================================ -->
 <script type="text/x-material-upload" id="matUploadDoc"><!DOCTYPE html>
@@ -5077,7 +5110,7 @@ window.addEventListener('DOMContentLoaded', function() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재입고 등록 (Rev6.0)</title>
+  <title>소재입고 등록 (Rev6.1)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -5176,7 +5209,7 @@ window.addEventListener('DOMContentLoaded', function() {
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재입고 등록 (Rev6.0)</h1>
+  <h1>📤 소재입고 등록 (Rev6.1)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
@@ -5797,18 +5830,28 @@ async function doRegister(){
       }));
       if(emptyPayloads.length){
         const postCerts=async(payloads)=>{
-          const res=await fetch(SB_URL+'/rest/v1/inspection_certs',{
-            method:'POST',
-            headers:{
-              'Content-Type':'application/json',
-              'apikey':SB_KEY,
-              'Authorization':'Bearer '+SB_KEY,
-              'Prefer':'return=minimal'
-            },
-            body:JSON.stringify(payloads)
-          });
-          const txt=res.ok?'':await res.text().catch(()=>'');
-          return {ok:res.ok,status:res.status,text:txt};
+          /* [Rev6.1] 중복 입고 방지 : lot_no+heat_no+receipt_date 기준 upsert */
+          const doPost=async(useConflict)=>{
+            const res=await fetch(SB_URL+'/rest/v1/inspection_certs'+(useConflict?CERT_CONFLICT:''),{
+              method:'POST',
+              headers:{
+                'Content-Type':'application/json',
+                'apikey':SB_KEY,
+                'Authorization':'Bearer '+SB_KEY,
+                'Prefer':useConflict?'resolution=merge-duplicates,return=minimal':'return=minimal'
+              },
+              body:JSON.stringify(payloads)
+            });
+            const txt=res.ok?'':await res.text().catch(()=>'');
+            return {ok:res.ok,status:res.status,text:txt};
+          };
+          let r=await doPost(!_certConflictOff);
+          if(!r.ok&&!_certConflictOff&&CERT_NOCONSTRAINT.test(r.text)){
+            console.warn('[CERT] UNIQUE 제약 없음 - 일반 INSERT 로 폴백');
+            _certConflictOff=true;
+            r=await doPost(false);
+          }
+          return r;
         };
         try{
           /* 1차: 풀 페이로드 */
@@ -6657,6 +6700,13 @@ function readCertModalData(){
   c.certData=data;
 }
 
+/* [Rev6.1] inspection_certs 중복 방지 upsert 설정
+   DB 전제 : ALTER TABLE inspection_certs ADD CONSTRAINT uq_cert_lot UNIQUE (lot_no,heat_no,receipt_date);
+   제약이 없으면 42P10 응답 → 자동으로 일반 INSERT 폴백 */
+const CERT_CONFLICT='?on_conflict=lot_no,heat_no,receipt_date';
+const CERT_NOCONSTRAINT=/42P10|no unique or exclusion constraint|ON CONFLICT/i;
+let _certConflictOff=false;
+
 /* [Rev6.0] 밀시트 서버 저장용 이미지 압축 : 50KB 이하 JPEG */
 const MS_MAX_BYTES=50*1024;
 function _b64Bytes(dataUrl){const i=dataUrl.indexOf(',');return Math.ceil((dataUrl.length-i-1)*3/4)}
@@ -6799,13 +6849,24 @@ async function certSaveCurrent(){
   };
   
   async function tryInsert(payload){
-    const res=await fetch(SB_URL+'/rest/v1/inspection_certs',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'},
-      body:JSON.stringify(payload)
-    });
-    const txt=await res.text().catch(()=>'');
-    return {ok:res.ok, status:res.status, text:txt};
+    /* [Rev6.1] 중복 입고 방지 : lot_no+heat_no+receipt_date 기준 upsert */
+    const doPost=async(useConflict)=>{
+      const res=await fetch(SB_URL+'/rest/v1/inspection_certs'+(useConflict?CERT_CONFLICT:''),{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
+                 'Prefer':useConflict?'resolution=merge-duplicates,return=representation':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+      const txt=await res.text().catch(()=>'');
+      return {ok:res.ok, status:res.status, text:txt};
+    };
+    let r=await doPost(!_certConflictOff);
+    if(!r.ok&&!_certConflictOff&&CERT_NOCONSTRAINT.test(r.text)){
+      console.warn('[CERT] UNIQUE 제약 없음 - 일반 INSERT 로 폴백');
+      _certConflictOff=true;
+      r=await doPost(false);
+    }
+    return r;
   }
   
   let lastResp=null;
@@ -7192,14 +7253,14 @@ document.getElementById('certModal').addEventListener('click',e=>{if(e.target.id
 </script>
 
 <!-- ============================================================
-     내장 소재 수입검사 화면 (material_IQC.html v3.5)
+     내장 소재 수입검사 화면 (material_IQC.html v3.7)
      ============================================================ -->
 <script type="text/x-material-iqc" id="matIqcDoc"><!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>소재 수입검사 v3.6 | (주)태진다이텍</title>
+<title>소재 수입검사 v3.7 | (주)태진다이텍</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Malgun Gothic','맑은 고딕','Segoe UI',sans-serif;background:#f4f6f9;color:#222;font-size:14px;line-height:1.5}
@@ -7339,7 +7400,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 
 <div class="hdr">
   <div>
-    <h1>📋 소재 수입검사 시스템 v3.6</h1>
+    <h1>📋 소재 수입검사 시스템 v3.7</h1>
     <div class="sub">(주)태진다이텍 · 품질관리팀 · 그룹 자동 통합 (공급자+재질+두께+폭)</div>
   </div>
   <div class="user-info" id="userInfoBar">검사자: <b id="loginUser">로그인 필요</b></div>
@@ -7972,7 +8033,7 @@ async function pushInspToSupabase(insp){
     heat_no: insp.heat,
     coil_count: insp.coilCount,
     total_weight: insp.weight,
-    receipt_date: insp.recvDate,
+    receipt_date: insp.recvDate || insp.inspDate || todayKST(),  /* [v3.7] 빈 문자열 방지 : date 컬럼 22007 오류 */
     insp_date: insp.inspDate,
     inspector: insp.inspector,
     inspector_dept: insp.inspectorDept,
