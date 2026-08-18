@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재입고 등록 (Rev6.2)</title>
+  <title>소재발송 등록 (Rev7.2)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -102,7 +102,7 @@
 </head>
 <body>
 <div class="hdr">
-  <h1>📤 소재입고 등록 (Rev6.2)</h1>
+  <h1>📤 소재발송 등록 (Rev7.2)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
 </div>
 <div class="tabs">
@@ -124,7 +124,7 @@
       <div class="card-tit">⚙ 기본 설정</div>
       <div class="info-box blue">출발지, 도착지, 담당자는 여기서 설정하면<br>업로드한 모든 데이터에 자동 적용됩니다.</div>
       <div class="fg"><label>출발지 (소재업체)</label><select id="cfgFrom" onchange="onVendorChange()"><option value="">로딩 중...</option></select><input type="hidden" id="cfgVendorCode"></div>
-      <div class="fg"><label>도착지</label><input type="text" id="cfgTo" value="태진다이텍" placeholder="도착지 입력" list="toList"><datalist id="toList"><option value="태진다이텍"><option value="보관장"><option value="생산라인"><option value="본사 창고"></datalist></div>
+      <div class="fg"><label>도착지</label><input type="text" id="cfgTo" value="AAA" placeholder="도착지 입력" list="toList"><datalist id="toList"><option value="AAA"><option value="보관장"><option value="생산라인"><option value="본사 창고"></datalist></div>
       <div class="fg"><label>담당자명</label><input type="text" id="cfgWorker" placeholder="담당자명 입력"></div>
       <button class="btn btn-blue" onclick="goStep(2)">다음 → 파일 업로드</button>
     </div>
@@ -230,7 +230,7 @@
     <div style="border-top:2px solid #e0e0e0;padding-top:14px;margin-top:12px">
       <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
-        <div class="fg" style="margin-bottom:0"><label style="font-size:11px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: 태경스틸" style="font-size:14px;padding:10px 12px"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:11px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: aaa" style="font-size:14px;padding:10px 12px"></div>
         <div class="fg" style="margin-bottom:0"><label style="font-size:11px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="TG" maxlength="10" style="font-size:14px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
       </div>
       <input type="hidden" id="vendorEditId">
@@ -379,7 +379,11 @@ function kstISOString(d){
 }
 
 const SB_LS_KEY='PD_MATERIAL_SB_CFG'; /* Rev5.9 : 기존 시스템과 localStorage 완전 분리 */
-/* Rev5.7 : 통합 DB 이전 (omngtyewdaqpphnzeate -> pllwltojbofjaftcemvn) */
+/* ============================================================
+   [Rev7.1] 신규 회사 전용 프로젝트(pllwltojbofjaftcemvn)만 사용.
+   태진 기존 DB(omngtyewdaqpphnzeate / jgvikmakenpllwxwdugk)와
+   절대 연결하지 않습니다. 이 파일에 태진 DB 키 없음.
+   ============================================================ */
 const SB_DEFAULT_URL='https://pllwltojbofjaftcemvn.supabase.co';
 const SB_DEFAULT_KEY='sb_publishable_9dYJzdz472b888EcqdBBaA_Ncwk0yvT';
 function getSbCfg(){try{return JSON.parse(localStorage.getItem(SB_LS_KEY)||'{}')}catch(e){return{}}}
@@ -529,13 +533,19 @@ function openPinLock(){
    그 외        = 단독 실행: 두 탭 모두 표시 */
 document.addEventListener('DOMContentLoaded',()=>{
   const m=(window.name||'').trim();
-  const tabs=document.querySelectorAll('.tabs .tab');
   if(m==='matUploadReg'){
-    if(tabs[1])tabs[1].style.display='none';
+    /* [Rev6.3] 소재발송 메뉴 : 설정 탭 완전 삭제 (탭바 자체 제거) */
+    const bar=document.querySelector('.tabs');if(bar)bar.remove();
+    const pnl=document.getElementById('mainPnl1');if(pnl)pnl.remove();
   }else if(m==='matUploadCfg'){
-    const bar=document.querySelector('.tabs');if(bar)bar.style.display='none';
-    const h=document.querySelector('.hdr');if(h)h.style.display='none';
-    swMainTab(1);
+    /* DB설정 메뉴 : 설정 화면만 표시 */
+    const bar=document.querySelector('.tabs');if(bar)bar.remove();
+    const h=document.querySelector('.hdr');if(h)h.remove();
+    const pnl0=document.getElementById('mainPnl0');if(pnl0)pnl0.remove();
+    /* mainPnl0 제거 후에는 인덱스 기반 swMainTab 사용 불가 → 직접 활성화 */
+    _settingsUnlocked=true;_settingsUnlockedBy='';
+    const pnl1=document.getElementById('mainPnl1');if(pnl1)pnl1.classList.add('on');
+    loadSettingsUI();
   }
 });
 
@@ -920,11 +930,8 @@ let _vendorCache=[];
 
 // 1차 하드코딩 소재업체 (서버 미등록 시 fallback)
 const _DEFAULT_VENDORS=[
-  {id:null,code:'TG',name:'태경스틸',         sort:1},
-  {id:null,code:'DI',name:'㈜동일스테인레스',  sort:2},
-  {id:null,code:'DK',name:'동국산업',         sort:3},
-  {id:null,code:'NS',name:'나스테크',         sort:4},
-  {id:null,code:'HK',name:'한국금속',         sort:5}
+  {id:null,code:'AA',name:'aaa', sort:1},
+  {id:null,code:'BB',name:'bbb', sort:2}
 ];
 
 async function loadVendorsFromServer(){
@@ -943,7 +950,7 @@ async function loadVendorsFromServer(){
   // 서버에 업체 정보가 없으면 1차 하드코딩 5개 사용
   if(!_vendorCache.length){
     _vendorCache=_DEFAULT_VENDORS.map(v=>({...v}));
-    console.log('[INIT] 기본 소재업체 5개 적용 (서버 미등록)');
+    console.log('[INIT] 기본 소재업체 2개 적용 (서버 미등록)');
   }
   return _vendorCache;
 }
