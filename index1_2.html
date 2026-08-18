@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.60</title>
+<title>프레스 생산관리 Rev.7.61</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -986,6 +986,42 @@
   }
 
 
+  /* ===== [Rev.7.61] LOT 품질검사 (측정/외관) ===== */
+  .q-guide {
+    padding:10px 12px; border:1px solid #bfdbfe; border-radius:10px; background:#eff6ff;
+    color:#1e40af; font-size:12px; font-weight:700; line-height:1.55; margin-bottom:10px;
+  }
+  .q-lot-head { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:8px; margin-bottom:10px; }
+  .q-lot-card { border:1.5px solid #cbd5e1; border-radius:10px; padding:10px 12px; background:#fff; min-width:0; }
+  .q-lot-card.main { border-color:#86efac; background:#f0fdf4; }
+  .q-lot-card .ql { font-size:10px; font-weight:800; color:#64748b; margin-bottom:3px; }
+  .q-lot-card .qv { font-size:15px; font-weight:900; color:#0f172a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .q-lot-card.main .qv { color:#15803d; }
+  .q-stat { display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
+  .q-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 7px; border-radius:12px; background:#e2e8f0; color:#475569; font-size:10px; font-weight:800; }
+  .q-chip.ok { background:#dcfce7; color:#15803d; }
+  .q-chip.ng { background:#fee2e2; color:#b91c1c; }
+  .q-chip.hold { background:#e0f2fe; color:#0369a1; }
+  .q-now-btn { width:100%; margin-top:5px; padding:8px 9px; border:1px solid #93c5fd; border-radius:8px; background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .q-save { width:100%; padding:13px; border:0; border-radius:10px; background:#1d4ed8; color:#fff; font-size:15px; font-weight:900; cursor:pointer; font-family:inherit; }
+  .q-save.visual { background:#7c3aed; }
+  .q-save:active { transform:scale(.98); }
+  .q-section-title { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:900; color:#334155; margin:2px 0 8px; }
+  .q-section-title span { margin-left:auto; color:#64748b; font-size:10px; font-weight:700; }
+  .q-judge { display:inline-block; min-width:38px; text-align:center; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:900; }
+  .q-judge.OK { background:#dcfce7; color:#15803d; }
+  .q-judge.NG { background:#fee2e2; color:#b91c1c; }
+  .q-judge.HOLD { background:#e0f2fe; color:#0369a1; }
+  .q-history td { vertical-align:top; }
+  .q-history .q-sub { display:block; margin-top:2px; font-size:10px; color:#64748b; }
+  .q-empty { padding:18px 8px; text-align:center; color:#94a3b8; font-size:12px; }
+  .drawer-menu-group[data-menu-group="quality"] .flow-badge { margin-left:auto; min-width:22px; padding:2px 7px; border-radius:10px; background:#e2e8f0; color:#64748b; font-size:10px; font-weight:900; text-align:center; }
+  .drawer-menu-group[data-menu-group="quality"] .tab-btn.active .flow-badge { background:rgba(255,255,255,.22); color:#fff; }
+  @media (max-width:560px){
+    .q-lot-head{grid-template-columns:1fr}
+    .q-history{min-width:720px}
+  }
+
   /* ===== PC 화면별 폭 조절 + 햄버거 메뉴 순서 편집 ===== */
   .menuordbtn{
     width:30px;height:30px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;color:#475569;
@@ -1086,7 +1122,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.60</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.61</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1115,7 +1151,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.60</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.61</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1127,6 +1163,11 @@
     <button class="tab-btn step" data-menu-id="iqc" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="step-no">3</span><span class="tab-ico">🔎</span>수입검사<span class="flow-badge" id="flowIqcBadge">-</span></button>
     <button class="tab-btn step active" data-menu-id="prod" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="step-no">4</span><span class="tab-ico">⚙️</span>생산작업<span class="tab-dot"></span></button>
     <button class="tab-btn step last" data-menu-id="report" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">5</span><span class="tab-ico">📝</span>생산일보</button>
+  </div>
+  <div class="drawer-sep">품질검사</div>
+  <div class="drawer-menu-group" data-menu-group="quality">
+    <button class="tab-btn" data-menu-id="measure" data-tab="t-measure" onclick="switchTab('t-measure', this)"><span class="tab-ico">📏</span>측정검사<span class="flow-badge" id="qMeasureBadge">0</span></button>
+    <button class="tab-btn" data-menu-id="visual" data-tab="t-visual" onclick="switchTab('t-visual', this)"><span class="tab-ico">👁️</span>외관검사<span class="flow-badge" id="qVisualBadge">0</span></button>
   </div>
   <div class="drawer-sep">마스터</div>
   <div class="drawer-menu-group" data-menu-group="master">
@@ -1241,6 +1282,77 @@
   </div>
 
 </div>
+
+<!-- ===== [Rev.7.61] 측정검사 ===== -->
+<div class="tab-panel" id="t-measure">
+  <div class="card">
+    <div class="sec-title">📏 측정검사 <span class="right">LOT별 이력 자동 묶음</span></div>
+    <div class="q-guide">LOT를 먼저 선택하고 <b>측정항목 · 규격 · 측정값 · 판정</b>만 등록합니다. 같은 LOT의 측정검사와 외관검사 이력이 함께 집계됩니다.</div>
+    <div class="q-lot-head">
+      <div class="q-lot-card main">
+        <div class="ql">선택 LOT</div><div class="qv" id="qmLotTitle">LOT 미입력</div>
+        <div class="q-stat" id="qmLotStats"></div>
+      </div>
+      <div class="q-lot-card">
+        <div class="ql">빠른 입력</div><div class="qv" id="qmNowInfo">현재 생산 LOT 불러오기</div>
+        <button class="q-now-btn" onclick="qualityUseCurrent('measure')">📦 현재 LOT · 품번 적용</button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="fld"><label>검사일 *</label><input type="date" id="qmDate"></div>
+      <div class="fld"><label>LOT *</label><input type="text" id="qmLot" list="qualityLotList" placeholder="LOT 번호" oninput="qualityLotChanged('measure')"></div>
+      <div class="fld"><label>품번 *</label><input type="text" id="qmItem" placeholder="품번"></div>
+      <div class="fld"><label>검사자</label><input type="text" id="qmWorker" placeholder="검사자"></div>
+      <div class="fld"><label>측정항목 *</label><input type="text" id="qmName" placeholder="예: 폭, 높이, 홀간격"></div>
+      <div class="fld"><label>규격/기준</label><input type="text" id="qmSpec" placeholder="예: 25.0 ±0.2 mm"></div>
+      <div class="fld"><label>측정값 *</label><input type="text" id="qmValue" inputmode="decimal" placeholder="측정값"></div>
+      <div class="fld"><label>판정 *</label><select id="qmJudge"><option value="OK">OK</option><option value="NG">NG</option><option value="보류">보류</option></select></div>
+      <div class="fld full"><label>비고</label><input type="text" id="qmNote" placeholder="특이사항만 간단히 입력"></div>
+    </div>
+    <button class="q-save" onclick="qualitySave('measure')">✅ 측정검사 저장</button>
+  </div>
+  <div class="card">
+    <div class="q-section-title">📚 측정검사 이력 <span id="qmCount">0건</span></div>
+    <div class="search-row"><input type="text" id="qmSearch" placeholder="LOT / 품번 / 측정항목 검색" oninput="renderQualityHistory('measure')"></div>
+    <div class="tbl-wrap"><table class="mtable q-history"><thead><tr><th>검사일 / LOT</th><th>품번</th><th>측정</th><th>판정</th><th></th></tr></thead><tbody id="qmHistory"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ===== [Rev.7.61] 외관검사 ===== -->
+<div class="tab-panel" id="t-visual">
+  <div class="card">
+    <div class="sec-title">👁️ 외관검사 <span class="right">LOT별 불량 추적</span></div>
+    <div class="q-guide">LOT 기준으로 <b>검사수량 · 불량수량 · 불량유형 · 판정</b>만 기록합니다. 같은 LOT의 측정검사 결과도 상단에서 바로 확인할 수 있습니다.</div>
+    <div class="q-lot-head">
+      <div class="q-lot-card main">
+        <div class="ql">선택 LOT</div><div class="qv" id="qvLotTitle">LOT 미입력</div>
+        <div class="q-stat" id="qvLotStats"></div>
+      </div>
+      <div class="q-lot-card">
+        <div class="ql">빠른 입력</div><div class="qv" id="qvNowInfo">현재 생산 LOT 불러오기</div>
+        <button class="q-now-btn" onclick="qualityUseCurrent('visual')">📦 현재 LOT · 품번 적용</button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="fld"><label>검사일 *</label><input type="date" id="qvDate"></div>
+      <div class="fld"><label>LOT *</label><input type="text" id="qvLot" list="qualityLotList" placeholder="LOT 번호" oninput="qualityLotChanged('visual')"></div>
+      <div class="fld"><label>품번 *</label><input type="text" id="qvItem" placeholder="품번"></div>
+      <div class="fld"><label>검사자</label><input type="text" id="qvWorker" placeholder="검사자"></div>
+      <div class="fld"><label>검사수량 *</label><input type="number" id="qvQty" min="1" inputmode="numeric" placeholder="수량"></div>
+      <div class="fld"><label>불량수량</label><input type="number" id="qvNgQty" min="0" inputmode="numeric" value="0"></div>
+      <div class="fld"><label>불량유형</label><select id="qvType"><option value="">없음</option><option>스크래치</option><option>찍힘/변형</option><option>버(Burr)</option><option>크랙</option><option>오염/이물</option><option>도장/표면</option><option>기타</option></select></div>
+      <div class="fld"><label>판정 *</label><select id="qvJudge"><option value="OK">OK</option><option value="NG">NG</option><option value="보류">보류</option></select></div>
+      <div class="fld full"><label>비고</label><input type="text" id="qvNote" placeholder="불량 위치/특이사항 등"></div>
+    </div>
+    <button class="q-save visual" onclick="qualitySave('visual')">✅ 외관검사 저장</button>
+  </div>
+  <div class="card">
+    <div class="q-section-title">📚 외관검사 이력 <span id="qvCount">0건</span></div>
+    <div class="search-row"><input type="text" id="qvSearch" placeholder="LOT / 품번 / 불량유형 검색" oninput="renderQualityHistory('visual')"></div>
+    <div class="tbl-wrap"><table class="mtable q-history"><thead><tr><th>검사일 / LOT</th><th>품번</th><th>외관 결과</th><th>판정</th><th></th></tr></thead><tbody id="qvHistory"></tbody></table></div>
+  </div>
+</div>
+<datalist id="qualityLotList"></datalist>
 
 <!-- ===== 일보 ===== -->
 
@@ -2035,7 +2147,7 @@ function setSyncStatus(level, text) {
   b.className = 'sync-badge ' + level;
   b.textContent = text;
 }
-const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
+const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-measure': '측정검사', 't-visual': '외관검사', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerBg').classList.add('show');
@@ -2281,7 +2393,7 @@ const PD_PCW_KEY='pd_pc_width_v1';
 const PD_PCW_MIN=720,PD_PCW_MAX=1400,PD_PCW_STEP=20;
 const PD_PCW_DEFAULT={
   't-prod':1020,'t-report':1020,'t-mat-order':1200,'t-mat-dispatch':1200,'t-iqc':1200,
-  't-material':1100,'t-master':1020,'t-mold':1020,'t-help':1020,'t-config':1020
+  't-measure':1100,'t-visual':1100,'t-material':1100,'t-master':1020,'t-mold':1020,'t-help':1020,'t-config':1020
 };
 let PD_PCW_VIEW='t-prod',PD_PCW_DATA={};
 function pcwClamp(v){
@@ -2391,6 +2503,8 @@ function switchTab(id, btn) {
   if (id === 't-mat-order') { if (!ordLines.length) resetOrderLines(); fetchMaterialOrders(); refreshMaterialFlowStatus(false); }
   if (id === 't-mat-dispatch') { ensureMaterialFrame('matDispatchFrame'); refreshMaterialFlowStatus(false); }
   if (id === 't-iqc') { ensureMaterialFrame('matIqcFrame'); refreshMaterialFlowStatus(false); }
+  if (id === 't-measure') prepareQualityView('measure');
+  if (id === 't-visual') prepareQualityView('visual');
   if (id === 't-material') { renderMaterialPresets(); loadMaterialReceipts(); loadPendingCerts(false); }
   /* [Rev.7.47] 소재입고 메뉴 숨김 → 생산작업 진입 시 소재 LOT 목록을 직접 확보 */
   if (id === 't-prod' && !materialReceipts.length) { renderMaterialPresets(); loadMaterialReceipts(); }
@@ -6900,6 +7014,152 @@ function renderMoldTable() {
   document.getElementById('moldCount').textContent = list.length + ' / ' + molds.length + '건';
 }
 
+/* ===== [Rev.7.61] LOT 품질검사 : 측정 / 외관 ===== */
+const LS_QUALITY_INSPECTION = 'pdQualityInspection_v1';
+let qualityRecords = loadQualityRecords();
+
+function loadQualityRecords(){
+  try{
+    const a = JSON.parse(localStorage.getItem(LS_QUALITY_INSPECTION) || '[]');
+    return Array.isArray(a) ? a : [];
+  }catch(e){ return []; }
+}
+function saveQualityRecords(){
+  try{ localStorage.setItem(LS_QUALITY_INSPECTION, JSON.stringify(qualityRecords)); }catch(e){}
+  updateQualityBadges();
+}
+function qualityPrefix(type){ return type === 'visual' ? 'qv' : 'qm'; }
+function qualityJudgeClass(j){ return j === 'OK' ? 'OK' : (j === 'NG' ? 'NG' : 'HOLD'); }
+function qualityKnownLots(){
+  const out = [];
+  const add = function(v){ v=String(v||'').trim(); if(v && out.indexOf(v)<0) out.push(v); };
+  try{ materialReceipts.forEach(r=>add(r.lot_no)); }catch(e){}
+  try{ lots.forEach(r=>add(r.lot_no)); }catch(e){}
+  try{ qualityRecords.forEach(r=>add(r.lot)); }catch(e){}
+  try{ add(sel.lot); }catch(e){}
+  return out.sort(function(a,b){ return b.localeCompare(a, 'ko', {numeric:true}); });
+}
+function renderQualityLotOptions(){
+  const dl = document.getElementById('qualityLotList'); if(!dl) return;
+  dl.innerHTML = qualityKnownLots().map(function(x){ return '<option value="'+escHtml(x)+'"></option>'; }).join('');
+}
+function qualityLotChanged(type){
+  renderQualityLotSummary(type);
+}
+function qualityUseCurrent(type){
+  const p = qualityPrefix(type);
+  if(!sel.lot){ alert('현재 생산작업에 선택된 LOT가 없습니다.\nLOT를 직접 입력하거나 생산작업에서 LOT를 먼저 선택하세요.'); return; }
+  const le=document.getElementById(p+'Lot'), ie=document.getElementById(p+'Item');
+  if(le) le.value=sel.lot || '';
+  if(ie && !ie.value) ie.value=sel.item || '';
+  renderQualityLotSummary(type);
+}
+function prepareQualityView(type){
+  const p = qualityPrefix(type);
+  const d=document.getElementById(p+'Date'); if(d && !d.value) d.value=kstTodayStr();
+  const w=document.getElementById(p+'Worker'); if(w && !w.value) w.value=(worker && worker.name) ? worker.name : '';
+  const now=document.getElementById(p+'NowInfo'); if(now) now.textContent=sel.lot ? ('LOT '+sel.lot+(sel.item?' · '+sel.item:'')) : '현재 생산 LOT 없음';
+  renderQualityLotOptions();
+  renderQualityLotSummary(type);
+  renderQualityHistory(type);
+  updateQualityBadges();
+}
+function renderQualityLotSummary(type){
+  const p=qualityPrefix(type), le=document.getElementById(p+'Lot');
+  const lot=String(le&&le.value||'').trim();
+  const title=document.getElementById(p+'LotTitle'), stats=document.getElementById(p+'LotStats');
+  if(title) title.textContent=lot || 'LOT 미입력';
+  if(!stats) return;
+  if(!lot){ stats.innerHTML='<span class="q-chip">LOT 입력 후 이력 표시</span>'; return; }
+  const list=qualityRecords.filter(r=>String(r.lot||'').trim()===lot);
+  const mc=list.filter(r=>r.type==='measure').length, vc=list.filter(r=>r.type==='visual').length;
+  const last=list.slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))[0];
+  let h='<span class="q-chip">📏 측정 '+mc+'건</span><span class="q-chip">👁 외관 '+vc+'건</span>';
+  if(last){
+    const cls=last.judge==='OK'?'ok':(last.judge==='NG'?'ng':'hold');
+    h+='<span class="q-chip '+cls+'">최근 '+escHtml(last.judge||'-')+'</span>';
+  }
+  stats.innerHTML=h;
+}
+function qualityVal(id){ const e=document.getElementById(id); return e ? String(e.value||'').trim() : ''; }
+function qualitySave(type){
+  const p=qualityPrefix(type);
+  const date=qualityVal(p+'Date'), lot=qualityVal(p+'Lot'), item=qualityVal(p+'Item'), workerName=qualityVal(p+'Worker'), judge=qualityVal(p+'Judge');
+  if(!date){ alert('검사일을 입력하세요'); return; }
+  if(!lot){ alert('LOT를 입력하세요'); document.getElementById(p+'Lot')?.focus(); return; }
+  if(!item){ alert('품번을 입력하세요'); document.getElementById(p+'Item')?.focus(); return; }
+  const row={
+    id:'Q'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), type:type, date:date, lot:lot, item:item,
+    worker:workerName || ((worker&&worker.name)||''), judge:judge || 'OK', note:qualityVal(p+'Note'), created_at:kstNowISO()
+  };
+  if(type==='measure'){
+    row.measure_name=qualityVal('qmName'); row.spec=qualityVal('qmSpec'); row.value=qualityVal('qmValue');
+    if(!row.measure_name){ alert('측정항목을 입력하세요'); document.getElementById('qmName')?.focus(); return; }
+    if(!row.value){ alert('측정값을 입력하세요'); document.getElementById('qmValue')?.focus(); return; }
+  }else{
+    row.inspect_qty=Math.max(0,parseInt(qualityVal('qvQty'))||0);
+    row.ng_qty=Math.max(0,parseInt(qualityVal('qvNgQty'))||0);
+    row.defect_type=qualityVal('qvType');
+    if(!(row.inspect_qty>0)){ alert('검사수량을 입력하세요'); document.getElementById('qvQty')?.focus(); return; }
+    if(row.ng_qty>row.inspect_qty){ alert('불량수량은 검사수량보다 클 수 없습니다'); return; }
+  }
+  qualityRecords.unshift(row);
+  if(qualityRecords.length>3000) qualityRecords=qualityRecords.slice(0,3000);
+  saveQualityRecords();
+  renderQualityLotOptions();
+  renderQualityHistory(type);
+  renderQualityLotSummary(type);
+  if(type==='measure'){
+    ['qmName','qmSpec','qmValue','qmNote'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
+    document.getElementById('qmJudge').value='OK';
+  }else{
+    ['qvNote'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
+    document.getElementById('qvQty').value=''; document.getElementById('qvNgQty').value='0'; document.getElementById('qvType').value=''; document.getElementById('qvJudge').value='OK';
+  }
+  layoutToast('✅ '+(type==='measure'?'측정검사':'외관검사')+' · LOT '+lot+' 저장');
+}
+function renderQualityHistory(type){
+  const p=qualityPrefix(type), tb=document.getElementById(p+'History'); if(!tb) return;
+  const q=qualityVal(p+'Search').toLowerCase();
+  const list=qualityRecords.filter(function(r){
+    if(r.type!==type) return false;
+    if(!q) return true;
+    return [r.lot,r.item,r.measure_name,r.spec,r.value,r.defect_type,r.note,r.worker].join(' ').toLowerCase().indexOf(q)>=0;
+  });
+  const cnt=document.getElementById(p+'Count'); if(cnt) cnt.textContent=list.length+'건';
+  tb.innerHTML='';
+  if(!list.length){ tb.innerHTML='<tr><td colspan="5"><div class="q-empty">등록된 검사 이력이 없습니다</div></td></tr>'; return; }
+  list.slice(0,300).forEach(function(r){
+    const tr=document.createElement('tr');
+    let detail='';
+    if(type==='measure'){
+      detail='<b>'+escHtml(r.measure_name||'-')+'</b><span class="q-sub">'+escHtml(r.spec||'기준 미입력')+' → 측정 '+escHtml(r.value||'-')+'</span>';
+    }else{
+      const qty=Number(r.inspect_qty)||0, ng=Number(r.ng_qty)||0;
+      detail='<b>'+qty.toLocaleString()+'개 검사 · 불량 '+ng.toLocaleString()+'개</b><span class="q-sub">'+escHtml(r.defect_type||'외관 이상 없음')+'</span>';
+    }
+    tr.innerHTML='<td><b>'+escHtml(r.date||'-')+'</b><span class="q-sub">LOT '+escHtml(r.lot||'-')+'</span></td>'+ 
+      '<td>'+escHtml(r.item||'-')+'<span class="q-sub">'+escHtml(r.worker||'-')+'</span></td>'+ 
+      '<td>'+detail+(r.note?'<span class="q-sub">'+escHtml(r.note)+'</span>':'')+'</td>'+ 
+      '<td><span class="q-judge '+qualityJudgeClass(r.judge)+'">'+escHtml(r.judge||'-')+'</span></td>'+ 
+      '<td style="text-align:right"><button class="mini-btn del" onclick="qualityDelete(\''+r.id+'\')">삭제</button></td>';
+    tb.appendChild(tr);
+  });
+}
+function qualityDelete(id){
+  const r=qualityRecords.find(x=>x.id===id); if(!r) return;
+  if(!confirm('이 검사 이력을 삭제할까요?\nLOT: '+(r.lot||'-'))) return;
+  qualityRecords=qualityRecords.filter(x=>x.id!==id);
+  saveQualityRecords();
+  renderQualityHistory('measure'); renderQualityHistory('visual');
+  renderQualityLotSummary('measure'); renderQualityLotSummary('visual'); renderQualityLotOptions();
+}
+function updateQualityBadges(){
+  const m=qualityRecords.filter(r=>r.type==='measure').length, v=qualityRecords.filter(r=>r.type==='visual').length;
+  const mb=document.getElementById('qMeasureBadge'), vb=document.getElementById('qVisualBadge');
+  if(mb) mb.textContent=m; if(vb) vb.textContent=v;
+}
+
 /* ===== 호기 선택 이벤트 ===== */
 document.getElementById('machineSelect').addEventListener('change', async function() {
   const code = this.value;
@@ -6993,6 +7253,9 @@ window.addEventListener('DOMContentLoaded', function() {
     renderMaterialOrders();
     updateMaterialOrderBadges();
     refreshMaterialFlowStatus(false);
+    updateQualityBadges();
+    renderQualityLotOptions();
+    ['qmDate','qvDate'].forEach(function(id){ const e=document.getElementById(id); if(e&&!e.value)e.value=kstTodayStr(); });
   } catch (e) { console.warn('[material flow init]', e); }
 });
 
@@ -7000,7 +7263,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- ============================================================
-     [Rev.7.60] 소재발송(material_upload.html) · 수입검사(material_IQC.html)
+     [Rev.7.61] 소재발송(material_upload.html) · 수입검사(material_IQC.html)
      화면은 별도 파일로 분리 — 같은 폴더에 두 파일을 함께 배포하세요.
      ============================================================ -->
 
