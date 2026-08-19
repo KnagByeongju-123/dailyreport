@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.66</title>
+<title>프레스 생산관리 Rev.7.68</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -319,6 +319,40 @@
   .tpl-note { font-size: 11px; font-weight: 700; color: #64748b; line-height: 1.55; margin: 8px 0 10px;
     background: #f1f5f9; border-radius: 8px; padding: 8px 10px; }
   .insp-chip.off { background: #94a3b8; }
+
+  /* [Rev.7.67] 인트로 PIN 로그인 */
+  .pin-gate {
+    position: fixed; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center;
+    padding: 18px; background: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #0c4a6e 100%);
+    transition: opacity .28s, visibility .28s;
+  }
+  .pin-gate.done { opacity: 0; visibility: hidden; pointer-events: none; }
+  .pg-box { width: 100%; max-width: 330px; text-align: center; }
+  .pg-logo { font-size: 40px; line-height: 1; margin-bottom: 6px; }
+  .pg-title { font-size: 19px; font-weight: 800; color: #f1f5f9; letter-spacing: -.4px; }
+  .pg-sub { font-size: 12.5px; font-weight: 700; color: #94a3b8; margin-top: 4px; }
+  .pg-dots { display: flex; gap: 10px; justify-content: center; margin: 18px 0 6px; min-height: 16px; }
+  .pg-dots i { width: 13px; height: 13px; border-radius: 50%; background: transparent; border: 2px solid #475569; }
+  .pg-dots i.on { background: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,.6); }
+  .pg-msg { min-height: 17px; font-size: 12px; font-weight: 800; color: #94a3b8; margin-bottom: 10px; }
+  .pg-msg.err { color: #fca5a5; }
+  .pg-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .pg-key {
+    padding: 15px 0; border: 1.5px solid #334155; border-radius: 12px; background: rgba(255,255,255,.06);
+    color: #e2e8f0; font-size: 21px; font-weight: 800; cursor: pointer; font-family: inherit;
+  }
+  .pg-key:active { background: #0284c7; border-color: #0284c7; }
+  .pg-key.sub { font-size: 16px; color: #94a3b8; }
+  .pg-enter {
+    width: 100%; margin-top: 12px; padding: 14px; border: none; border-radius: 12px;
+    background: #0284c7; color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit;
+  }
+  .pg-enter:active { background: #0369a1; }
+  .wk-info { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 4px 12px; }
+  .wk-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed #e2e8f0; }
+  .wk-row:last-child { border-bottom: none; }
+  .wk-l { font-size: 12px; font-weight: 800; color: #64748b; }
+  .wk-v { font-size: 14px; font-weight: 800; color: #0f172a; }
 
   /* [Rev.7.66] 핀 관리 */
   .pin-master-box { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -1252,7 +1286,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.66</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.68</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1281,7 +1315,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.66</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.68</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -2115,16 +2149,43 @@
   </div>
 </div>
 
+<!-- ===== [Rev.7.67] 인트로 : PIN 로그인 ===== -->
+<div class="pin-gate" id="pinGate">
+  <div class="pg-box">
+    <div class="pg-logo">🏭</div>
+    <div class="pg-title">프레스 생산관리</div>
+    <div class="pg-sub" id="pgSub">핀번호를 입력하세요</div>
+    <div class="pg-dots" id="pgDots"></div>
+    <div class="pg-msg" id="pgMsg"></div>
+    <div class="pg-keys">
+      <button class="pg-key" onclick="pgKey('1')">1</button>
+      <button class="pg-key" onclick="pgKey('2')">2</button>
+      <button class="pg-key" onclick="pgKey('3')">3</button>
+      <button class="pg-key" onclick="pgKey('4')">4</button>
+      <button class="pg-key" onclick="pgKey('5')">5</button>
+      <button class="pg-key" onclick="pgKey('6')">6</button>
+      <button class="pg-key" onclick="pgKey('7')">7</button>
+      <button class="pg-key" onclick="pgKey('8')">8</button>
+      <button class="pg-key" onclick="pgKey('9')">9</button>
+      <button class="pg-key sub" onclick="pgClear()">C</button>
+      <button class="pg-key" onclick="pgKey('0')">0</button>
+      <button class="pg-key sub" onclick="pgBack()">←</button>
+    </div>
+    <button class="pg-enter" onclick="pgSubmit()">🔓 로그인</button>
+  </div>
+</div>
+
 <div class="modal-bg" id="workerModal">
   <div class="modal" style="max-width:400px">
-    <h2>👷 작업자 설정 <button class="x" onclick="closeWorkerModal()" style="margin-left:auto">✕</button></h2>
-    <div class="sel-hint" style="margin-bottom:10px">이 앱 전용 작업자 정보입니다. 사내 PIN 로그인과 무관하게 사용할 수 있습니다.</div>
-    <div class="form-grid">
-      <div class="fld full"><label>작업자명</label><input type="text" id="wkName" placeholder=""></div>
-      <div class="fld full"><label>부서</label><select id="wkDept"></select></div>
+    <h2>👷 작업자 정보 <button class="x" onclick="closeWorkerModal()" style="margin-left:auto">✕</button></h2>
+    <div class="sel-hint" style="margin-bottom:10px">핀 로그인으로 확인된 정보입니다. 변경하려면 로그아웃 후 다른 핀으로 로그인하세요.</div>
+    <div class="wk-info">
+      <div class="wk-row"><span class="wk-l">이름</span><span class="wk-v" id="wkInfoName">—</span></div>
+      <div class="wk-row"><span class="wk-l">부서</span><span class="wk-v" id="wkInfoDept">—</span></div>
+      <div class="wk-row"><span class="wk-l">권한</span><span class="wk-v" id="wkInfoRole">—</span></div>
     </div>
-    <button class="btn-primary" onclick="applyWorker()">✅ 저장</button>
-    <div style="margin-top:6px"><button class="btn-gray" onclick="useGuestWorker()">게스트로 사용</button></div>
+    <button class="btn-primary" style="margin-top:12px" onclick="pinLogout()">🔒 로그아웃 (핀 재입력)</button>
+    <div style="margin-top:6px"><button class="btn-gray" onclick="closeWorkerModal()">닫기</button></div>
   </div>
 </div>
 
@@ -3404,7 +3465,8 @@ function renderPins() {
   renderPinTable('vendor');
   const dl = document.getElementById('pinDeptList');
   if (dl) {
-    const depts = Array.from(new Set(pins.filter(function(x){return x.pin_type==='staff'&&x.dept;}).map(function(x){return x.dept;})));
+    const used = pins.filter(function(x){return x.pin_type==='staff'&&x.dept;}).map(function(x){return x.dept;});
+    const depts = Array.from(new Set(DEPT_LIST.concat(used)));
     dl.innerHTML = depts.map(function(d){ return '<option value="'+escHtml(d)+'">'; }).join('');
   }
 }
@@ -3551,53 +3613,131 @@ function pinDbAlert(e, what) {
    ESG PIN 로그인 여부와 상관없이 바로 사용할 수 있고,
    작업자 이름은 이 앱만의 키(pdWorker_v1)로 별도 보관한다. */
 const LS_WORKER = 'pdWorker_v1';
-const DEPT_LIST = ['생산팀', '품질관리팀', '개발팀', '설계팀', '영업관리팀', '공장장', '대표이사'];
+const DEPT_LIST = ['생산팀', '품질관리팀', '개발팀', '설계팀', '영업관리팀', '공장장', '대표이사'];  // 핀설정 부서 자동완성 기본값
 function detectWorker() {
   try {
     const a = JSON.parse(localStorage.getItem(LS_WORKER) || 'null');
-    if (a && a.name) return { id: a.id || a.name, name: a.name, dept: a.dept || '' };
+    if (a && a.name) return { id: a.id || a.name, name: a.name, dept: a.dept || '', role: a.role || 'staff' };
   } catch (e) {}
-  return { id: 'GUEST', name: '게스트', dept: '' };
+  return { id: 'GUEST', name: '게스트', dept: '', role: 'guest' };
 }
 let worker = detectWorker();
-function saveWorker(name, dept) {
-  const nm = String(name || '').trim();
-  if (!nm) {
-    try { localStorage.removeItem(LS_WORKER); } catch (e) {}
-    worker = { id: 'GUEST', name: '게스트', dept: '' };
-  } else {
-    worker = { id: nm, name: nm, dept: String(dept || '').trim() };
-    try { localStorage.setItem(LS_WORKER, JSON.stringify(worker)); } catch (e) {}
-  }
-  renderWorkerChip();
-  markDirty();
-}
 function renderWorkerChip() {
   const c = document.getElementById('workerChip');
   c.textContent = worker.name + (worker.dept ? ' · ' + worker.dept : '');
   c.classList.toggle('guest', worker.id === 'GUEST');
-  c.title = '터치하여 작업자 변경';
+  c.title = '터치하여 로그인 정보 확인';
   const dw = document.getElementById('drawerWorker');
-  if (dw) dw.textContent = '👷 ' + worker.name + (worker.dept ? ' · ' + worker.dept : '') + ' (터치하여 변경)';
+  if (dw) dw.textContent = '👷 ' + worker.name + (worker.dept ? ' · ' + worker.dept : '') + ' (터치하여 확인)';
 }
-// 작업자 설정 팝업
+// 작업자 정보 팝업 (핀 로그인 결과 표시)
 function openWorkerModal() {
-  document.getElementById('wkName').value = (worker.id === 'GUEST') ? '' : worker.name;
-  const ds = document.getElementById('wkDept');
-  ds.innerHTML = '<option value="">— 부서 선택 —</option>' +
-    DEPT_LIST.map(function(d) { return '<option value="' + d + '">' + d + '</option>'; }).join('');
-  ds.value = worker.dept || '';
+  document.getElementById('wkInfoName').textContent = worker.name || '—';
+  document.getElementById('wkInfoDept').textContent = worker.dept || '—';
+  document.getElementById('wkInfoRole').textContent =
+    worker.role === 'master' ? '🔑 마스터 (전체 권한)' :
+    worker.role === 'staff' ? '👷 사원' : '👤 게스트 (열람 위주)';
   document.getElementById('workerModal').classList.add('show');
 }
 function closeWorkerModal() { document.getElementById('workerModal').classList.remove('show'); }
-function applyWorker() {
-  saveWorker(document.getElementById('wkName').value, document.getElementById('wkDept').value);
-  closeWorkerModal();
-  showHint('👷 작업자 <b>' + escHtml(worker.name) + '</b> 설정됨');
+
+/* ===== [Rev.7.67] 인트로 PIN 로그인 ===== */
+const LS_PIN_SESSION = 'pdPinSession_v1';
+let _pgVal = '';
+
+function pgRenderDots() {
+  const d = document.getElementById('pgDots');
+  if (!d) return;
+  d.innerHTML = (_pgVal ? _pgVal.split('') : []).map(function() { return '<i class="on"></i>'; }).join('') ||
+                '<i></i><i></i><i></i><i></i>';
 }
-function useGuestWorker() {
-  saveWorker('', '');
+function pgMsg(t, err) {
+  const m = document.getElementById('pgMsg');
+  if (!m) return;
+  m.textContent = t || '';
+  m.className = 'pg-msg' + (err ? ' err' : '');
+}
+function pgKey(n) {
+  if (_pgVal.length >= 8) return;
+  _pgVal += n; pgRenderDots(); pgMsg('');
+  if (navigator.vibrate) navigator.vibrate(12);
+  if (_pgVal.length >= 4) pgTryAuto();
+}
+function pgBack() { _pgVal = _pgVal.slice(0, -1); pgRenderDots(); pgMsg(''); }
+function pgClear() { _pgVal = ''; pgRenderDots(); pgMsg(''); }
+
+let _pgAutoTimer = null;
+function pgTryAuto() {
+  clearTimeout(_pgAutoTimer);
+  _pgAutoTimer = setTimeout(function() {
+    if (pins.some(function(x) { return x.active !== false && String(x.pin) === _pgVal; })) pgSubmit();
+  }, 350);
+}
+async function pgSubmit() {
+  if (!_pgVal) { pgMsg('핀번호를 입력하세요', true); return; }
+  if (!pins.length) { try { await loadPins(); } catch (e) {} }
+  const hit = pins.find(function(x) { return x.active !== false && String(x.pin) === _pgVal; });
+  if (!hit) {
+    pgMsg('등록되지 않은 핀입니다', true);
+    if (navigator.vibrate) navigator.vibrate([60, 50, 60]);
+    _pgVal = ''; pgRenderDots();
+    return;
+  }
+  if (hit.pin_type === 'vendor') {
+    pgMsg('업체 핀은 소재발송 화면에서 사용하세요', true);
+    _pgVal = ''; pgRenderDots();
+    return;
+  }
+  applyPinLogin(hit);
+  closePinGate();
+  showHint('🔓 <b>' + escHtml(worker.name) + '</b> 로그인' + (worker.dept ? ' · ' + escHtml(worker.dept) : ''));
+}
+function applyPinLogin(row) {
+  worker = {
+    id: String(row.id), name: row.name || '사용자', dept: row.dept || '',
+    role: row.pin_type === 'master' ? 'master' : 'staff'
+  };
+  try { localStorage.setItem(LS_PIN_SESSION, JSON.stringify(worker)); } catch (e) {}
+  try { localStorage.setItem(LS_WORKER, JSON.stringify(worker)); } catch (e) {}
+  renderWorkerChip();
+  markDirty();
+}
+function closePinGate() {
+  const g = document.getElementById('pinGate');
+  if (g) g.classList.add('done');
+  _pgVal = ''; pgRenderDots(); pgMsg('');
+}
+function openPinGate() {
+  const g = document.getElementById('pinGate');
+  if (!g) return;
+  _pgVal = ''; pgRenderDots(); pgMsg('');
+  g.classList.remove('done');
+}
+function pinLogout() {
+  if (session.active && !confirm('설비가동 중입니다. 로그아웃할까요?\n(가동 상태는 유지됩니다)')) return;
+  try { localStorage.removeItem(LS_PIN_SESSION); localStorage.removeItem(LS_WORKER); } catch (e) {}
+  worker = { id: 'GUEST', name: '미로그인', dept: '', role: 'guest' };
+  renderWorkerChip();
   closeWorkerModal();
+  openPinGate();
+}
+async function initPinGate() {
+  try { await loadPins(); } catch (e) {}
+  let sess = null;
+  try { sess = JSON.parse(localStorage.getItem(LS_PIN_SESSION) || 'null'); } catch (e) {}
+  if (sess && sess.id) {
+    const still = pins.find(function(x) { return String(x.id) === String(sess.id) && x.active !== false; });
+    if (still) { applyPinLogin(still); closePinGate(); return; }
+  }
+  // 등록된 핀이 하나도 없으면 최초 설정을 위해 통과시킨다
+  if (!pins.length) {
+    worker = { id: 'ADMIN', name: '초기설정', dept: '', role: 'master' };
+    renderWorkerChip();
+    closePinGate();
+    showHint('⚠ 등록된 핀이 없습니다 · <b>핀설정</b>에서 마스터/사원 핀을 먼저 등록하세요');
+    return;
+  }
+  openPinGate();
 }
 
 /* ===== 마스터 데이터 ===== */
@@ -8064,6 +8204,7 @@ function restoreSelection() {
 
 async function init() {
   renderWorkerChip();
+  initPinGate();
   loadCountConfig();
   applyMatUploadUrl();
   loadState();
