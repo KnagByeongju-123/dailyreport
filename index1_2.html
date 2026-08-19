@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.64</title>
+<title>프레스 생산관리 Rev.7.66</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { color-scheme: light; }
@@ -319,6 +319,17 @@
   .tpl-note { font-size: 11px; font-weight: 700; color: #64748b; line-height: 1.55; margin: 8px 0 10px;
     background: #f1f5f9; border-radius: 8px; padding: 8px 10px; }
   .insp-chip.off { background: #94a3b8; }
+
+  /* [Rev.7.66] 핀 관리 */
+  .pin-master-box { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; }
+  .pmb-l { font-size: 12px; font-weight: 800; color: #475569; }
+  .pmb-v { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: 4px;
+    font-family: ui-monospace, monospace; flex: 1; min-width: 90px; }
+  .pmb-v.none { font-size: 14px; color: #94a3b8; letter-spacing: 0; font-family: inherit; }
+  .pin-eye { padding: 8px 12px; border: 1.5px solid #cbd5e1; background: #fff; color: #475569;
+    border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  .pin-cell { font-family: ui-monospace, monospace; font-weight: 800; letter-spacing: 2px; color: #0369a1; }
 
   /* [Rev.7.57] 소재발주 품목 표 */
   .ord-lines-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;
@@ -1241,7 +1252,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.64</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.66</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1270,7 +1281,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.64</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.66</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1296,6 +1307,7 @@
   </div>
   <div class="drawer-sep">시스템</div>
   <div class="drawer-menu-group" data-menu-group="system">
+    <button class="tab-btn" data-menu-id="pin" data-tab="t-pin" onclick="switchTab('t-pin', this)"><span class="tab-ico">📌</span>핀설정</button>
     <button class="tab-btn" data-menu-id="help" data-tab="t-help" onclick="switchTab('t-help', this)"><span class="tab-ico">📖</span>사용안내</button>
     <button class="tab-btn" data-menu-id="config" data-tab="t-config" onclick="switchTab('t-config', this)"><span class="tab-ico">🧰</span>DB설정</button>
   </div>
@@ -1631,6 +1643,74 @@
   <!-- [Rev.7.38] 상단 히어로 바 제거 → 등록 화면 단독 표시 -->
   <div class="embed-wrap md-embed">
     <iframe class="embed-frame" id="matDispatchFrame" title="소재발송 등록"></iframe>
+  </div>
+</div>
+
+<!-- ===== [Rev.7.66] 핀설정 (마스터 · 사원 · 업체) ===== -->
+<div class="tab-panel" id="t-pin">
+  <div class="sub-tabs">
+    <button class="sub-tab active" id="pinTabMaster" onclick="switchPinTab('master')">🔑 마스터</button>
+    <button class="sub-tab" id="pinTabStaff" onclick="switchPinTab('staff')">👷 사원 <span class="flow-badge" id="pinStaffBadge">0</span></button>
+    <button class="sub-tab" id="pinTabVendor" onclick="switchPinTab('vendor')">🏢 업체 <span class="flow-badge" id="pinVendorBadge">0</span></button>
+  </div>
+
+  <!-- 마스터 핀 -->
+  <div class="card pin-view" id="pinViewMaster">
+    <div class="sec-title">🔑 마스터 핀</div>
+    <div class="sel-hint" style="margin-bottom:10px">전체 권한 핀입니다. 설정 변경·삭제 등 관리 기능에 사용합니다. <b>외부에 노출되지 않도록 주의</b>하세요.</div>
+    <div class="pin-master-box">
+      <div class="pmb-l">현재 마스터 핀</div>
+      <div class="pmb-v" id="pinMasterView">— 미설정 —</div>
+      <button class="pin-eye" onclick="togglePinMask()" id="pinEyeBtn">👁 표시</button>
+    </div>
+    <div class="form-grid" style="margin-top:10px">
+      <div class="fld"><label>새 마스터 핀 (4~8자리 숫자)</label><input type="text" id="pinMasterNew" inputmode="numeric" maxlength="8" placeholder="예: 1234"></div>
+      <div class="fld"><label>확인 입력</label><input type="text" id="pinMasterNew2" inputmode="numeric" maxlength="8" placeholder="한 번 더"></div>
+    </div>
+    <button class="btn-primary" onclick="saveMasterPin()">💾 마스터 핀 저장</button>
+  </div>
+
+  <!-- 사원 핀 -->
+  <div class="card pin-view" id="pinViewStaff" style="display:none">
+    <div class="sec-title">👷 사원 핀 <span class="right" id="pinStaffCount">—</span></div>
+    <div class="form-grid">
+      <div class="fld"><label>부서</label><input type="text" id="pinStaffDept" placeholder="예: 품질관리팀" list="pinDeptList"><datalist id="pinDeptList"></datalist></div>
+      <div class="fld"><label>이름 *</label><input type="text" id="pinStaffName" placeholder="사원명"></div>
+      <div class="fld"><label>핀 (4~8자리) *</label><input type="text" id="pinStaffPin" inputmode="numeric" maxlength="8" placeholder="예: 1234"></div>
+      <div class="fld"><label>비고</label><input type="text" id="pinStaffNote" placeholder=""></div>
+      <input type="hidden" id="pinStaffId">
+    </div>
+    <button class="btn-primary" onclick="savePinRow('staff')">✅ 사원 핀 저장</button>
+    <div style="margin-top:6px"><button class="btn-gray" onclick="clearPinForm('staff')">✚ 새로 입력</button></div>
+    <div class="search-row" style="margin-top:12px">
+      <input type="text" id="pinStaffSearch" placeholder="부서 / 이름 검색" oninput="renderPinTable('staff')">
+    </div>
+    <div class="tbl-wrap">
+      <table class="mtable"><thead><tr><th>부서</th><th>이름</th><th>핀</th><th>상태</th><th></th></tr></thead><tbody id="pinStaffBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 업체 핀 -->
+  <div class="card pin-view" id="pinViewVendor" style="display:none">
+    <div class="sec-title">🏢 업체 핀 <span class="right" id="pinVendorCount">—</span></div>
+    <div class="sel-hint" style="margin-bottom:8px">소재업체가 발송 등록 시 사용하는 핀입니다.</div>
+    <div class="form-grid">
+      <div class="fld"><label>업체명 *</label><input type="text" id="pinVendorName" placeholder="업체명"></div>
+      <div class="fld"><label>업체코드</label><input type="text" id="pinVendorCode" placeholder="예: V001"></div>
+      <div class="fld"><label>핀 (4~8자리) *</label><input type="text" id="pinVendorPin" inputmode="numeric" maxlength="8" placeholder="예: 5678"></div>
+      <div class="fld"><label>비고</label><input type="text" id="pinVendorNote" placeholder=""></div>
+      <input type="hidden" id="pinVendorId">
+    </div>
+    <button class="btn-primary" onclick="savePinRow('vendor')">✅ 업체 핀 저장</button>
+    <div style="margin-top:6px"><button class="btn-gray" onclick="clearPinForm('vendor')">✚ 새로 입력</button></div>
+    <div class="search-row" style="margin-top:12px">
+      <input type="text" id="pinVendorSearch" placeholder="업체명 / 코드 검색" oninput="renderPinTable('vendor')">
+    </div>
+    <div class="tbl-wrap">
+      <table class="mtable"><thead><tr><th>업체명</th><th>코드</th><th>핀</th><th>상태</th><th></th></tr></thead><tbody id="pinVendorBody"></tbody></table>
+    </div>
+    <div class="sel-hint" style="margin-top:10px">소재발송 화면의 출발지 목록·업체 설정은 아래에서 열 수 있습니다.</div>
+    <button class="btn-gray" style="margin-top:6px" onclick="openMatUploadWindow()">📤 소재발송 설정 화면 열기</button>
   </div>
 </div>
 
@@ -2355,7 +2435,7 @@ function setSyncStatus(level, text) {
   b.className = 'sync-badge ' + level;
   b.textContent = text;
 }
-const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-work-order': '프레스 작업지시', 't-measure': '측정검사', 't-visual': '외관검사', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-help': '사용안내', 't-config': 'DB설정' };
+const MENU_NAMES = { 't-prod': '생산작업', 't-report': '생산일보', 't-mat-order': '소재발주', 't-mat-dispatch': '소재발송', 't-iqc': '수입검사', 't-work-order': '프레스 작업지시', 't-measure': '측정검사', 't-visual': '외관검사', 't-material': '소재입고', 't-master': '호기설정', 't-mold': '금형설정', 't-pin': '핀설정', 't-help': '사용안내', 't-config': 'DB설정' };
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerBg').classList.add('show');
@@ -2420,6 +2500,10 @@ function loadMenuOrder(){
   // [Rev.7.62] 기존 사용자 저장 순서에도 신규 작업지시를 생산작업 바로 앞에 자동 삽입
   if(Array.isArray(saved.work) && saved.work.indexOf('work-order')<0){
     const i=saved.work.indexOf('prod'); saved.work.splice(i>=0?i:3,0,'work-order');
+  }
+  // [Rev.7.65] 기존 저장 순서에 신규 핀설정을 사용안내 앞에 자동 삽입
+  if(Array.isArray(saved.system) && saved.system.indexOf('pin')<0){
+    const i=saved.system.indexOf('help'); saved.system.splice(i>=0?i:0,0,'pin');
   }
   applyMenuOrder(saved);
 }
@@ -2605,7 +2689,7 @@ const PD_PCW_KEY='pd_pc_width_v1';
 const PD_PCW_MIN=720,PD_PCW_MAX=1400,PD_PCW_STEP=20;
 const PD_PCW_DEFAULT={
   't-prod':1020,'t-report':1020,'t-mat-order':1200,'t-mat-dispatch':1200,'t-iqc':1200,
-  't-work-order':1180,'t-measure':1100,'t-visual':1100,'t-material':1100,'t-master':1020,'t-mold':1020,'t-help':1020,'t-config':1020
+  't-work-order':1180,'t-measure':1100,'t-visual':1100,'t-material':1100,'t-master':1020,'t-mold':1020,'t-pin':1200,'t-help':1020,'t-config':1020
 };
 let PD_PCW_VIEW='t-prod',PD_PCW_DATA={};
 function pcwClamp(v){
@@ -2723,6 +2807,7 @@ function switchTab(id, btn) {
   if (id === 't-prod' && !materialReceipts.length) { renderMaterialPresets(); loadMaterialReceipts(); }
   if (id === 't-master') renderMachineTable();
   if (id === 't-mold') renderMoldTable();
+  if (id === 't-pin') { loadPins(); }
   if (id === 't-config') { updateLocalInfo(); }
   // 카운팅 DB는 설비가동/생산일보 화면에서만 동작합니다. 다른 메뉴로 이동하면 즉시 중지합니다.
   restartEspPoll(id === 't-prod' || id === 't-report');
@@ -3270,6 +3355,197 @@ function reloadMaterialFrame(id) {
 }
 
 
+
+/* ===== [Rev.7.66] 핀 관리 (마스터 / 사원 / 업체) ===== */
+const T_PIN = 'pd_pin';
+let pins = [];
+let _pinMask = true;
+let _pinTab = 'master';
+
+function switchPinTab(t) {
+  _pinTab = t;
+  ['master','staff','vendor'].forEach(function(k) {
+    const b = document.getElementById('pinTab' + k.charAt(0).toUpperCase() + k.slice(1));
+    const v = document.getElementById('pinView' + k.charAt(0).toUpperCase() + k.slice(1));
+    if (b) b.classList.toggle('active', k === t);
+    if (v) v.style.display = (k === t) ? '' : 'none';
+  });
+}
+function maskPin(p) {
+  const v = String(p || '');
+  return _pinMask ? '•'.repeat(Math.max(4, v.length)) : v;
+}
+function togglePinMask() {
+  _pinMask = !_pinMask;
+  const b = document.getElementById('pinEyeBtn');
+  if (b) b.textContent = _pinMask ? '👁 표시' : '🙈 숨김';
+  renderPins();
+}
+function validPin(v) { return /^[0-9]{4,8}$/.test(String(v || '').trim()); }
+
+async function loadPins() {
+  try {
+    pins = await pd('GET', T_PIN + '?select=*&order=pin_type,dept,name') || [];
+  } catch (e) {
+    pins = [];
+    if (isMissingTableErr(e)) showHint('⚠ 핀 테이블이 없습니다 · <b>pin_ddl.sql</b>을 실행하세요');
+    else console.warn('핀 조회 실패', e);
+  }
+  renderPins();
+}
+function renderPins() {
+  const m = pins.find(function(x) { return x.pin_type === 'master' && x.active !== false; });
+  const mv = document.getElementById('pinMasterView');
+  if (mv) {
+    mv.textContent = m ? maskPin(m.pin) : '— 미설정 —';
+    mv.className = 'pmb-v' + (m ? '' : ' none');
+  }
+  renderPinTable('staff');
+  renderPinTable('vendor');
+  const dl = document.getElementById('pinDeptList');
+  if (dl) {
+    const depts = Array.from(new Set(pins.filter(function(x){return x.pin_type==='staff'&&x.dept;}).map(function(x){return x.dept;})));
+    dl.innerHTML = depts.map(function(d){ return '<option value="'+escHtml(d)+'">'; }).join('');
+  }
+}
+function renderPinTable(type) {
+  const body = document.getElementById(type === 'staff' ? 'pinStaffBody' : 'pinVendorBody');
+  if (!body) return;
+  const q = (document.getElementById(type === 'staff' ? 'pinStaffSearch' : 'pinVendorSearch').value || '').trim().toLowerCase();
+  let list = pins.filter(function(x) { return x.pin_type === type; });
+  if (q) list = list.filter(function(x) {
+    return [x.dept, x.name, x.vendor_code, x.note].join(' ').toLowerCase().indexOf(q) >= 0;
+  });
+  const cnt = document.getElementById(type === 'staff' ? 'pinStaffCount' : 'pinVendorCount');
+  if (cnt) cnt.textContent = list.length + '명';
+  const badge = document.getElementById(type === 'staff' ? 'pinStaffBadge' : 'pinVendorBadge');
+  if (badge) badge.textContent = pins.filter(function(x){return x.pin_type===type&&x.active!==false;}).length;
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="5"><div class="empty">등록된 핀이 없습니다</div></td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(function(x) {
+    const col1 = type === 'staff' ? (x.dept || '-') : (x.name || '-');
+    const col2 = type === 'staff' ? (x.name || '-') : (x.vendor_code || '-');
+    return '<tr' + (x.active === false ? ' style="opacity:.5"' : '') + '>' +
+      '<td>' + escHtml(col1) + '</td>' +
+      '<td><b>' + escHtml(col2) + '</b>' + (x.note ? '<div class="mold-shot-sub">' + escHtml(x.note) + '</div>' : '') + '</td>' +
+      '<td class="pin-cell">' + escHtml(maskPin(x.pin)) + '</td>' +
+      '<td><button class="mini-btn" onclick="togglePinActive(' + x.id + ')">' + (x.active === false ? '미사용' : '사용') + '</button></td>' +
+      '<td style="text-align:right">' +
+        '<button class="mini-btn edit" onclick="editPinRow(' + x.id + ')">수정</button> ' +
+        '<button class="btn-link-mini" onclick="deletePinRow(' + x.id + ')">삭제</button></td>' +
+      '</tr>';
+  }).join('');
+}
+function clearPinForm(type) {
+  if (type === 'staff') {
+    ['pinStaffId','pinStaffDept','pinStaffName','pinStaffPin','pinStaffNote'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+  } else {
+    ['pinVendorId','pinVendorName','pinVendorCode','pinVendorPin','pinVendorNote'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+  }
+}
+function editPinRow(id) {
+  const x = pins.find(function(p) { return String(p.id) === String(id); });
+  if (!x) return;
+  if (x.pin_type === 'staff') {
+    switchPinTab('staff');
+    document.getElementById('pinStaffId').value = x.id;
+    document.getElementById('pinStaffDept').value = x.dept || '';
+    document.getElementById('pinStaffName').value = x.name || '';
+    document.getElementById('pinStaffPin').value = x.pin || '';
+    document.getElementById('pinStaffNote').value = x.note || '';
+  } else {
+    switchPinTab('vendor');
+    document.getElementById('pinVendorId').value = x.id;
+    document.getElementById('pinVendorName').value = x.name || '';
+    document.getElementById('pinVendorCode').value = x.vendor_code || '';
+    document.getElementById('pinVendorPin').value = x.pin || '';
+    document.getElementById('pinVendorNote').value = x.note || '';
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function pinDup(pin, exceptId) {
+  return pins.some(function(x) {
+    return x.active !== false && String(x.pin) === String(pin) && String(x.id) !== String(exceptId || '');
+  });
+}
+async function savePinRow(type) {
+  const isStaff = type === 'staff';
+  const id = document.getElementById(isStaff ? 'pinStaffId' : 'pinVendorId').value;
+  const name = document.getElementById(isStaff ? 'pinStaffName' : 'pinVendorName').value.trim();
+  const pin = document.getElementById(isStaff ? 'pinStaffPin' : 'pinVendorPin').value.trim();
+  const note = document.getElementById(isStaff ? 'pinStaffNote' : 'pinVendorNote').value.trim();
+  if (!name) { alert(isStaff ? '이름을 입력하세요' : '업체명을 입력하세요'); return; }
+  if (!validPin(pin)) { alert('핀은 숫자 4~8자리로 입력하세요'); return; }
+  if (pinDup(pin, id)) { alert('이미 사용 중인 핀입니다. 다른 번호를 입력하세요.'); return; }
+  const row = {
+    pin_type: type, name: name, pin: pin, note: note || null, active: true, updated_at: kstNowISO(),
+    dept: isStaff ? (document.getElementById('pinStaffDept').value.trim() || null) : null,
+    vendor_code: isStaff ? null : (document.getElementById('pinVendorCode').value.trim() || null)
+  };
+  try {
+    if (id) await pd('PATCH', T_PIN + '?id=eq.' + id, row, { 'Prefer': 'return=minimal' });
+    else await pd('POST', T_PIN, [row], { 'Prefer': 'return=minimal' });
+    clearPinForm(type);
+    await loadPins();
+    showHint('📌 ' + (isStaff ? '사원' : '업체') + ' 핀 <b>' + escHtml(name) + '</b> 저장');
+  } catch (e) { pinDbAlert(e, '핀 저장'); }
+}
+async function saveMasterPin() {
+  const a = document.getElementById('pinMasterNew').value.trim();
+  const b = document.getElementById('pinMasterNew2').value.trim();
+  if (!validPin(a)) { alert('마스터 핀은 숫자 4~8자리로 입력하세요'); return; }
+  if (a !== b) { alert('확인 입력이 일치하지 않습니다'); return; }
+  const cur = pins.find(function(x) { return x.pin_type === 'master'; });
+  if (pinDup(a, cur ? cur.id : '')) { alert('이미 사용 중인 핀입니다. 다른 번호를 입력하세요.'); return; }
+  if (!confirm('마스터 핀을 변경할까요?\n\n변경 후에는 이전 핀을 사용할 수 없습니다.')) return;
+  try {
+    if (cur) {
+      await pd('PATCH', T_PIN + '?id=eq.' + cur.id,
+        { pin: a, active: true, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
+    } else {
+      await pd('POST', T_PIN, [{ pin_type: 'master', name: '마스터', pin: a, active: true }], { 'Prefer': 'return=minimal' });
+    }
+    document.getElementById('pinMasterNew').value = '';
+    document.getElementById('pinMasterNew2').value = '';
+    await loadPins();
+    showHint('🔑 마스터 핀이 변경되었습니다');
+  } catch (e) { pinDbAlert(e, '마스터 핀 저장'); }
+}
+async function togglePinActive(id) {
+  const x = pins.find(function(p) { return String(p.id) === String(id); });
+  if (!x) return;
+  const next = !(x.active !== false);
+  if (next && pinDup(x.pin, x.id)) { alert('같은 핀이 이미 사용 중입니다. 핀을 변경한 뒤 사용으로 바꾸세요.'); return; }
+  try {
+    await pd('PATCH', T_PIN + '?id=eq.' + id, { active: next, updated_at: kstNowISO() }, { 'Prefer': 'return=minimal' });
+    await loadPins();
+  } catch (e) { pinDbAlert(e, '상태 변경'); }
+}
+async function deletePinRow(id) {
+  const x = pins.find(function(p) { return String(p.id) === String(id); });
+  if (!x) return;
+  if (!confirm('[' + (x.name || '') + '] 핀을 삭제할까요?')) return;
+  try {
+    await pd('DELETE', T_PIN + '?id=eq.' + id, null, { 'Prefer': 'return=minimal' });
+    await loadPins();
+    showHint('🗑 핀 삭제됨');
+  } catch (e) { pinDbAlert(e, '삭제'); }
+}
+function pinDbAlert(e, what) {
+  if (isMissingTableErr(e)) {
+    alert('⚠ 핀 테이블이 아직 없습니다.\n\nSupabase SQL Editor 에서\n【 pin_ddl.sql 】 을 실행한 뒤 다시 시도하세요.\n\n(누락 테이블: pd_pin)');
+  } else if (/uq_pd_pin_active|duplicate key/i.test(String((e && e.message) || ''))) {
+    alert('이미 사용 중인 핀입니다. 다른 번호를 입력하세요.');
+  } else {
+    alert((what || '처리') + ' 실패:\n' + ((e && e.message) || e));
+  }
+}
 
 /* ===== 작업자 (이 앱 전용 · 기존 PIN 시스템과 무관) =====
    ESG PIN 로그인 여부와 상관없이 바로 사용할 수 있고,
