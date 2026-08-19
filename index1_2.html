@@ -1148,9 +1148,14 @@
 
   .pcwmenu{display:none}
   @media(min-width:761px){
-    body > .top-bar,
-    body > .tab-panel{
-      width:min(var(--pc-view-width,var(--pc-active-width,1020px)),calc(100vw - 24px));
+    body > .top-bar{
+      width:min(calc(var(--pc-active-width,1020px) * var(--pd-font-scale,1)),calc(100vw - 24px));
+      max-width:none;margin-left:auto;margin-right:auto;
+      transition:width .14s ease
+    }
+    #panelZone{width:100%;max-width:none}
+    #panelZone > .tab-panel{
+      width:min(var(--pc-view-width,var(--pc-active-width,1020px)),100%);
       max-width:none;margin-left:auto;margin-right:auto;
       transition:width .14s ease
     }
@@ -1193,7 +1198,7 @@
   .pfsquick button.on{background:#eff6ff;border-color:#60a5fa;color:#1d4ed8}
   .pcwbdrow{margin-top:12px}
   @media(max-width:760px){
-    body > .top-bar,body > .tab-panel{width:100%;max-width:none}
+    body > .top-bar,#panelZone,#panelZone > .tab-panel{width:100%;max-width:none}
     .top-meta{gap:4px}
     .menuordbtn{width:28px;height:28px}
     .pcwbtn{width:28px;height:28px;font-size:14px}
