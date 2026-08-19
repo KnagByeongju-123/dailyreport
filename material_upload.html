@@ -10,6 +10,35 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+    /* ===== 화면 설정(글자 크기 · 테두리 진하기) ===== */
+    :root{--mv-fs:1;--bd1:#b0b6c0;--bd2:#dcdfe5}
+    html.bd-1{--bd1:#ddd;--bd2:#eee}
+    html.bd-2{--bd1:#b0b6c0;--bd2:#dcdfe5}
+    html.bd-3{--bd1:#8a92a0;--bd2:#b0b6c0}
+    .main-pnl{zoom:var(--mv-fs,1)}
+    .vsmenu{position:absolute;right:12px;top:10px;z-index:60}
+    .vsbtn{width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.15);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;font-family:inherit;padding:0;transition:.15s}
+    .vsbtn:hover,.vsbtn.on{background:#fff;color:#1a237e}
+    .vspopup{position:absolute;right:0;top:calc(100% + 10px);width:min(300px,calc(100vw - 26px));padding:13px 14px 12px;border:1px solid var(--bd1,#ddd);border-radius:13px;background:#fff;box-shadow:0 14px 38px rgba(15,23,42,.25);opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top right;transition:opacity .14s ease,transform .14s ease,visibility .14s;z-index:12000;color:#212121;text-align:left}
+    .vspopup.show{opacity:1;visibility:visible;transform:none}
+    .vspopup:before{content:'';position:absolute;right:9px;top:-6px;width:10px;height:10px;background:#fff;border-left:1px solid var(--bd1,#ddd);border-top:1px solid var(--bd1,#ddd);transform:rotate(45deg)}
+    .vshead{display:flex;align-items:center;gap:8px;padding-bottom:9px;margin-bottom:10px;border-bottom:1px solid var(--bd2,#eee)}
+    .vshead b{font-size:13px;color:#1a237e;font-weight:700}
+    .vsclose{margin-left:auto;width:24px;height:24px;border:none;background:transparent;color:#888;font-size:18px;line-height:1;cursor:pointer;border-radius:6px}
+    .vsclose:hover{background:#f1f5f9;color:#212121}
+    .vsrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;font-size:12px;color:#666;font-weight:600}
+    .vsrow b{font-family:monospace;color:#1a237e;font-size:13px}
+    .vsrange{width:100%;height:26px;accent-color:#1a237e;cursor:pointer;display:block}
+    .vsscale{display:flex;justify-content:space-between;font-size:10px;color:#aaa;font-family:monospace;margin-top:-2px}
+    .vsquick{display:flex;gap:6px;margin-top:8px}
+    .vsquick button{flex:1;padding:8px 4px;border:1px solid var(--bd1,#ddd);border-radius:8px;background:#fafafa;color:#555;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;width:auto}
+    .vsquick button:hover{border-color:#1a237e;color:#1a237e}
+    .vsquick button.on{background:#e8eaf6;border-color:#1a237e;color:#1a237e}
+    .vsbdrow{margin-top:12px}
+    .vsfoot{display:flex;align-items:center;margin-top:10px;padding-top:9px;border-top:1px solid var(--bd2,#eee)}
+    .vssaved{font-size:11px;color:#2e7d32;font-weight:700;white-space:nowrap}
+    .vsreset{margin-left:auto;padding:6px 10px;border:1px solid var(--bd1,#ddd);border-radius:8px;background:#fafafa;color:#555;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;width:auto}
+    .vsreset:hover{border-color:#1a237e;color:#1a237e}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Noto Sans KR',sans-serif;background:#f0f2f5;color:#212121;min-height:100vh}
     .hdr{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:14px 16px;text-align:center}
@@ -19,15 +48,15 @@
     .card-tit{font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .fg{margin-bottom:12px}
     .fg label{display:block;font-size:14px;font-weight:600;color:#555;margin-bottom:4px}
-    .fg select,.fg input{width:100%;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-size:16px;font-family:inherit;background:#fff}
+    .fg select,.fg input{width:100%;padding:12px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-size:16px;font-family:inherit;background:#fff}
     .btn{padding:14px;border:none;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
     .btn:active{transform:scale(.97)}
     .btn-green{background:linear-gradient(135deg,#00c853,#00e676);color:#000}
     .btn-blue{background:linear-gradient(135deg,#1565c0,#42a5f5);color:#fff}
-    .btn-gray{background:#f5f5f5;color:#555;border:1px solid #ddd}
+    .btn-gray{background:#f5f5f5;color:#555;border:1px solid var(--bd1,#ddd)}
     .btn-sm{padding:8px 14px;font-size:14px;width:auto;border-radius:8px}
     .btn-row{display:flex;gap:8px;margin-bottom:12px}
-    .step{display:flex;gap:0;margin-bottom:14px;border-radius:10px;overflow:hidden;border:2px solid #e0e0e0}
+    .step{display:flex;gap:0;margin-bottom:14px;border-radius:10px;overflow:hidden;border:2px solid var(--bd1,#ddd)}
     .step-item{flex:1;padding:10px 6px;text-align:center;font-size:14px;font-weight:700;color:#aaa;background:#f5f5f5;transition:all .2s}
     .step-item.active{background:#1a237e;color:#fff}
     .step-item.done{background:#e8f5e9;color:#2e7d32}
@@ -36,16 +65,16 @@
     .info-box.green{background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32}
     .info-box.orange{background:#fff3e0;border:1px solid #ffe0b2;color:#e65100}
     .preview-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
-    .preview-tbl th{padding:7px 8px;background:#e8eaf6;border:1px solid #c5cae9;white-space:nowrap;color:#1a237e;font-weight:700}
-    .preview-tbl td{padding:6px 8px;border:1px solid #eee;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+    .preview-tbl th{padding:7px 8px;background:#e8eaf6;border:1px solid var(--bd1,#ddd);white-space:nowrap;color:#1a237e;font-weight:700}
+    .preview-tbl td{padding:6px 8px;border:1px solid var(--bd2,#eee);white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:18px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
     .back-link{display:inline-block;padding:10px 0;font-size:14px;color:#888;text-decoration:none}
     .back-link:hover{color:#1a237e}
-    .tabs{display:flex;background:#fff;border-bottom:2px solid #e0e0e0;position:sticky;top:0;z-index:50}
+    .tabs{display:flex;background:#fff;border-bottom:2px solid var(--bd1,#ddd);position:sticky;top:0;z-index:50}
     .tab{flex:1;padding:10px;text-align:center;font-size:15px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#888}
     .tab.on{color:#1a237e;border-bottom-color:#1a237e}
     .main-pnl{display:none}.main-pnl.on{display:block}
-    .file-drop{border:2.5px dashed #c5cae9;border-radius:12px;padding:30px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
+    .file-drop{border:2.5px dashed var(--bd1,#ddd);border-radius:12px;padding:30px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
     .file-drop:hover,.file-drop.dragover{border-color:#1a237e;background:#e8eaf6}
     .file-drop .fd-icon{font-size:36px;margin-bottom:6px}
     .file-drop .fd-text{font-size:15px;font-weight:600;color:#555}
@@ -101,9 +130,34 @@
   </style>
 </head>
 <body>
-<div class="hdr">
+<div class="hdr" style="position:relative">
   <h1>📤 소재발송 등록 (Rev7.4)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
+  <div class="vsmenu" id="vsMenu">
+    <button id="vsBtn" class="vsbtn" type="button" title="글자 크기 · 테두리 설정" aria-label="글자 크기 · 테두리 설정" aria-expanded="false" onclick="toggleViewPopup(event)">📐</button>
+    <div id="vsPopup" class="vspopup" role="dialog" aria-label="화면 설정" onclick="event.stopPropagation()">
+      <div class="vshead"><b>화면 설정</b><button class="vsclose" type="button" aria-label="닫기" onclick="closeViewPopup()">×</button></div>
+      <div class="vsrow"><span>글자 크기</span><b id="vsFsValue">100%</b></div>
+      <input id="vsFsRange" class="vsrange" type="range" min="80" max="150" step="5" value="100"
+        aria-label="글자 크기 조절" oninput="previewFontScale(this.value)" onchange="saveFontScale(this.value)">
+      <div class="vsscale"><span>80%</span><span>150%</span></div>
+      <div class="vsquick">
+        <button type="button" onclick="stepFontScale(-5)">A−</button>
+        <button type="button" onclick="saveFontScale(100)">100%</button>
+        <button type="button" onclick="stepFontScale(5)">A+</button>
+      </div>
+      <div class="vsrow vsbdrow"><span>테두리 진하기</span><b id="vsBdValue">진하게</b></div>
+      <div class="vsquick" id="vsBdBtns">
+        <button type="button" data-bd="1" onclick="saveBorderLv(1)">기본</button>
+        <button type="button" data-bd="2" onclick="saveBorderLv(2)">진하게</button>
+        <button type="button" data-bd="3" onclick="saveBorderLv(3)">더진하게</button>
+      </div>
+      <div class="vsfoot">
+        <span id="vsSaved" class="vssaved">저장됨</span>
+        <button class="vsreset" type="button" onclick="resetViewSettings()">기본값으로</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="tabs">
   <div class="tab on" onclick="swMainTab(0)">📤 등록</div>
@@ -226,8 +280,8 @@
     </div>
     <div class="info-box blue" style="font-size:12px">💡 등록한 업체는 <b>등록 탭의 출발지 드롭다운</b>에 표시됩니다.<br>업체코드는 발송 데이터의 <b>업체 식별자</b>로 저장됩니다 (예: AA, BB).<br>순서는 ▲▼ 버튼으로 변경 가능합니다.</div>
     <div style="font-size:14px;font-weight:700;color:#1a237e;margin:8px 0 6px 2px;padding-left:6px;border-left:3px solid #1a237e">📋 등록된 업체 목록</div>
-    <div id="vendorList" style="margin-bottom:10px;max-height:420px;overflow-y:auto;padding:4px;background:#fafafa;border-radius:8px;border:1px solid #eee"></div>
-    <div style="border-top:2px solid #e0e0e0;padding-top:14px;margin-top:12px">
+    <div id="vendorList" style="margin-bottom:10px;max-height:420px;overflow-y:auto;padding:4px;background:#fafafa;border-radius:8px;border:1px solid var(--bd2,#eee)"></div>
+    <div style="border-top:2px solid var(--bd1,#ddd);padding-top:14px;margin-top:12px">
       <div style="font-size:14px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
         <div class="fg" style="margin-bottom:0"><label style="font-size:13px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: aaa" style="font-size:16px;padding:10px 12px"></div>
@@ -246,11 +300,11 @@
     <div class="info-box blue" style="font-size:12px">💡 입력한 공지가 페이지 접속 시 자동 팝업됩니다.<br>비워두고 저장하면 팝업이 표시되지 않습니다. 사용자가 "오늘 하루 보지 않기" 선택 가능.</div>
     <div class="fg">
       <label>제목</label>
-      <input type="text" id="noticeTitle" placeholder="예: 추석 연휴 입고 일정 안내" style="padding:10px 12px;font-size:16px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box">
+      <input type="text" id="noticeTitle" placeholder="예: 추석 연휴 입고 일정 안내" style="padding:10px 12px;font-size:16px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box">
     </div>
     <div class="fg">
       <label>내용 (줄바꿈 가능)</label>
-      <textarea id="noticeBody" rows="5" placeholder="예: 9/15(월) ~ 9/17(수) 입고 불가&#10;9/18(목)부터 정상 운영" style="padding:10px 12px;font-size:15px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6"></textarea>
+      <textarea id="noticeBody" rows="5" placeholder="예: 9/15(월) ~ 9/17(수) 입고 불가&#10;9/18(목)부터 정상 운영" style="padding:10px 12px;font-size:15px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6"></textarea>
     </div>
     <div class="btn-row">
       <button class="btn btn-sm btn-blue" onclick="saveNotice()" style="flex:1">💾 공지 저장</button>
@@ -264,21 +318,21 @@
     <div class="info-box blue" style="font-size:12px">💡 <b>소재업체에서 파일 업로드 완료 시</b> 등록된 ntfy 방으로 자동 발송됩니다.</div>
     <div id="ntfyRuleList"></div>
     <div style="display:flex;gap:6px;margin-top:8px">
-      <input type="text" id="ntfyNewTopic" placeholder="방이름 (예: tj-mat)" style="flex:1;padding:8px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
+      <input type="text" id="ntfyNewTopic" placeholder="방이름 (예: tj-mat)" style="flex:1;padding:8px;font-size:14px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit">
       <button class="btn btn-sm btn-blue" onclick="addNtfyRule()" style="flex-shrink:0">+</button>
     </div>
     <div class="btn-row" style="margin-top:8px">
-      <input type="text" id="ntfyTestMsg" value="ntfy 테스트" style="flex:1;padding:8px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit">
+      <input type="text" id="ntfyTestMsg" value="ntfy 테스트" style="flex:1;padding:8px;font-size:14px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit">
       <button class="btn btn-sm" onclick="testNtfyAll()" style="background:#ef4444;color:#fff;flex-shrink:0">🔔 테스트</button>
     </div>
     <div id="ntfyStatus" style="font-size:13px;margin-top:4px;color:#888"></div>
   </div>
   <div class="card">
     <div class="card-tit">🔧 Supabase 설정</div>
-    <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
-    <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid #ddd;border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
+    <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
+    <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
   </div>
-  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:14px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;font-size:12px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS move_history_tj (
+  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:14px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid var(--bd1,#ddd);border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid var(--bd1,#ddd);border-radius:8px;font-size:12px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS move_history_tj (
   id bigint generated always as identity primary key,
   move_date date, move_time text, process text,
   departure text, destination text,
@@ -300,13 +354,13 @@ CREATE POLICY "anon_all" ON move_history_tj FOR ALL TO anon USING (true) WITH CH
 </div>
 
 <!-- 공지사항 팝업 모달 -->
-<div id="noticeModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px;box-sizing:border-box">
+<div id="noticeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:calc(16px / var(--mv-fs,1));box-sizing:border-box;zoom:var(--mv-fs,1)">
   <div style="background:#fff;max-width:520px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);max-height:90vh;display:flex;flex-direction:column">
     <div style="background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;padding:16px 20px;font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px">
       <span>📢</span><span id="noticeModalTitle">공지사항</span>
     </div>
-    <div id="noticeModalBody" style="padding:20px 22px;font-size:16px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;overflow-y:auto;flex:1;max-height:60vh"></div>
-    <div style="padding:12px 20px;background:#f7f8fc;border-top:1px solid #e0e0e0;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <div id="noticeModalBody" style="padding:20px 22px;font-size:16px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;overflow-y:auto;flex:1;max-height:calc(60vh / var(--mv-fs,1))"></div>
+    <div style="padding:12px 20px;background:#f7f8fc;border-top:1px solid var(--bd1,#ddd);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
       <label style="font-size:14px;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer">
         <input type="checkbox" id="noticeHideToday" style="width:16px;height:16px;cursor:pointer">
         오늘 하루 보지 않기
@@ -882,7 +936,7 @@ let _tt;function showToast(m){const el=document.getElementById('toast');el.textC
 function getHHMM(){const n=new Date();return String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')}
 function initHistDates(){const t=new Date(),m=new Date();m.setMonth(m.getMonth()-1);document.getElementById('histEnd').value=t.toISOString().split('T')[0];document.getElementById('histStart').value=m.toISOString().split('T')[0]}
 async function histFetch(){const sd=document.getElementById('histStart').value,ed=document.getElementById('histEnd').value;if(!sd||!ed)return{ok:false,msg:'날짜 선택'};let url=getSbUrl()+'/rest/v1/move_history_tj?select=*&order=move_date.desc,move_time.desc&limit=5000&move_date=gte.'+sd+'&move_date=lte.'+ed;const co=document.getElementById('histCompany').value.trim();if(co)url+='&material_info=ilike.*'+encodeURIComponent(co)+'*';try{const r=await fetch(url,{headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(!r.ok)throw new Error(r.status);return{ok:true,data:await r.json()}}catch(e){return{ok:false,msg:e.message}}}
-async function histQuery(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const st=document.getElementById('histStatus'),area=document.getElementById('histArea');st.textContent='조회 중...';area.innerHTML='';const r=await histFetch();if(!r.ok){st.textContent='❌ '+r.msg;st.style.color='#c62828';return}if(!r.data.length){st.textContent='⚠ 이력 없음';st.style.color='#e65100';return}st.textContent='✅ '+r.data.length+'건';st.style.color='#2e7d32';let h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e8eaf6"><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">일자</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">소재</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">LOT</th><th style="padding:5px 4px;border-bottom:1px solid #c5cae9">수량</th></tr>';r.data.slice(0,100).forEach(d=>{h+='<tr style="border-bottom:1px solid #eee"><td style="padding:4px">'+d.move_date+'</td><td style="padding:4px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.material_info||'-')+'</td><td style="padding:4px">'+(d.lot||'-')+'</td><td style="padding:4px">'+(d.qty||'-')+'</td></tr>'});area.innerHTML=h+'</table>'}
+async function histQuery(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const st=document.getElementById('histStatus'),area=document.getElementById('histArea');st.textContent='조회 중...';area.innerHTML='';const r=await histFetch();if(!r.ok){st.textContent='❌ '+r.msg;st.style.color='#c62828';return}if(!r.data.length){st.textContent='⚠ 이력 없음';st.style.color='#e65100';return}st.textContent='✅ '+r.data.length+'건';st.style.color='#2e7d32';let h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e8eaf6"><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">일자</th><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">소재</th><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">LOT</th><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">수량</th></tr>';r.data.slice(0,100).forEach(d=>{h+='<tr style="border-bottom:1px solid var(--bd2,#eee)"><td style="padding:4px">'+d.move_date+'</td><td style="padding:4px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.material_info||'-')+'</td><td style="padding:4px">'+(d.lot||'-')+'</td><td style="padding:4px">'+(d.qty||'-')+'</td></tr>'});area.innerHTML=h+'</table>'}
 async function histExcel(){const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}const hd=['일자','시간','공정','출발지','도착지','LOT','수량','소재정보','작업자','비고'];const rows=r.data.map(d=>[d.move_date,d.move_time,d.process,d.departure,d.destination,d.lot,d.qty,d.material_info,d.worker,d.note]);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([hd,...rows]),'소재입고');XLSX.writeFile(wb,'소재입고_'+document.getElementById('histStart').value.replace(/-/g,'')+'_'+document.getElementById('histEnd').value.replace(/-/g,'')+'.xlsx');showToast('📥 다운로드 완료')}
 async function histDelete(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}if(!confirm(r.data.length+'건 삭제?'))return;const ids=r.data.map(d=>d.id);for(let i=0;i<ids.length;i+=50){await fetch(getSbUrl()+'/rest/v1/move_history_tj?id=in.('+ids.slice(i,i+50).join(',')+')',{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}document.getElementById('histStatus').textContent='✅ 삭제 완료';document.getElementById('histArea').innerHTML=''}
 
@@ -965,13 +1019,13 @@ function renderVendorList(){
   const c=document.getElementById('vendorList');
   if(!c)return;
   if(!_vendorCache.length){
-    c.innerHTML='<div style="font-size:14px;color:#999;padding:20px;text-align:center;border:2px dashed #ddd;border-radius:8px;background:#fff">등록된 업체가 없습니다<br><span style="font-size:13px;color:#bbb">아래 "업체 추가"에서 등록하세요</span></div>';
+    c.innerHTML='<div style="font-size:14px;color:#999;padding:20px;text-align:center;border:2px dashed var(--bd1,#ddd);border-radius:8px;background:#fff">등록된 업체가 없습니다<br><span style="font-size:13px;color:#bbb">아래 "업체 추가"에서 등록하세요</span></div>';
     return;
   }
   c.innerHTML=_vendorCache.map((v,i)=>{
     const upDisabled=(i===0)?'disabled style="opacity:.3"':'';
     const downDisabled=(i===_vendorCache.length-1)?'disabled style="opacity:.3"':'';
-    return '<div style="display:flex;align-items:center;gap:6px;padding:10px 12px;background:#fff;border-radius:8px;margin-bottom:4px;font-size:15px;border:1px solid #e8eaf6;box-shadow:0 1px 2px rgba(0,0,0,.03)">'
+    return '<div style="display:flex;align-items:center;gap:6px;padding:10px 12px;background:#fff;border-radius:8px;margin-bottom:4px;font-size:15px;border:1px solid var(--bd2,#eee);box-shadow:0 1px 2px rgba(0,0,0,.03)">'
       +'<span style="color:#9aa0b4;min-width:24px;font-weight:700;font-size:13px;text-align:center;background:#e8eaf6;padding:3px 0;border-radius:4px">'+String(i+1).padStart(2,'0')+'</span>'
       +'<span style="flex:1;display:flex;align-items:center;gap:8px"><b style="color:#1a237e">'+v.name+'</b><span style="color:#fff;background:#3f51b5;font-family:monospace;font-size:13px;padding:2px 8px;border-radius:4px;font-weight:600">'+v.code+'</span></span>'
       +'<button onclick="moveVendor('+i+',-1)" '+upDisabled+' style="border:none;background:rgba(26,35,126,.1);color:#1a237e;width:28px;height:28px;border-radius:6px;cursor:pointer;font-weight:700" title="위로">▲</button>'
@@ -1508,14 +1562,14 @@ function renderCertModal(){
     const fname=ms.originalName||'밀시트';
     const sizeKB=ms.fileSize?(ms.fileSize/1024).toFixed(0)+' KB':'';
     if((ms.mimeType||'').startsWith('image/')){
-      preview.innerHTML=`<div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><img src="${ms.dataUrl}" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"><div style="margin-top:8px;font-size:14px;color:#16a34a;font-weight:600">✅ ${fname} ${sizeKB?'('+sizeKB+')':''} 압축 완료 · 서버 저장 예정</div></div>`;
+      preview.innerHTML=`<div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid var(--bd2,#eee);border-radius:10px;text-align:center"><img src="${ms.dataUrl}" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"><div style="margin-top:8px;font-size:14px;color:#16a34a;font-weight:600">✅ ${fname} ${sizeKB?'('+sizeKB+')':''} 압축 완료 · 서버 저장 예정</div></div>`;
     }else if((ms.mimeType||'')==='application/pdf'){
       preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;text-align:center"><div style="font-size:48px;margin-bottom:8px">📄</div><div style="font-size:16px;font-weight:700;color:#991b1b">${fname}</div><div style="margin-top:4px;font-size:14px;color:#7f1d1d">PDF · ${sizeKB}</div><div style="margin-top:10px;font-size:14px;color:#16a34a;font-weight:600">✅ 서버에 저장됩니다 (수입검사에서 확인 가능)</div></div>`;
     }else{
-      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center"><div style="font-size:16px;font-weight:700">${fname}</div><div style="margin-top:4px;font-size:14px;color:#64748b">${ms.mimeType||''} · ${sizeKB}</div><div style="margin-top:8px;font-size:14px;color:#16a34a;font-weight:600">✅ 첨부됨</div></div>`;
+      preview.innerHTML=`<div style="margin-top:10px;padding:24px;background:#f8fafc;border:1px solid var(--bd2,#eee);border-radius:10px;text-align:center"><div style="font-size:16px;font-weight:700">${fname}</div><div style="margin-top:4px;font-size:14px;color:#64748b">${ms.mimeType||''} · ${sizeKB}</div><div style="margin-top:8px;font-size:14px;color:#16a34a;font-weight:600">✅ 첨부됨</div></div>`;
     }
   }else{
-    preview.innerHTML='<div style="padding:40px 20px;text-align:center;color:#94a3b8;border:2px dashed #cbd5e1;border-radius:10px;background:#fafbfc;font-size:16px;margin-top:10px">📷 밀시트 (사진 또는 PDF)를 첨부하세요<br><span style="font-size:14px;color:#cbd5e1">스마트폰 카메라 / 갤러리 / PDF 파일 모두 가능</span></div>';
+    preview.innerHTML='<div style="padding:40px 20px;text-align:center;color:#94a3b8;border:2px dashed var(--bd1,#ddd);border-radius:10px;background:#fafbfc;font-size:16px;margin-top:10px">📷 밀시트 (사진 또는 PDF)를 첨부하세요<br><span style="font-size:14px;color:#cbd5e1">스마트폰 카메라 / 갤러리 / PDF 파일 모두 가능</span></div>';
   }
   
   const charge=c.certData?.charge||(isSUS?'허미정':'문수진');
@@ -2028,8 +2082,8 @@ window.updateCertBadge=function(){
 </script>
 
 <!-- ===== 성적서 등록 모달 (흑백 단순 표 스타일) ===== -->
-<div id="certModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.7);z-index:9999;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(3px)">
-  <div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:95vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
+<div id="certModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.7);z-index:9999;align-items:center;justify-content:center;padding:calc(14px / var(--mv-fs,1));backdrop-filter:blur(3px);zoom:var(--mv-fs,1)">
+  <div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:calc(95vh / var(--mv-fs,1));overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
     <!-- 헤더 -->
     <div style="padding:18px 24px;background:#fff;color:#000;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000;border-radius:14px 14px 0 0">
       <div style="font-size:20px;font-weight:700;letter-spacing:-0.3px;color:#000">
@@ -2046,7 +2100,7 @@ window.updateCertBadge=function(){
     
     <div style="padding:22px 26px">
       <!-- 정보 박스 (단순화) -->
-      <div id="certInfoBox" style="padding:14px 18px;background:#fafafa;border:1px solid #ccc;border-radius:6px;font-size:16px;line-height:1.8;color:#000;margin-bottom:18px"></div>
+      <div id="certInfoBox" style="padding:14px 18px;background:#fafafa;border:1px solid var(--bd1,#ddd);border-radius:6px;font-size:16px;line-height:1.8;color:#000;margin-bottom:18px"></div>
       
       <!-- 측정값 표 제목 -->
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:8px">
@@ -2202,7 +2256,7 @@ window.updateCertBadge=function(){
           cursor:not-allowed !important;
           background:#f5f5f5 !important;
           color:#aaa !important;
-          border-color:#ccc !important;
+          border-color:var(--bd1,#ddd) !important;
         }
       </style>
       
@@ -2229,7 +2283,7 @@ window.updateCertBadge=function(){
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #000">
         📎 밀시트 첨부 (선택)
       </div>
-      <div style="background:#fafafa;padding:12px 14px;border:1px solid #ccc;border-radius:4px;margin-bottom:8px">
+      <div style="background:#fafafa;padding:12px 14px;border:1px solid var(--bd1,#ddd);border-radius:4px;margin-bottom:8px">
         <input type="file" id="certMillFile" accept="image/*,application/pdf,.pdf" onchange="certMillsheetUpload(this)" style="font-size:16px;font-family:inherit">
         <div style="font-size:14px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 서버 저장용은 자동 압축, 메일은 원본 첨부 (최대 10 MB)</div>
       </div>
@@ -2249,6 +2303,84 @@ window.updateCertBadge=function(){
 
 <script>
 document.getElementById('certModal').addEventListener('click',e=>{if(e.target.id==='certModal')closeCertModal()});
+
+/* ============================================================
+   화면 설정 : 글자 크기 + 테두리 진하기
+   ============================================================ */
+const VS_FS_KEY='mup_font_scale_v1', VS_BD_KEY='mup_border_lv_v1';
+const VS_FS_MIN=80, VS_FS_MAX=150, VS_FS_STEP=5, VS_FS_DEF=100;
+const VS_BD_NAME={1:'기본',2:'진하게',3:'더진하게'};
+let VS_FS=VS_FS_DEF, VS_BD=2;
+function vsFsClamp(v){
+  let n=Number(v)||VS_FS_DEF;
+  n=Math.round(n/VS_FS_STEP)*VS_FS_STEP;
+  return Math.max(VS_FS_MIN,Math.min(VS_FS_MAX,n));
+}
+function loadFontScale(){
+  try{VS_FS=vsFsClamp(localStorage.getItem(VS_FS_KEY)||VS_FS_DEF)}catch(e){VS_FS=VS_FS_DEF}
+  applyFontScale(VS_FS,false);
+}
+function applyFontScale(v,save){
+  const n=vsFsClamp(v);
+  VS_FS=n;
+  document.documentElement.style.setProperty('--mv-fs',(n/100).toString());
+  const rg=document.getElementById('vsFsRange'); if(rg)rg.value=n;
+  const val=document.getElementById('vsFsValue'); if(val)val.textContent=n+'%';
+  if(save){try{localStorage.setItem(VS_FS_KEY,String(n))}catch(e){} vsSaved('저장됨')}
+}
+function previewFontScale(v){vsSaved('조절중');applyFontScale(v,false)}
+function saveFontScale(v){applyFontScale(v,true)}
+function stepFontScale(d){saveFontScale(VS_FS+d)}
+function loadBorderLv(){
+  let n=2;
+  try{n=Number(localStorage.getItem(VS_BD_KEY))||2}catch(e){n=2}
+  applyBorderLv(n,false);
+}
+function applyBorderLv(v,save){
+  const n=[1,2,3].includes(Number(v))?Number(v):2;
+  VS_BD=n;
+  const h=document.documentElement;
+  h.classList.remove('bd-1','bd-2','bd-3');
+  h.classList.add('bd-'+n);
+  const val=document.getElementById('vsBdValue'); if(val)val.textContent=VS_BD_NAME[n];
+  document.querySelectorAll('#vsBdBtns button').forEach(b=>b.classList.toggle('on',Number(b.dataset.bd)===n));
+  if(save){try{localStorage.setItem(VS_BD_KEY,String(n))}catch(e){} vsSaved('저장됨')}
+}
+function saveBorderLv(v){applyBorderLv(v,true)}
+function resetViewSettings(){
+  applyFontScale(VS_FS_DEF,true);
+  applyBorderLv(2,true);
+  vsSaved('기본값');
+}
+function vsSaved(t){
+  const el=document.getElementById('vsSaved'); if(!el)return;
+  el.textContent=t;
+  clearTimeout(vsSaved._t);
+  if(t==='기본값')vsSaved._t=setTimeout(()=>el.textContent='저장됨',900);
+}
+function toggleViewPopup(e){
+  if(e)e.stopPropagation();
+  const pop=document.getElementById('vsPopup'), btn=document.getElementById('vsBtn');
+  if(!pop||!btn)return;
+  const open=!pop.classList.contains('show');
+  pop.classList.toggle('show',open);
+  btn.classList.toggle('on',open);
+  btn.setAttribute('aria-expanded',open?'true':'false');
+  if(open){applyFontScale(VS_FS,false);applyBorderLv(VS_BD,false)}
+}
+function closeViewPopup(){
+  const pop=document.getElementById('vsPopup'), btn=document.getElementById('vsBtn');
+  if(pop)pop.classList.remove('show');
+  if(btn){btn.classList.remove('on');btn.setAttribute('aria-expanded','false')}
+}
+document.addEventListener('click',e=>{
+  const m=document.getElementById('vsMenu');
+  if(m&&!m.contains(e.target))closeViewPopup();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewPopup()});
+loadFontScale();
+loadBorderLv();
+
 </script>
 </body>
 </html>
