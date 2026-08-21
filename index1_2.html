@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.77</title>
+<title>프레스 생산관리 Rev.7.78</title>
 <style>
   /* 테두리 진하기(3단계) — 저해상도 모니터 가독성 대응 */
   :root{--bd1:#94a3b8;--bd2:#cbd5e1}
@@ -1351,7 +1351,7 @@
   }
 </style>
 
-
+<!-- [Rev.7.78] 측정검사 임베드 프레임 스타일 (JS 문자열 안에 잘못 들어가 있던 블록 복구) -->
 <style id="measure-frame-05-style">
 /* 첨부 insp.html 측정검사를 주 화면으로 사용하고 기존 내장 측정 화면은 데이터 호환용으로 숨김 */
 #drawer .tab-btn[data-menu-id="measure"] .flow-badge{display:none!important}
@@ -1369,7 +1369,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.77</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.78</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1416,7 +1416,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.77</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.78</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -2236,7 +2236,7 @@
 </div>
 
 <!-- ===== [Rev.7.67] 인트로 : PIN 로그인 ===== -->
-<div class="pin-gate done" id="pinGate" style="display:none" hidden>
+<div class="pin-gate" id="pinGate">
   <div class="pg-box">
     <div class="pg-logo">🏭</div>
     <div class="pg-title">프레스 생산관리</div>
@@ -2272,13 +2272,13 @@
 <div class="modal-bg" id="workerModal">
   <div class="modal" style="max-width:400px">
     <h2>👷 작업자 정보 <button class="x" onclick="closeWorkerModal()" style="margin-left:auto">✕</button></h2>
-    <div class="sel-hint" style="margin-bottom:10px">현재 버전은 <b>로그인 없이</b> 사용합니다. (인트로 PIN 화면 비활성화)</div>
+    <div class="sel-hint" style="margin-bottom:10px">핀 로그인으로 확인된 정보입니다. 변경하려면 로그아웃 후 다른 핀으로 로그인하세요.</div>
     <div class="wk-info">
       <div class="wk-row"><span class="wk-l">이름</span><span class="wk-v" id="wkInfoName">—</span></div>
       <div class="wk-row"><span class="wk-l">부서</span><span class="wk-v" id="wkInfoDept">—</span></div>
       <div class="wk-row"><span class="wk-l">권한</span><span class="wk-v" id="wkInfoRole">—</span></div>
     </div>
-    <button class="btn-primary" id="wkLogoutBtn" style="margin-top:12px;display:none" onclick="pinLogout()">🔒 로그아웃 (핀 재입력)</button>
+    <button class="btn-primary" id="wkLogoutBtn" style="margin-top:12px" onclick="pinLogout()">🔒 로그아웃 (핀 재입력)</button>
     <div style="margin-top:6px"><button class="btn-gray" onclick="closeWorkerModal()">닫기</button></div>
   </div>
 </div>
@@ -3519,7 +3519,8 @@ function _injectMode(doc, mode) {
       '#mainPnl1{display:block!important}</style>' +
       '<scr' + 'ipt>document.addEventListener("DOMContentLoaded",function(){' +
       'try{_settingsUnlocked=true;_settingsUnlockedBy="";loadSettingsUI();}catch(e){console.warn("[cfg-mode]",e);}' +
-      '});</scr' + 'ipt></head>');
+      '});</scr' + 'ipt>' +
+      '</head>');
   }
   return doc;
 }
@@ -3802,7 +3803,7 @@ function closeWorkerModal() { document.getElementById('workerModal').classList.r
 /* ===== [Rev.7.67] 인트로 PIN 로그인 ===== */
 /* [Rev.7.77] 인트로 PIN 로그인 사용 안함 — 실행 즉시 메인 진입
    다시 켜려면 아래 값을 true 로만 바꾸면 된다. */
-const PIN_GATE_ENABLED = false;
+const PIN_GATE_ENABLED = true;
 const LS_PIN_SESSION = 'pdPinSession_v1';
 const PIN_SESSION_DAYS = 7;
 const INITIAL_MASTER_PIN = '0000';
@@ -3989,6 +3990,10 @@ async function initPinGate() {
     return;
   }
 
+  /* [Rev.7.78] DB 조회를 기다리지 않고 게이트를 먼저 띄운다 (테마 셸에 먹히는 것 방지) */
+  openPinGate();
+  pgMsg('초기 비밀번호 0000 · 로그인 후 7일간 유지', false);
+
   try { await loadPins(); } catch (e) {}
   let sess = null;
   try { sess = JSON.parse(localStorage.getItem(LS_PIN_SESSION) || 'null'); } catch (e) {}
@@ -4010,7 +4015,7 @@ async function initPinGate() {
   renderWorkerChip();
 
   openPinGate();
-  pgMsg('초기비번 0000 입력 시 바로 메인으로 들어갑니다', false);
+  pgMsg('초기 비밀번호 0000 · 로그인 후 7일간 유지', false);
 }
 
 /* ===== 마스터 데이터 ===== */
@@ -8782,7 +8787,11 @@ window.__JP_UI_CFG={
     anchor.parentNode.insertBefore(top, anchor.nextSibling);
     top.parentNode.insertBefore(shell, top.nextSibling);
     shell.appendChild(side); shell.appendChild(main);
-    rest.forEach(x => main.appendChild(x));   /* 이미 실행된 script 이동은 재실행되지 않음 */
+    rest.forEach(x => {
+      /* [Rev.7.78] 인트로 PIN 게이트는 body 직속을 유지해야 전체화면 오버레이가 정상 동작 */
+      if (x.nodeType === 1 && x.id === 'pinGate') { document.body.appendChild(x); return; }
+      main.appendChild(x);
+    });   /* 이미 실행된 script 이동은 재실행되지 않음 */
   }
   function catItems(c){
     try { return (typeof c.items === 'function' ? c.items() : c.items) || []; } catch (e) { return []; }
