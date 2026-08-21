@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.79</title>
+<title>프레스 생산관리 Rev.7.80</title>
 <style>
   /* 테두리 진하기(3단계) — 저해상도 모니터 가독성 대응 */
   :root{--bd1:#94a3b8;--bd2:#cbd5e1}
@@ -1369,7 +1369,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.79</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.80</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1416,7 +1416,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.79</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.80</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -3912,8 +3912,8 @@ function applyPinLogin(row, keepExp) {
   const sess = Object.assign({}, worker, { exp: exp });
   try { localStorage.setItem(LS_PIN_SESSION, JSON.stringify(sess)); } catch (e) {}
   try { localStorage.setItem(LS_WORKER, JSON.stringify(worker)); } catch (e) {}
-  /* 측정검사(insp.html)도 동일한 7일 로그인 만료를 사용 */
-  try { localStorage.setItem('mm_session', JSON.stringify({ name: worker.name, exp: exp })); } catch (e) {}
+  /* [Rev.7.80] 측정검사(insp.html)도 동일한 7일 만료를 사용 · 키는 pd_ 네임스페이스로 분리 */
+  try { localStorage.setItem('pd_session', JSON.stringify({ name: worker.name, exp: exp })); } catch (e) {}
   renderWorkerChip();
   markDirty();
   /* [Rev.7.79] 로그인 직후에만 측정검사 프레임 로드 허용 */
@@ -3988,7 +3988,7 @@ function pinLogout() {
     return;
   }
   if (session.active && !confirm('설비가동 중입니다. 로그아웃할까요?\n(가동 상태는 유지됩니다)')) return;
-  try { localStorage.removeItem(LS_PIN_SESSION); localStorage.removeItem(LS_WORKER); localStorage.removeItem('mm_session'); sessionStorage.removeItem('mm_user'); } catch (e) {}
+  try { localStorage.removeItem(LS_PIN_SESSION); localStorage.removeItem(LS_WORKER); localStorage.removeItem('pd_session'); sessionStorage.removeItem('pd_user'); } catch (e) {}
   worker = { id: 'GUEST', name: '미로그인', dept: '', role: 'guest' };
   renderWorkerChip();
   closeWorkerModal();
@@ -4009,7 +4009,7 @@ async function initPinGate() {
       role: 'master'
     };
     try { localStorage.setItem(LS_WORKER, JSON.stringify(worker)); } catch (e) {}
-    try { localStorage.setItem('mm_session', JSON.stringify({ name: worker.name, exp: Date.now() + PIN_SESSION_MS })); } catch (e) {}
+    try { localStorage.setItem('pd_session', JSON.stringify({ name: worker.name, exp: Date.now() + PIN_SESSION_MS })); } catch (e) {}
     renderWorkerChip();
     try { await loadPins(); } catch (e) {}
     return;
@@ -4035,7 +4035,7 @@ async function initPinGate() {
   }
 
   /* 만료되었거나 더 이상 유효하지 않은 세션은 정리 */
-  try { localStorage.removeItem(LS_PIN_SESSION); localStorage.removeItem(LS_WORKER); localStorage.removeItem('mm_session'); } catch (e) {}
+  try { localStorage.removeItem(LS_PIN_SESSION); localStorage.removeItem(LS_WORKER); localStorage.removeItem('pd_session'); } catch (e) {}
   worker = { id: 'GUEST', name: '미로그인', dept: '', role: 'guest' };
   renderWorkerChip();
 

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ffffff">
-<title>검사성적서 — 금형제작관리 Rev.7.79</title>
+<title>검사성적서 — 프레스 생산관리 Rev.8.1</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -1564,7 +1564,7 @@ html.insp-embed .modal{zoom:1!important}
 <body>
 <header>
   <div class="hleft">
-    <div class="hmb" onclick="location.href='index.html'" title="메인으로" style="font-size:19px;color:var(--gold);align-items:center;justify-content:center">←</div>
+    <div class="hmb" onclick="location.href='index1_2.html'" title="메인으로" style="font-size:19px;color:var(--gold);align-items:center;justify-content:center">←</div>
     <span class="htitle gold-txt">검사성적서</span>
   </div>
   <div class="hright">
@@ -1672,9 +1672,9 @@ html.insp-embed .modal{zoom:1!important}
     <div id="insp-cfg" class="hide">
       <div class="qfbox"><span class="qflb">⚙️ 성적서 바닥글 (문서번호 · 회사명 · 용지)</span>
         <div class="ihdr cfg3">
-          <div class="fg"><label>좌측 — 문서번호</label><input id="cf-l" placeholder="예: IPQP-1234"></div>
-          <div class="fg"><label>중앙 — 회사명</label><input id="cf-c" placeholder="예: 일평기연"></div>
-          <div class="fg"><label>우측 — 용지 / 비고</label><input id="cf-r" placeholder="예: A4(210×297)"></div>
+          <div class="fg"><label>좌측 — 문서번호</label><input id="cf-l" placeholder=""></div>
+          <div class="fg"><label>중앙 — 회사명</label><input id="cf-c" placeholder=""></div>
+          <div class="fg"><label>우측 — 용지 / 비고</label><input id="cf-r" placeholder="A4(210×297)"></div>
         </div>
         <div class="ftprev" id="cf-prev"></div>
         <div class="stkbar">
@@ -1683,10 +1683,10 @@ html.insp-embed .modal{zoom:1!important}
         </div>
       </div>
       <div class="qfbox measure-db-box"><span class="qflb">🗄️ 측정검사 전용 DB</span>
-        <div class="measure-db-note">측정 양식·치수측정값·결과·출력설정은 <b>index1_2 생산DB와 별도 Supabase DB</b>에 저장합니다. 금형/공정 목록만 생산DB에서 읽습니다.</div>
+        <div class="measure-db-note">측정 양식·치수측정값·결과·출력설정은 기본적으로 <b>프레스 생산DB의 pd_measure_* 테이블</b>에 저장합니다. 금형/공정 목록은 <b>pd_mold · pd_insp_process</b>에서 읽습니다.</div>
         <div class="ihdr cfg3 measure-db-grid">
           <div class="fg" style="grid-column:1/3"><label>측정DB Supabase URL</label><input id="mdb-url" placeholder="https://xxxxx.supabase.co" autocomplete="off"></div>
-          <div class="fg"><label>Storage 버킷</label><input id="mdb-bucket" value="measure-files" placeholder="measure-files"></div>
+          <div class="fg"><label>Storage 버킷</label><input id="mdb-bucket" value="pd-measure" placeholder="pd-measure"></div>
           <div class="fg" style="grid-column:1/-1"><label>Publishable / anon key</label><input id="mdb-key" type="password" placeholder="sb_publishable_... 또는 anon key" autocomplete="new-password"></div>
         </div>
         <div class="measure-db-status" id="mdb-status">측정DB 미설정</div>
@@ -1783,10 +1783,10 @@ if(window.self!==window.top){document.documentElement.classList.add('embedded');
 /* ---------- 화면 테마 (index.html과 공유) ---------- */
 (function(){
   try{
-    window.__mmTheme=localStorage.getItem('mm_theme_v1')||'';
-    if(window.__mmTheme!=='mono'&&window.__mmTheme!=='clean')window.__mmTheme='';
-    window.__mmApplyTheme=function(){
-      var t=window.__mmTheme;
+    window.__pdTheme=localStorage.getItem('pd_theme_v1')||'';
+    if(window.__pdTheme!=='mono'&&window.__pdTheme!=='clean')window.__pdTheme='';
+    window.__pdApplyTheme=function(){
+      var t=window.__pdTheme;
       /* 클린 테마는 PC(1000px 이상)에서만 적용 */
       if(t==='clean'&&(window.innerWidth||document.documentElement.clientWidth)<1000)t='';
       if(t)document.documentElement.setAttribute('data-theme',t);
@@ -1794,27 +1794,27 @@ if(window.self!==window.top){document.documentElement.classList.add('embedded');
       var m=document.querySelector('meta[name="theme-color"]');
       if(m)m.setAttribute('content','#ffffff');
     };
-    window.__mmApplyTheme();
-    window.addEventListener('resize',window.__mmApplyTheme);
+    window.__pdApplyTheme();
+    window.addEventListener('resize',window.__pdApplyTheme);
     window.addEventListener('storage',function(e){
-      if(e.key!=='mm_theme_v1')return;
-      window.__mmTheme=(e.newValue==='mono'||e.newValue==='clean')?e.newValue:'';
-      window.__mmApplyTheme();
+      if(e.key!=='pd_theme_v1')return;
+      window.__pdTheme=(e.newValue==='mono'||e.newValue==='clean')?e.newValue:'';
+      window.__pdApplyTheme();
     });
   }catch(e){}
 })();
 
 
 /* ================= DB 설정 =================
-   CORE DB  : index1_2 생산DB — 금형/공정 기준정보 읽기 전용
+   CORE DB  : 프레스 생산DB(pd_*) — 금형/공정 기준정보 읽기 전용
    MEASURE DB: 측정검사 전용 — 양식/치수/결과/출력설정/도면 저장
    ============================================================ */
 const CORE_BASE="https://pllwltojbofjaftcemvn.supabase.co";
 const CORE_URL=CORE_BASE+"/rest/v1";
 const CORE_KEY="sb_publishable_9dYJzdz472b888EcqdBBaA_Ncwk0yvT";
 const CORE_H={"apikey":CORE_KEY,"Authorization":"Bearer "+CORE_KEY,"Content-Type":"application/json"};
-const MDB_URL_KEY='measure_db_url_v1',MDB_KEY_KEY='measure_db_key_v1',MDB_BUCKET_KEY='measure_db_bucket_v1';
-const MDB_BUCKET_DEF='measure-files';
+const MDB_URL_KEY='pd_measure_db_url_v1',MDB_KEY_KEY='pd_measure_db_key_v1',MDB_BUCKET_KEY='pd_measure_db_bucket_v1';
+const MDB_BUCKET_DEF='pd-measure';
 let MDB={url:'',key:'',bucket:MDB_BUCKET_DEF};
 function loadMeasureDbCfg(){
   try{
@@ -1824,11 +1824,20 @@ function loadMeasureDbCfg(){
   }catch(e){MDB={url:'',key:'',bucket:MDB_BUCKET_DEF}}
   return MDB;
 }
-function measureDbReady(){return !!(MDB.url&&MDB.key)}
+/* [프레스 전용] 측정DB를 따로 지정하지 않으면 프레스 생산DB(CORE)의 pd_measure_* 테이블을 쓴다.
+   → 별도 Supabase 프로젝트를 만들지 않아도 즉시 동작한다. */
+function effMdb(){
+  return (MDB.url&&MDB.key)
+    ? {url:MDB.url,key:MDB.key,bucket:MDB.bucket||MDB_BUCKET_DEF,ext:true}
+    : {url:CORE_BASE,key:CORE_KEY,bucket:MDB.bucket||MDB_BUCKET_DEF,ext:false};
+}
+function measureDbReady(){return true}
+function measureDbExternal(){return !!(MDB.url&&MDB.key)}
 loadMeasureDbCfg();
 
 /* ================= 세션 (index1_2.html과 공유 · 7일 고정 만료) ================= */
-const SESS_KEY='mm_session', MAIN_SESS_KEY='pdPinSession_v1', SESS_DAYS=7;
+/* [프레스 전용] 세션키를 pd_ 네임스페이스로 분리 — 금형제작관리(mm_session)와 섞이지 않게 한다 */
+const SESS_KEY='pd_session', MAIN_SESS_KEY='pdPinSession_v1', SESS_DAYS=7;
 function readSession(){
   const now=Date.now();
   /* 1순위: 메인 생산관리 PIN 로그인 세션 */
@@ -1836,7 +1845,7 @@ function readSession(){
     const p=JSON.parse(localStorage.getItem(MAIN_SESS_KEY)||'null');
     if(p&&p.name&&Number(p.exp)>now){
       localStorage.setItem(SESS_KEY,JSON.stringify({name:p.name,exp:Number(p.exp)}));
-      sessionStorage.setItem('mm_user',p.name);
+      sessionStorage.setItem('pd_user',p.name);
       return p.name;
     }
     if(p&&Number(p.exp)<=now)localStorage.removeItem(MAIN_SESS_KEY);
@@ -1845,12 +1854,12 @@ function readSession(){
   try{
     const o=JSON.parse(localStorage.getItem(SESS_KEY)||'null');
     if(o&&o.name&&Number(o.exp)>now){
-      sessionStorage.setItem('mm_user',o.name);
+      sessionStorage.setItem('pd_user',o.name);
       return o.name;
     }
     if(o)localStorage.removeItem(SESS_KEY);
   }catch(e){}
-  sessionStorage.removeItem('mm_user');
+  sessionStorage.removeItem('pd_user');
   return null;
 }
 let USER=readSession();
@@ -1863,9 +1872,9 @@ async function coreApi(path,opt={}){
   return r.json();
 }
 async function mapi(path,opt={}){
-  if(!measureDbReady())throw new Error('측정DB 미설정 — 출력설정 탭에서 별도 측정DB를 설정하세요');
-  const h={apikey:MDB.key,Authorization:'Bearer '+MDB.key,'Content-Type':'application/json'};
-  const r=await fetch(MDB.url+'/rest/v1'+path,{headers:{...h,Prefer:opt.method&&opt.method!=="GET"?"return=representation":""},...opt});
+  const d=effMdb();
+  const h={apikey:d.key,Authorization:'Bearer '+d.key,'Content-Type':'application/json'};
+  const r=await fetch(d.url+'/rest/v1'+path,{headers:{...h,Prefer:opt.method&&opt.method!=="GET"?"return=representation":""},...opt});
   if(!r.ok){const t=await r.text();throw new Error(t)}
   if(r.status===204)return null;
   return r.json();
@@ -1875,28 +1884,28 @@ function setMdbStatus(msg,kind){const el=document.getElementById('mdb-status');i
 function drawMeasureDbSettings(){
   const u=document.getElementById('mdb-url'),k=document.getElementById('mdb-key'),b=document.getElementById('mdb-bucket');
   if(u)u.value=MDB.url||'';if(k)k.value=MDB.key||'';if(b)b.value=MDB.bucket||MDB_BUCKET_DEF;
-  setMdbStatus(measureDbReady()?'측정DB 설정됨 · 생산DB와 분리 저장':'측정DB 미설정 — URL/Key를 입력하세요',measureDbReady()?'ok':'');
+  setMdbStatus(measureDbExternal()?('외부 측정DB 사용 중 · '+MDB.url):'기본값 · 프레스 생산DB의 pd_measure_* 테이블 사용','ok');
 }
 function saveMeasureDbSettings(){
   const u=(document.getElementById('mdb-url')?.value||'').trim().replace(/\/$/,''),k=(document.getElementById('mdb-key')?.value||'').trim(),b=(document.getElementById('mdb-bucket')?.value||MDB_BUCKET_DEF).trim()||MDB_BUCKET_DEF;
   if(!u||!k)return setMdbStatus('URL과 Publishable/anon key를 모두 입력하세요','err');
-  if(u===CORE_BASE)return setMdbStatus('index1_2 생산DB와 같은 URL입니다. 별도 Supabase 프로젝트 URL을 입력하세요','err');
+  if(u===CORE_BASE)return setMdbStatus('프레스 생산DB와 같은 URL입니다. 비워두면 자동으로 생산DB의 pd_measure_* 를 사용합니다','err');
   try{localStorage.setItem(MDB_URL_KEY,u);localStorage.setItem(MDB_KEY_KEY,k);localStorage.setItem(MDB_BUCKET_KEY,b)}catch(e){}
-  MDB={url:u,key:k,bucket:b};setMdbStatus('저장됨 · 측정 데이터는 별도 DB에 저장됩니다','ok');
+  MDB={url:u,key:k,bucket:b};setMdbStatus('저장됨 · 측정 데이터는 외부 측정DB에 저장됩니다','ok');
   renderInsp().catch(()=>{});loadFoot().then(drawFoot).catch(()=>{});
 }
 function clearMeasureDbSettings(){
-  if(!confirm('이 브라우저의 측정DB 연결 설정을 지울까요? 실제 DB 데이터는 삭제되지 않습니다.'))return;
+  if(!confirm('외부 측정DB 설정을 지우고 프레스 생산DB(pd_measure_*)로 되돌릴까요?\n실제 DB 데이터는 삭제되지 않습니다.'))return;
   try{localStorage.removeItem(MDB_URL_KEY);localStorage.removeItem(MDB_KEY_KEY);localStorage.removeItem(MDB_BUCKET_KEY)}catch(e){}
   MDB={url:'',key:'',bucket:MDB_BUCKET_DEF};drawMeasureDbSettings();
 }
 async function testMeasureDb(){
   const u=(document.getElementById('mdb-url')?.value||'').trim().replace(/\/$/,''),k=(document.getElementById('mdb-key')?.value||'').trim();
   if(!u||!k)return setMdbStatus('URL과 Key를 입력하세요','err');
-  if(u===CORE_BASE)return setMdbStatus('생산DB와 같은 URL입니다. 별도 DB를 사용하세요','err');
+  if(u===CORE_BASE)return setMdbStatus('프레스 생산DB와 같은 URL입니다. 외부 DB를 쓸 때만 입력하세요','err');
   setMdbStatus('연결 확인 중...');
-  try{const r=await fetch(u+'/rest/v1/measure_forms?select=id&limit=1',{headers:{apikey:k,Authorization:'Bearer '+k}});if(!r.ok)throw new Error((await r.text()).slice(0,180));setMdbStatus('연결 정상 · measure_forms 확인 완료','ok')}
-  catch(e){setMdbStatus('연결 실패 · measure_db_schema.sql / URL / Key를 확인하세요 — '+e.message,'err')}
+  try{const r=await fetch(u+'/rest/v1/pd_measure_forms?select=id&limit=1',{headers:{apikey:k,Authorization:'Bearer '+k}});if(!r.ok)throw new Error((await r.text()).slice(0,180));setMdbStatus('연결 정상 · pd_measure_forms 확인 완료','ok')}
+  catch(e){setMdbStatus('연결 실패 · pd_measure_schema.sql / URL / Key를 확인하세요 — '+e.message,'err')}
 }
 function esc(s){return (s??'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
@@ -1914,21 +1923,23 @@ function openBig(src){const w=window.open('');w.document.write('<body style="mar
 let MASTER=[];
 function opN(c){return (c||'').replace(/^OP|^RP/,'')}
 function FM(flow){return MASTER.filter(m=>(m.flow||'신작')===flow)}
-function pflow(p){return p&&p.mold_type==='수리'?'수리':'신작'}
+/* [프레스 전용] pd_mold 에는 신작/수리 구분이 없다 → 공정 흐름은 항상 '신작' */
+function pflow(p){return '신작'}
 function mName(c){const m=MASTER.find(x=>x.op_code===c);return m?m.process_name:''}
 async function loadMaster(){
-  MASTER=await api("/mm_master?select=*&order=seq");
+  MASTER=await api("/pd_insp_process?select=*&order=seq");
   MASTER.forEach(m=>{if(typeof m.tasks==='string'){try{m.tasks=JSON.parse(m.tasks)}catch(e){m.tasks=[]}}});
 }
 
 /* ---------- 금형 목록 ---------- */
 let QAPJ=[],INSP=[];
 async function loadQaProjects(){
-  QAPJ=await api("/mm_project?select=id,mold_no,mold_name,status,mold_type&order=created_at.desc");
+  QAPJ=(await api("/pd_mold?select=id,mold_no,item_no,model_code,customer,active&order=mold_no.asc")||[])
+         .filter(x=>x.active!==false);
   return QAPJ;
 }
-function qaOpt(x){return `<option value="${x.id}">${x.mold_type==='수리'?'[수리] ':'[신작] '}${esc(x.mold_no)} — ${esc(x.mold_name)}</option>`}
-function qaMold(id){const p=QAPJ.find(x=>String(x.id)===String(id));return p?p.mold_no+' '+p.mold_name:''}
+function qaOpt(x){return `<option value="${x.id}">${esc(x.mold_no)}${x.item_no?' — '+esc(x.item_no):''}</option>`}
+function qaMold(id){const p=QAPJ.find(x=>String(x.id)===String(id));return p?(p.mold_no+(p.item_no?' '+p.item_no:'')):''}
 function qaFilterLabel(f1,f2,extra){
   const p=[];
   if(f1||f2)p.push('기간 '+(f1||'~')+' ~ '+(f2||'~'));
@@ -1956,27 +1967,28 @@ function shrinkBlob(file,max){return new Promise((res,rej)=>{
 async function uploadImg(file,folder){
   const blob=await shrinkBlob(file);
   const name=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
-  if(!measureDbReady())throw new Error('측정DB가 설정되지 않았습니다');
-  const r=await fetch(MDB.url+"/storage/v1/object/"+MDB.bucket+"/"+name,{
+  const d=effMdb();
+  const r=await fetch(d.url+"/storage/v1/object/"+d.bucket+"/"+name,{
     method:"POST",
-    headers:{apikey:MDB.key,Authorization:"Bearer "+MDB.key,"Content-Type":"image/jpeg","x-upsert":"true"},
+    headers:{apikey:d.key,Authorization:"Bearer "+d.key,"Content-Type":"image/jpeg","x-upsert":"true"},
     body:blob});
-  if(!r.ok){const t=await r.text();throw new Error('업로드 실패: '+t)}
-  return MDB.url+"/storage/v1/object/public/"+MDB.bucket+"/"+name;
+  if(!r.ok){const t=await r.text();throw new Error('업로드 실패 ('+d.bucket+' 버킷을 확인하세요): '+t)}
+  return d.url+"/storage/v1/object/public/"+d.bucket+"/"+name;
 }
 async function deleteImg(url){
-  if(!url||!measureDbReady()||!url.includes('/storage/v1/object/public/'+MDB.bucket+'/'))return;
-  const path=url.split('/storage/v1/object/public/'+MDB.bucket+'/')[1];
-  try{await fetch(MDB.url+"/storage/v1/object/"+MDB.bucket+"/"+path,
-    {method:"DELETE",headers:{apikey:MDB.key,Authorization:"Bearer "+MDB.key}});}catch(e){}
+  const d=effMdb();
+  if(!url||!url.includes('/storage/v1/object/public/'+d.bucket+'/'))return;
+  const path=url.split('/storage/v1/object/public/'+d.bucket+'/')[1];
+  try{await fetch(d.url+"/storage/v1/object/"+d.bucket+"/"+path,
+    {method:"DELETE",headers:{apikey:d.key,Authorization:"Bearer "+d.key}});}catch(e){}
 }
 /* ---------- 성적서 바닥글 설정 ---------- */
-const FOOT_KEY='mm_insp_foot_v1';
+const FOOT_KEY='pd_insp_foot_v1';
 const FOOT_DEF={l:'',c:'',r:'A4(210×297)'};
 let FOOT=Object.assign({},FOOT_DEF);
 async function loadFoot(){
   try{
-    const r=await mapi("/measure_doc_cfg?select=*&doc_type=eq.insp");
+    const r=await mapi("/pd_measure_doc_cfg?select=*&doc_type=eq.insp");
     if(r&&r.length){FOOT={l:r[0].foot_l||'',c:r[0].foot_c||'',r:r[0].foot_r||FOOT_DEF.r};
       try{localStorage.setItem(FOOT_KEY,JSON.stringify(FOOT))}catch(e){}
       return}
@@ -2000,11 +2012,11 @@ async function saveFoot(){
   try{localStorage.setItem(FOOT_KEY,JSON.stringify(FOOT))}catch(e){}
   try{
     const body={doc_type:'insp',foot_l:FOOT.l||null,foot_c:FOOT.c||null,foot_r:FOOT.r||null};
-    const ex=await mapi("/measure_doc_cfg?select=doc_type&doc_type=eq.insp");
-    if(ex&&ex.length)await mapi("/measure_doc_cfg?doc_type=eq.insp",{method:"PATCH",body:JSON.stringify(body)});
-    else await mapi("/measure_doc_cfg",{method:"POST",body:JSON.stringify(body)});
+    const ex=await mapi("/pd_measure_doc_cfg?select=doc_type&doc_type=eq.insp");
+    if(ex&&ex.length)await mapi("/pd_measure_doc_cfg?doc_type=eq.insp",{method:"PATCH",body:JSON.stringify(body)});
+    else await mapi("/pd_measure_doc_cfg",{method:"POST",body:JSON.stringify(body)});
     toast('출력설정 저장 완료 (전 사용자 공통)');
-  }catch(e){toast(measureDbReady()?'출력설정 DB 저장 실패 — measure_db_schema.sql을 확인하세요':'측정DB 미설정 — 이 기기에만 저장됨')}
+  }catch(e){toast(measureDbReady()?'출력설정 DB 저장 실패 — pd_measure_schema.sql을 확인하세요':'측정DB 미설정 — 이 기기에만 저장됨')}
   prevFoot();
 }
 function resetFoot(){
@@ -2062,7 +2074,7 @@ function qaPdf(docNo,title,moldLabel,filterLabel,bodyHtml,signs){
 /* ---------- 글자 크기 (index.html과 동일 키) ---------- */
 
 /* ---------- PC 본문 폭 ---------- */
-const PCW_SUB_KEY='mm_pc_width_sub_v1';
+const PCW_SUB_KEY='pd_pc_width_sub_v1';
 const PCW_ID='insp';
 let MM_PCW=1280;
 function pcwClampS(v){let n=Number(v)||1280;n=Math.round(n/20)*20;return Math.max(720,Math.min(1600,n))}
@@ -2089,7 +2101,7 @@ function loadPCW(){
 }
 loadPCW();
 
-const FS_KEY='mm_font_scale_v1';
+const FS_KEY='pd_font_scale_v1';
 let MM_FS=100;
 function fsClamp(v){let n=Number(v)||100;n=Math.round(n/5)*5;return Math.max(80,Math.min(150,n))}
 function applyFontScale(v,save){
@@ -2168,9 +2180,9 @@ async function renderInsp(){
   inspOpOptions('iw-op','전체 공정');
   inspOpOptions('if-op','전체 공정');
   let err='';
-  try{FORMS=await mapi("/measure_forms?select=*&project_id=eq."+pid+"&order=op_code");}catch(e){FORMS=[];err='측정DB 연결 실패 — 출력설정에서 별도 측정DB를 설정하고 measure_db_schema.sql을 실행하세요'}
-  try{INSP=await mapi("/measure_rows?select=*&project_id=eq."+pid+"&order=created_at.desc");}catch(e){INSP=[]}
-  try{RPTS=await mapi("/measure_reports?select=*&project_id=eq."+pid+"&order=created_at.desc");}catch(e){RPTS=[];err='측정DB 연결 실패 — 출력설정에서 별도 측정DB를 설정하고 measure_db_schema.sql을 실행하세요'}
+  try{FORMS=await mapi("/pd_measure_forms?select=*&project_id=eq."+pid+"&order=op_code");}catch(e){FORMS=[];err='측정DB 연결 실패 — 출력설정에서 별도 측정DB를 설정하고 pd_measure_schema.sql을 실행하세요'}
+  try{INSP=await mapi("/pd_measure_rows?select=*&project_id=eq."+pid+"&order=created_at.desc");}catch(e){INSP=[]}
+  try{RPTS=await mapi("/pd_measure_reports?select=*&project_id=eq."+pid+"&order=created_at.desc");}catch(e){RPTS=[];err='측정DB 연결 실패 — 출력설정에서 별도 측정DB를 설정하고 pd_measure_schema.sql을 실행하세요'}
   if(err)document.getElementById('inspbody').innerHTML=`<tr><td colspan="6" class="empty">${err}</td></tr>`;
   drawFormItems();renderFormList();renderWFormList();renderInspLog();
 }
@@ -2547,15 +2559,15 @@ async function saveForm(){
   if(SKFILE){
     try{toast('도면 업로드 중...');sketch=await uploadImg(SKFILE,'insp')}
     catch(e){
-      if(!confirm('도면 이미지 업로드에 실패했습니다.\n('+(String(e.message).includes('Bucket')?'Storage 버킷 measure-files 없음 — measure_db_schema.sql 확인 필요':e.message)+')\n\n도면 없이 양식만 저장할까요?'))return;
+      if(!confirm('도면 이미지 업로드에 실패했습니다.\n('+(String(e.message).includes('Bucket')?'Storage 버킷 measure-files 없음 — pd_measure_schema.sql 확인 필요':e.message)+')\n\n도면 없이 양식만 저장할까요?'))return;
       sketch=SKURL;
     }
   }
   const body={project_id:pid,op_code:op,title:title,
     sketch:sketch||null,marks:MARKS,items:items,author:USER||null};
   try{
-    if(FEDIT)await mapi(`/measure_forms?id=eq.${FEDIT}`,{method:"PATCH",body:JSON.stringify(body)});
-    else await mapi("/measure_forms",{method:"POST",body:JSON.stringify(body)});
+    if(FEDIT)await mapi(`/pd_measure_forms?id=eq.${FEDIT}`,{method:"PATCH",body:JSON.stringify(body)});
+    else await mapi("/pd_measure_forms",{method:"POST",body:JSON.stringify(body)});
     toast(FEDIT?'양식을 수정했습니다':'성적서 양식을 등록했습니다');
     newForm();
     await renderInsp();
@@ -2581,7 +2593,7 @@ async function delForm(id){
   if(!confirm('이 성적서 양식을 삭제할까요? (작성된 성적서 기록은 유지)'))return;
   const f=formOf(id);
   try{
-    await mapi(`/measure_forms?id=eq.${id}`,{method:"DELETE"});
+    await mapi(`/pd_measure_forms?id=eq.${id}`,{method:"DELETE"});
     if(f&&f.sketch)deleteImg(f.sketch);
     if(String(FEDIT)===String(id))newForm();
     await renderInsp();
@@ -2733,15 +2745,15 @@ async function saveWrite(){
   const ng=tg.filter(r=>r.judge==='NG').length;
   try{
     const hdr=Object.assign(writeHdr(),{item_cnt:tg.length,ng_cnt:ng});
-    const [rpt]=await mapi("/measure_reports",{method:"POST",body:JSON.stringify(hdr)});
+    const [rpt]=await mapi("/pd_measure_reports",{method:"POST",body:JSON.stringify(hdr)});
     const rows=tg.map(r=>({project_id:pid,rpt_id:rpt.id,op_code:hdr.op_code,item:r.item,
       method:r.method||null,spec:r.spec||null,
       x1:r.x1||null,x2:r.x2||null,x3:r.x3||null,x4:r.x4||null,x5:r.x5||null,
       x6:r.x6||null,x7:r.x7||null,x8:r.x8||null,x9:r.x9||null,x10:r.x10||null,
       actual:INSP_X.map(k=>r[k]).filter(Boolean).join(' / ')||null,
       judge:r.judge||'OK',worker:worker,memo:r.memo||null}));
-    await mapi("/measure_rows",{method:"POST",body:JSON.stringify(rows)});
-    await mapi("/measure_history",{method:"POST",body:JSON.stringify({project_id:pid,op_code:hdr.op_code,action:'검사',
+    await mapi("/pd_measure_rows",{method:"POST",body:JSON.stringify(rows)});
+    await mapi("/pd_measure_history",{method:"POST",body:JSON.stringify({project_id:pid,op_code:hdr.op_code,action:'검사',
       detail:`검사성적서 작성 [${hdr.form_title||''}] ${tg.length}항목${ng?' · NG '+ng:''}`,worker:worker})});
     toast(`성적서 저장 완료 — ${tg.length}항목`+(ng?` · NG ${ng}건, NCR 등록 권장`:''));
     cancelWrite();
@@ -2832,10 +2844,10 @@ async function delInspRpt(id){
   try{
     if(String(id).startsWith('L')){
       const ids=rptRowsOf(id).map(r=>r.id);
-      if(ids.length)await mapi("/measure_rows?id=in.("+ids.join(',')+")",{method:"DELETE"});
+      if(ids.length)await mapi("/pd_measure_rows?id=in.("+ids.join(',')+")",{method:"DELETE"});
     }else{
-      await mapi("/measure_rows?rpt_id=eq."+id,{method:"DELETE"});
-      await mapi("/measure_reports?id=eq."+id,{method:"DELETE"});
+      await mapi("/pd_measure_rows?rpt_id=eq."+id,{method:"DELETE"});
+      await mapi("/pd_measure_reports?id=eq."+id,{method:"DELETE"});
     }
     await renderInsp();
   }catch(e){toast('삭제 실패: '+e.message)}
