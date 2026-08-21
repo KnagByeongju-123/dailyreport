@@ -1382,17 +1382,17 @@
           <button class="pcwclose" type="button" aria-label="닫기" onclick="closePCWidthPopup()">×</button>
         </div>
         <div class="pcwrow pcw-width-only"><span>화면 폭</span><b id="pcwValue">1020px</b></div>
-        <input id="pcwRange" class="pcwrange pcw-width-only" type="range" min="720" max="1400" step="20" value="1020"
+        <input id="pcwRange" class="pcwrange pcw-width-only" type="range" min="720" max="1600" step="20" value="1020"
           aria-label="PC 화면 폭 조절" oninput="previewPCWidth(this.value)" onchange="savePCWidth(this.value)">
-        <div class="pcwscale pcw-width-only"><span>720px</span><span>1400px</span></div>
+        <div class="pcwscale pcw-width-only"><span>720px</span><span>1600px</span></div>
 
         <div class="pcwrow" id="pfsRow"><span>글자 크기</span><b id="pfsValue">100%</b></div>
-        <input id="pfsRange" class="pcwrange" type="range" min="80" max="150" step="5" value="100"
+        <input id="pfsRange" class="pcwrange" type="range" min="90" max="180" step="5" value="115"
           aria-label="글자 크기 조절" oninput="previewFontScale(this.value)" onchange="saveFontScale(this.value)">
-        <div class="pcwscale"><span>80%</span><span>150%</span></div>
+        <div class="pcwscale"><span>90%</span><span>180%</span></div>
         <div class="pfsquick">
           <button type="button" onclick="stepFontScale(-5)">A−</button>
-          <button type="button" onclick="saveFontScale(100)">100%</button>
+          <button type="button" onclick="saveFontScale(115)">기본 115%</button>
           <button type="button" onclick="stepFontScale(5)">A+</button>
         </div>
 
@@ -2841,7 +2841,7 @@ function menuPointerUp(e){
 
 /* PC 화면별 폭 조절 */
 const PD_PCW_KEY='pd_pc_width_v1';
-const PD_PCW_MIN=720,PD_PCW_MAX=1400,PD_PCW_STEP=20;
+const PD_PCW_MIN=720,PD_PCW_MAX=1600,PD_PCW_STEP=20;
 const PD_PCW_DEFAULT={
   't-prod':1020,'t-report':1020,'t-mat-order':1200,'t-mat-dispatch':1200,'t-iqc':1200,
   't-work-order':1180,'t-measure':1100,'t-visual':1100,'t-material':1100,'t-master':1020,'t-mold':1020,'t-pin':1200,'t-help':1020,'t-config':1020
@@ -2876,8 +2876,8 @@ function applyPCWidth(v,w,save){
   return px;
 }
 /* ===== [Rev.7.69] 글자 크기 조절 ===== */
-const PD_FS_KEY='pd_font_scale_v1';
-const PD_FS_MIN=80,PD_FS_MAX=150,PD_FS_STEP=5,PD_FS_DEFAULT=100;
+const PD_FS_KEY='pd_font_scale_v2';
+const PD_FS_MIN=90,PD_FS_MAX=180,PD_FS_STEP=5,PD_FS_DEFAULT=115;
 let PD_FS=PD_FS_DEFAULT;
 function fsClamp(v){
   let n=Number(v)||PD_FS_DEFAULT;
@@ -2892,6 +2892,11 @@ function applyFontScale(v,save){
   const n=fsClamp(v);
   PD_FS=n;
   document.documentElement.style.setProperty('--pd-font-scale',(n/100).toString());
+  /* 상단/좌측 PC 메뉴는 본문 zoom 밖에 있으므로 글자 크기를 별도로 연동 */
+  const ui=Math.min(n,150)/100;
+  document.documentElement.style.setProperty('--pd-ui-title-fs',(19*ui).toFixed(1)+'px');
+  document.documentElement.style.setProperty('--pd-ui-nav-fs',(14.5*ui).toFixed(1)+'px');
+  document.documentElement.style.setProperty('--pd-ui-small-fs',(12.5*ui).toFixed(1)+'px');
   const rg=document.getElementById('pfsRange');if(rg)rg.value=n;
   const val=document.getElementById('pfsValue');if(val)val.textContent=n+'%';
   if(save){try{localStorage.setItem(PD_FS_KEY,String(n))}catch(e){}pcwSaved('저장됨')}
@@ -9284,5 +9289,48 @@ function measureFrameReady(){
   try{f.contentWindow.postMessage({type:'jp-measure-tab',tab:'make'},'*')}catch(e){}
 }
 </script>
+
+<style id="pc-readable-control-fix-v1">
+/* ===== PC 화면조절 보정: 2단 메뉴에서도 화면 폭/글자 크기 설정을 실제 본문에 적용 ===== */
+@media(min-width:1000px){
+  html.jp-menu-nav2:not(.jp-lay-mobile) #panelZone{
+    width:calc(100% / var(--pd-font-scale,1))!important;
+    max-width:calc(100% / var(--pd-font-scale,1))!important;
+    margin-left:0!important;margin-right:0!important;
+  }
+  html.jp-menu-nav2:not(.jp-lay-mobile) #panelZone > .tab-panel{
+    width:min(var(--pc-view-width,var(--pc-active-width,1180px)),100%)!important;
+    max-width:100%!important;
+    margin-left:auto!important;margin-right:auto!important;
+  }
+
+  /* 글자 크기 설정을 상단/좌측 메뉴에도 반영 */
+  body > .top-bar h1{font-size:var(--pd-ui-title-fs,21.9px)!important}
+  body > .top-bar .cur-menu,
+  .worker-chip,.sync-badge{font-size:var(--pd-ui-small-fs,14.4px)!important}
+  html.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav .tb,
+  html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav .shd,
+  html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav .sitem{
+    font-size:var(--pd-ui-nav-fs,16.7px)!important;
+  }
+  html.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav .tb .ic,
+  html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav .sitem .ic{
+    font-size:calc(var(--pd-ui-nav-fs,16.7px) + 1px)!important;
+  }
+}
+
+/* 작업지시 기본 글자 자체도 한 단계 크게 */
+#t-work-order .wo-guide{font-size:14px!important;line-height:1.7!important}
+#t-work-order .wo-kpi .l{font-size:12.5px!important}
+#t-work-order .fld label{font-size:13.5px!important}
+#t-work-order .fld input,
+#t-work-order .fld select{font-size:14.5px!important;min-height:40px!important}
+#t-work-order .wo-filter input,
+#t-work-order .wo-filter select{font-size:13.5px!important;min-height:38px!important}
+#t-work-order .wo-table th,
+#t-work-order .wo-table td{font-size:13.5px!important;line-height:1.45!important}
+#t-work-order .wo-save{font-size:15px!important}
+#t-work-order .wo-clear{font-size:13.5px!important}
+</style>
 </body>
 </html>
