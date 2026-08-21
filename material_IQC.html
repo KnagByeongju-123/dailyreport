@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>소재 수입검사 v4.2 | AAA</title>
+<title>소재 수입검사 v4.3 | AAA</title>
 <style>
 /* ===== 화면 설정(글자 크기 · 테두리 진하기) ===== */
 :root{--mv-fs:1;--bd1:#94a3b8;--bd2:#cbd5e1}
@@ -173,7 +173,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 
 <div class="hdr">
   <div>
-    <h1>📋 소재 수입검사 시스템 v4.2</h1>
+    <h1>📋 소재 수입검사 시스템 v4.3</h1>
     <div class="sub">AAA · 품질관리팀 · 그룹 자동 통합 (공급자+재질+두께+폭)</div>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
@@ -2773,6 +2773,177 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewPopup()});
 loadFontScale();
 loadBorderLv();
+
+</script>
+<script>
+window.__JP_UI_CFG={
+  popupId:'vsPopup',rowClass:'vsrow',quickClass:'vsquick',footSel:'.vsfoot',
+  menuDefault:'top',menuMobileForce:'top',menuMobileName:'상단 탭',
+  menuOptions:[{v:'top',n:'상단 탭'},{v:'left',n:'좌측 메뉴'}],
+  saved:function(t){if(typeof vsSaved==='function')vsSaved(t)},
+  extraCss:`
+  html.jp-menu-left .tabs{position:fixed;left:0;top:var(--jp-hdr,0px);bottom:0;width:176px;flex-direction:column;gap:2px;padding:10px 8px;border-bottom:none;border-right:2px solid var(--bd2,#e2e8f0);overflow:auto;z-index:40;background:#fff}
+  html.jp-menu-left .tabs .tab-btn,html.jp-menu-left .tabs .tab{flex:none;text-align:left;border-bottom:none;border-left:3px solid transparent;border-radius:0 8px 8px 0;padding:11px 12px;width:100%}
+  html.jp-menu-left .tabs .tab-btn.active,html.jp-menu-left .tabs .tab.on{border-left-color:#2c5282;background:#eef4ff;border-bottom-color:transparent}
+  html.jp-menu-left .container{margin-left:176px;max-width:none}
+  html.jp-menu-left .hdr{padding-left:24px}
+`,
+  onMenu:function(m){
+      const h=document.querySelector('.hdr');
+      const upd=()=>{document.documentElement.style.setProperty('--jp-hdr',Math.max(0,(h?h.offsetHeight:0)-window.scrollY)+'px')};
+      if(!window.__jpScrollBound){window.__jpScrollBound=1;window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd)}
+      upd();
+    }
+};
+</script>
+<script>
+/* ============================================================
+   [일평기연 공통] 화면 UI 설정 모듈 — 메뉴 배치 · 레이아웃(PC/모바일) · 색상 · 글꼴
+   설정값은 localStorage('jp_ui_v1')에 저장되어 모든 화면에서 공유됩니다.
+   ============================================================ */
+(function(){
+  const CFG = window.__JP_UI_CFG || {};
+  const KEY = 'jp_ui_v1';
+  const DEF = {menu: CFG.menuDefault || 'top', layout: 'auto', theme: '', font: 'sys', weight: 'n'};
+  const MENU_OPT = CFG.menuOptions || [];                 // [{v:'top',n:'상단 탭'},...]
+  const ROW = CFG.rowClass || 'vsrow', QUICK = CFG.quickClass || 'vsquick', FOOT = CFG.footSel || '.vsfoot';
+  const POP = CFG.popupId || 'vsPopup';
+  let S = Object.assign({}, DEF);
+  try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+
+  /* ---------- CSS ---------- */
+  const css = `
+  /* 색상 테마 — 고정요소(드로어/모달) 깨짐 방지를 위해 전면 오버레이 backdrop-filter 방식 */
+  html[data-jp-theme]::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:2147483647}
+  html[data-jp-theme="mono"]::after{backdrop-filter:grayscale(1);-webkit-backdrop-filter:grayscale(1)}
+  html[data-jp-theme="clean"]::after{backdrop-filter:saturate(.6) contrast(1.03);-webkit-backdrop-filter:saturate(.6) contrast(1.03)}
+  html[data-jp-theme="dark"]::after{backdrop-filter:invert(.92) hue-rotate(180deg);-webkit-backdrop-filter:invert(.92) hue-rotate(180deg)}
+  html[data-jp-theme="clean"] .card,html[data-jp-theme="clean"] .kpi,html[data-jp-theme="clean"] .wo-kpi{box-shadow:none!important}
+  @media print{html[data-jp-theme]::after{display:none!important}}
+  .pcwpopup,.vspopup{max-height:calc(100vh - 70px);overflow-y:auto}
+  /* 글꼴 */
+  html[data-jp-font="noto"] body,html[data-jp-font="noto"] button,html[data-jp-font="noto"] input,html[data-jp-font="noto"] select,html[data-jp-font="noto"] textarea{font-family:'Noto Sans KR','Malgun Gothic',sans-serif!important}
+  html[data-jp-font="nanum"] body,html[data-jp-font="nanum"] button,html[data-jp-font="nanum"] input,html[data-jp-font="nanum"] select,html[data-jp-font="nanum"] textarea{font-family:'Nanum Gothic','Malgun Gothic',sans-serif!important}
+  html[data-jp-font="pretend"] body,html[data-jp-font="pretend"] button,html[data-jp-font="pretend"] input,html[data-jp-font="pretend"] select,html[data-jp-font="pretend"] textarea{font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif!important}
+  html[data-jp-weight="b"] body{font-weight:600}
+  html[data-jp-weight="b"] td,html[data-jp-weight="b"] th,html[data-jp-weight="b"] label,html[data-jp-weight="b"] input,html[data-jp-weight="b"] select{font-weight:700!important}
+  /* 레이아웃: 모바일 고정(PC에서 폰 화면처럼 좁게) */
+  html.jp-lay-mobile body{max-width:540px;margin:0 auto;box-shadow:0 0 0 1px var(--bd2,#e2e8f0)}
+  html.jp-lay-mobile .pcw-width-only{display:none!important}
+  html.jp-lay-mobile .drawer{max-width:82vw}
+  /* 팝업 공통 */
+  .jp-row{margin-top:12px}
+  .jp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:7px}
+  .jp-grid button{display:flex;align-items:center;gap:5px;padding:7px 6px;border:1px solid var(--bd1,#cbd5e1);border-radius:7px;background:#f8fafc;color:#475569;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .jp-grid button i{width:11px;height:11px;border-radius:50%;flex-shrink:0;display:block;border:1px solid rgba(0,0,0,.15)}
+  .jp-grid button.on,.jp-grid button:hover{border-color:#60a5fa;background:#eff6ff;color:#1d4ed8}
+  .jp-grid.c3{grid-template-columns:repeat(3,1fr)}
+  .jp-hint{font-size:10px;color:#94a3b8;margin-top:4px;line-height:1.4}
+  ${CFG.extraCss || ''}`;
+  const st = document.createElement('style'); st.id = 'jpUiStyle'; st.textContent = css; document.head.appendChild(st);
+
+  /* ---------- 유틸 ---------- */
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function narrow(){ return window.matchMedia('(max-width:760px)').matches; }
+  function isMobile(){ return S.layout === 'mobile' || (S.layout === 'auto' && narrow()); }
+  window.jpIsMobile = isMobile;
+
+  let fontLoaded = {};
+  function loadFont(f){
+    const url = {noto:'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap',
+                 nanum:'https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap',
+                 pretend:'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css'}[f];
+    if (!url || fontLoaded[f]) return;
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = url; document.head.appendChild(l); fontLoaded[f] = 1;
+  }
+
+  /* ---------- 적용 ---------- */
+  function applyTheme(){
+    const h = document.documentElement;
+    if (S.theme) h.setAttribute('data-jp-theme', S.theme); else h.removeAttribute('data-jp-theme');
+  }
+  function applyFont(){
+    const h = document.documentElement;
+    loadFont(S.font);
+    if (S.font && S.font !== 'sys') h.setAttribute('data-jp-font', S.font); else h.removeAttribute('data-jp-font');
+    if (S.weight === 'b') h.setAttribute('data-jp-weight', 'b'); else h.removeAttribute('data-jp-weight');
+  }
+  function applyLayout(){
+    const h = document.documentElement;
+    h.classList.toggle('jp-lay-mobile', S.layout === 'mobile');
+    h.classList.toggle('jp-lay-pc', S.layout === 'pc');
+    const vp = document.querySelector('meta[name="viewport"]');
+    if (vp) {
+      if (!vp.dataset.orig) vp.dataset.orig = vp.getAttribute('content');
+      /* 폰에서 PC 레이아웃: 뷰포트를 1024px로 고정 → PC용 미디어쿼리 적용 */
+      vp.setAttribute('content', S.layout === 'pc' ? 'width=1024, initial-scale=0.38, maximum-scale=3, user-scalable=yes' : vp.dataset.orig);
+    }
+  }
+  function applyMenu(){
+    const h = document.documentElement;
+    MENU_OPT.forEach(o => h.classList.remove('jp-menu-' + o.v));
+    let m = S.menu;
+    if (isMobile() && CFG.menuMobileForce) m = CFG.menuMobileForce;   // 모바일에선 강제 모드
+    h.classList.add('jp-menu-' + m);
+    if (typeof CFG.onMenu === 'function') CFG.onMenu(m, S);
+  }
+  function applyAll(){ applyTheme(); applyFont(); applyLayout(); applyMenu(); mark(); }
+
+  /* ---------- 팝업 UI ---------- */
+  const THEMES = [
+    {v:'', n:'기본', c:'#2563eb'}, {v:'clean', n:'클린(연하게)', c:'#94a3b8'},
+    {v:'mono', n:'모노(흑백)', c:'#fff'}, {v:'dark', n:'다크(야간)', c:'#0f172a'}
+  ];
+  const FONTS = [{v:'sys', n:'맑은 고딕'}, {v:'noto', n:'Noto Sans'}, {v:'nanum', n:'나눔고딕'}, {v:'pretend', n:'Pretendard'}];
+  const LAYS = [{v:'auto', n:'자동'}, {v:'pc', n:'PC'}, {v:'mobile', n:'모바일'}];
+
+  function btns(list, key, attr, cls){
+    return `<div class="jp-grid ${cls || ''}" data-jp="${key}">` + list.map(o =>
+      `<button type="button" data-v="${o.v}" onclick="jpUI.set('${key}','${o.v}')">${attr && o.c ? `<i style="background:${o.c}"></i>` : ''}${o.n}</button>`).join('') + '</div>';
+  }
+  function build(){
+    const pop = document.getElementById(POP); if (!pop || document.getElementById('jpUiBlock')) return;
+    const foot = pop.querySelector(FOOT);
+    const w = document.createElement('div'); w.id = 'jpUiBlock';
+    w.innerHTML = `
+      ${MENU_OPT.length ? `<div class="${ROW} jp-row"><span>메뉴 배치</span><b id="jpMenuV"></b></div>${btns(MENU_OPT, 'menu', false, MENU_OPT.length === 3 ? 'c3' : '')}
+      <div class="jp-hint">모바일(좁은 화면)에서는 ${CFG.menuMobileName || '상단 탭'}으로 자동 표시</div>` : ''}
+      <div class="${ROW} jp-row"><span>화면 레이아웃</span><b id="jpLayV"></b></div>${btns(LAYS, 'layout', false, 'c3')}
+      <div class="jp-hint">자동: 화면 크기에 따라 전환 · PC: 휴대폰에서도 PC 화면 · 모바일: PC에서도 폰 폭으로 표시</div>
+      <div class="${ROW} jp-row"><span>화면 색상</span><b id="jpThemeV"></b></div>${btns(THEMES, 'theme', true)}
+      <div class="${ROW} jp-row"><span>글꼴</span><b id="jpFontV"></b></div>${btns(FONTS, 'font')}
+      <div class="jp-grid c3" data-jp="weight" style="margin-top:6px">
+        <button type="button" data-v="n" onclick="jpUI.set('weight','n')">보통 굵기</button>
+        <button type="button" data-v="b" onclick="jpUI.set('weight','b')">굵게</button>
+      </div>`;
+    if (foot) pop.insertBefore(w, foot); else pop.appendChild(w);
+    mark();
+  }
+  function mark(){
+    document.querySelectorAll('#jpUiBlock .jp-grid').forEach(g => {
+      const k = g.dataset.jp;
+      g.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(b.dataset.v) === String(S[k] ?? '')));
+    });
+    const lb = (id, list, v) => { const el = document.getElementById(id); if (el) el.textContent = (list.find(o => String(o.v) === String(v)) || {}).n || ''; };
+    lb('jpMenuV', MENU_OPT, S.menu); lb('jpLayV', LAYS, S.layout); lb('jpThemeV', THEMES, S.theme); lb('jpFontV', FONTS, S.font);
+  }
+
+  window.jpUI = {
+    get: () => Object.assign({}, S),
+    set(k, v){ S[k] = v; save(); applyAll(); if (typeof CFG.saved === 'function') CFG.saved('저장됨'); },
+    reset(){ S = Object.assign({}, DEF); save(); applyAll(); },
+    apply: applyAll, isMobile
+  };
+
+  /* 기본값으로 버튼에 연동 */
+  const prevReset = window.resetViewSettings;
+  window.resetViewSettings = function(){ if (typeof prevReset === 'function') prevReset.apply(this, arguments); window.jpUI.reset(); };
+
+  applyTheme(); applyFont(); applyLayout();
+  const init = () => { build(); applyMenu(); mark(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.addEventListener('resize', () => { applyMenu(); });
+})();
 
 </script>
 </body>
