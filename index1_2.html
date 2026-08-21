@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.81</title>
+<title>프레스 생산관리 Rev.7.82</title>
 <style>
   /* 테두리 진하기(3단계) — 저해상도 모니터 가독성 대응 */
   :root{--bd1:#94a3b8;--bd2:#cbd5e1}
@@ -1369,7 +1369,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.81</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.82</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1416,7 +1416,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.81</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.82</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1425,13 +1425,13 @@
     <button class="tab-btn step" data-menu-id="mat-order" data-tab="t-mat-order" onclick="switchTab('t-mat-order', this)"><span class="step-no">1</span><span class="tab-ico">🧾</span>소재발주<span class="flow-badge" id="flowOrderBadge">0</span></button>
     <button class="tab-btn step" data-menu-id="mat-dispatch" data-tab="t-mat-dispatch" onclick="switchTab('t-mat-dispatch', this)"><span class="step-no">2</span><span class="tab-ico">📤</span>소재발송<span class="step-sub">업체등록</span></button>
     <!-- [Rev.7.47] 소재입고(t-material)는 메뉴에서 숨김 — 패널은 생산작업 LOT 선택용으로 유지 -->
-    <button class="tab-btn step" data-menu-id="iqc" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="step-no">3</span><span class="tab-ico">🔎</span>수입검사<span class="flow-badge" id="flowIqcBadge">-</span></button>
-    <button class="tab-btn step" data-menu-id="work-order" data-tab="t-work-order" onclick="switchTab('t-work-order', this)"><span class="step-no">4</span><span class="tab-ico">📋</span>작업지시<span class="wo-flow-badge" id="woMenuBadge">0</span></button>
-    <button class="tab-btn step active" data-menu-id="prod" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="step-no">5</span><span class="tab-ico">⚙️</span>생산작업<span class="tab-dot"></span></button>
-    <button class="tab-btn step last" data-menu-id="report" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">6</span><span class="tab-ico">📝</span>생산일보</button>
+    <button class="tab-btn step" data-menu-id="work-order" data-tab="t-work-order" onclick="switchTab('t-work-order', this)"><span class="step-no">3</span><span class="tab-ico">📋</span>작업지시<span class="wo-flow-badge" id="woMenuBadge">0</span></button>
+    <button class="tab-btn step active" data-menu-id="prod" data-tab="t-prod" onclick="switchTab('t-prod', this)"><span class="step-no">4</span><span class="tab-ico">⚙️</span>생산작업<span class="tab-dot"></span></button>
+    <button class="tab-btn step last" data-menu-id="report" data-tab="t-report" onclick="switchTab('t-report', this)"><span class="step-no">5</span><span class="tab-ico">📝</span>생산일보</button>
   </div>
   <div class="drawer-sep">품질검사</div>
   <div class="drawer-menu-group" data-menu-group="quality">
+    <button class="tab-btn" data-menu-id="iqc" data-tab="t-iqc" onclick="switchTab('t-iqc', this)"><span class="tab-ico">🔎</span>수입검사<span class="flow-badge" id="flowIqcBadge">-</span></button>
     <button class="tab-btn" data-menu-id="measure" data-tab="t-measure" onclick="switchTab('t-measure', this)"><span class="tab-ico">📏</span>측정검사<span class="flow-badge" id="qMeasureBadge">0</span></button>
     <button class="tab-btn" data-menu-id="visual" data-tab="t-visual" onclick="switchTab('t-visual', this)"><span class="tab-ico">👁️</span>외관검사<span class="flow-badge" id="qVisualBadge">0</span></button>
   </div>
@@ -2659,6 +2659,13 @@ function loadMenuOrder(){
   // [Rev.7.65] 기존 저장 순서에 신규 핀설정을 사용안내 앞에 자동 삽입
   if(Array.isArray(saved.system) && saved.system.indexOf('pin')<0){
     const i=saved.system.indexOf('help'); saved.system.splice(i>=0?i:0,0,'pin');
+  }
+  // [Rev.7.82] 수입검사(iqc)를 업무절차 → 품질검사 그룹으로 이동
+  if(Array.isArray(saved.work) && saved.work.indexOf('iqc')>=0){
+    saved.work=saved.work.filter(id=>id!=='iqc');
+  }
+  if(saved.quality && Array.isArray(saved.quality) && saved.quality.indexOf('iqc')<0){
+    saved.quality.unshift('iqc');
   }
   applyMenuOrder(saved);
 }
