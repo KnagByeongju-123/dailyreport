@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.82</title>
+<title>프레스 생산관리 Rev.7.83</title>
 <style>
   /* 테두리 진하기(3단계) — 저해상도 모니터 가독성 대응 */
   :root{--bd1:#94a3b8;--bd2:#cbd5e1}
@@ -1103,6 +1103,16 @@
   .q-chip.ng { background:#fee2e2; color:#b91c1c; }
   .q-chip.hold { background:#e0f2fe; color:#0369a1; }
   .q-now-btn { width:100%; margin-top:5px; padding:8px 9px; border:1px solid #93c5fd; border-radius:8px; background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:800; cursor:pointer; font-family:inherit; }
+  /* [Rev.7.83] 외관검사 다중 불량유형 */
+  .q-ng-box { border:1.5px solid #ddd6fe; border-radius:10px; background:#faf5ff; padding:9px 10px; margin:2px 0 10px; }
+  .q-ng-head { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:900; color:#6d28d9; margin-bottom:7px; }
+  .q-ng-head .q-ng-sum { margin-left:auto; font-size:11px; font-weight:800; color:#7c3aed; }
+  .q-ng-row { display:grid; grid-template-columns:minmax(0,1.5fr) 78px 30px; gap:6px; margin-bottom:6px; align-items:center; }
+  .q-ng-row select, .q-ng-row input { width:100%; padding:9px 8px; border:1.5px solid var(--bd1,#cbd5e1); border-radius:8px; font-size:13px; font-family:inherit; background:#fff; box-sizing:border-box; }
+  .q-ng-row .q-ng-del { padding:8px 0; border:1px solid #fecaca; border-radius:8px; background:#fef2f2; color:#b91c1c; font-size:13px; font-weight:900; cursor:pointer; font-family:inherit; }
+  .q-ng-add { width:100%; padding:9px; border:1px dashed #a78bfa; border-radius:8px; background:#fff; color:#6d28d9; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .q-ng-etc { display:none; margin-bottom:6px; }
+  .q-ng-etc.on { display:block; }
   .q-save { width:100%; padding:13px; border:0; border-radius:10px; background:#1d4ed8; color:#fff; font-size:15px; font-weight:900; cursor:pointer; font-family:inherit; }
   .q-save.visual { background:#7c3aed; }
   .q-save:active { transform:scale(.98); }
@@ -1369,7 +1379,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.82</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.83</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1416,7 +1426,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.82</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.83</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1674,20 +1684,26 @@
     </div>
     <div class="form-grid">
       <div class="fld"><label>검사일 *</label><input type="date" id="qvDate"></div>
+      <div class="fld"><label>생산일자 *</label><input type="date" id="qvProdDate"></div>
+      <div class="fld"><label>생산호기 *</label><select id="qvMachine"><option value="">호기 선택</option></select></div>
       <div class="fld"><label>LOT *</label><input type="text" id="qvLot" list="qualityLotList" placeholder="LOT 번호" oninput="qualityLotChanged('visual')"></div>
       <div class="fld"><label>품번 *</label><input type="text" id="qvItem" placeholder="품번"></div>
       <div class="fld"><label>검사자</label><input type="text" id="qvWorker" placeholder="검사자"></div>
       <div class="fld"><label>검사수량 *</label><input type="number" id="qvQty" min="1" inputmode="numeric" placeholder="수량"></div>
-      <div class="fld"><label>불량수량</label><input type="number" id="qvNgQty" min="0" inputmode="numeric" value="0"></div>
-      <div class="fld"><label>불량유형</label><select id="qvType"><option value="">없음</option><option>스크래치</option><option>찍힘/변형</option><option>버(Burr)</option><option>크랙</option><option>오염/이물</option><option>도장/표면</option><option>기타</option></select></div>
-      <div class="fld"><label>판정 *</label><select id="qvJudge"><option value="OK">OK</option><option value="NG">NG</option><option value="보류">보류</option></select></div>
+      <div class="fld"><label>불량수량 합계</label><input type="number" id="qvNgQty" min="0" inputmode="numeric" value="0" readonly style="background:#f1f5f9;font-weight:900"></div>
+      <div class="fld"><label>판정 *</label><select id="qvJudge" onchange="this.dataset.manual='1'"><option value="OK">OK</option><option value="NG">NG</option><option value="보류">보류</option></select></div>
       <div class="fld full"><label>비고</label><input type="text" id="qvNote" placeholder="불량 위치/특이사항 등"></div>
+    </div>
+    <div class="q-ng-box">
+      <div class="q-ng-head">🔧 불량유형 · 수량 (여러 건 등록)<span class="q-ng-sum" id="qvNgSum">불량 0개 · 0종</span></div>
+      <div id="qvNgRows"></div>
+      <button type="button" class="q-ng-add" onclick="qvNgAddRow()">＋ 불량유형 추가</button>
     </div>
     <button class="q-save visual" onclick="qualitySave('visual')">✅ 외관검사 저장</button>
   </div>
   <div class="card">
     <div class="q-section-title">📚 외관검사 이력 <span id="qvCount">0건</span></div>
-    <div class="search-row"><input type="text" id="qvSearch" placeholder="LOT / 품번 / 불량유형 검색" oninput="renderQualityHistory('visual')"></div>
+    <div class="search-row"><input type="text" id="qvSearch" placeholder="LOT / 품번 / 호기 / 불량유형 검색" oninput="renderQualityHistory('visual')"></div>
     <div class="tbl-wrap"><table class="mtable q-history"><thead><tr><th>검사일 / LOT</th><th>품번</th><th>외관 결과</th><th>판정</th><th></th></tr></thead><tbody id="qvHistory"></tbody></table></div>
   </div>
 </div>
@@ -8378,6 +8394,11 @@ function qualityUseCurrent(type){
   const le=document.getElementById(p+'Lot'), ie=document.getElementById(p+'Item');
   if(le) le.value=sel.lot || '';
   if(ie && !ie.value) ie.value=sel.item || '';
+  if(type==='visual'){
+    qvFillMachines();
+    const me=document.getElementById('qvMachine'); if(me && sel.machine) me.value=sel.machine.machine_code||'';
+    const pe=document.getElementById('qvProdDate'); if(pe) pe.value=kstTodayStr();
+  }
   renderQualityLotSummary(type);
   if(type==='measure') qualityLoadMasterForItem();
 }
@@ -8386,6 +8407,12 @@ function prepareQualityView(type){
   const d=document.getElementById(p+'Date'); if(d && !d.value) d.value=kstTodayStr();
   const w=document.getElementById(p+'Worker'); if(w && !w.value) w.value=(worker && worker.name) ? worker.name : '';
   const now=document.getElementById(p+'NowInfo'); if(now) now.textContent=sel.lot ? ('LOT '+sel.lot+(sel.item?' · '+sel.item:'')) : '현재 생산 LOT 없음';
+  if(type==='visual'){
+    const pd=document.getElementById('qvProdDate'); if(pd && !pd.value) pd.value=kstTodayStr();
+    qvFillMachines();
+    const nr=document.getElementById('qvNgRows'); if(nr && !nr.children.length) qvNgAddRow();
+    qvNgSync();
+  }
   renderQualityLotOptions();
   renderQualityLotSummary(type);
   renderQualityHistory(type);
@@ -8413,6 +8440,84 @@ function renderQualityLotSummary(type){
   }
   stats.innerHTML=h;
 }
+/* ===== [Rev.7.83] 외관검사 : 생산호기 · 생산일자 · 다중 불량유형 ===== */
+const QV_DEFECTS=['스크래치','찍힘/변형','버(Burr)','크랙','오염/이물','도장/표면','치수불량','소재불량','기타'];
+function qvNgAddRow(data){
+  const wrap=document.getElementById('qvNgRows'); if(!wrap) return;
+  const d=data||{};
+  const row=document.createElement('div'); row.className='q-ng-row';
+  const sel=document.createElement('select');
+  sel.appendChild(new Option('불량유형 선택',''));
+  QV_DEFECTS.forEach(function(t){ sel.appendChild(new Option(t,t)); });
+  const etc=document.createElement('input');
+  etc.type='text'; etc.placeholder='불량유형 직접입력'; etc.className='q-ng-etc';
+  const qty=document.createElement('input');
+  qty.type='number'; qty.min='0'; qty.inputMode='numeric'; qty.placeholder='수량'; qty.value=(d.qty!=null?d.qty:'');
+  const del=document.createElement('button');
+  del.type='button'; del.className='q-ng-del'; del.textContent='×'; del.title='삭제';
+
+  const known=d.type && QV_DEFECTS.indexOf(d.type)>=0;
+  if(d.type){ if(known){ sel.value=d.type; } else { sel.value='기타'; etc.value=d.type; } }
+  const syncEtc=function(){ etc.classList.toggle('on', sel.value==='기타'); };
+  syncEtc();
+
+  sel.addEventListener('change', function(){ syncEtc(); qvNgSync(); });
+  etc.addEventListener('input', qvNgSync);
+  qty.addEventListener('input', qvNgSync);
+  del.addEventListener('click', function(){
+    row.remove(); etcBox.remove();
+    if(!wrap.querySelector('.q-ng-row')) qvNgAddRow();
+    qvNgSync();
+  });
+
+  row.appendChild(sel); row.appendChild(qty); row.appendChild(del);
+  const etcBox=document.createElement('div'); etcBox.appendChild(etc);
+  wrap.appendChild(row); wrap.appendChild(etcBox);
+  qvNgSync();
+}
+function qvNgList(){
+  const wrap=document.getElementById('qvNgRows'); if(!wrap) return [];
+  const out=[];
+  wrap.querySelectorAll('.q-ng-row').forEach(function(row){
+    const sel=row.querySelector('select'), qty=row.querySelector('input[type=number]');
+    const etc=row.nextElementSibling ? row.nextElementSibling.querySelector('.q-ng-etc') : null;
+    let type=String(sel.value||'').trim();
+    if(type==='기타' && etc && String(etc.value||'').trim()) type=String(etc.value).trim();
+    const n=Math.max(0, parseInt(qty.value)||0);
+    if(!type && !n) return;
+    out.push({ type:type||'미분류', qty:n });
+  });
+  return out;
+}
+function qvNgSync(){
+  const list=qvNgList();
+  const total=list.reduce(function(a,b){ return a+(Number(b.qty)||0); },0);
+  const kinds=list.filter(function(x){ return (Number(x.qty)||0)>0 || x.type!=='미분류'; }).length;
+  const t=document.getElementById('qvNgQty'); if(t) t.value=total;
+  const sum=document.getElementById('qvNgSum'); if(sum) sum.textContent='불량 '+total.toLocaleString()+'개 · '+kinds+'종';
+  const j=document.getElementById('qvJudge');
+  if(j && !j.dataset.manual) j.value = total>0 ? 'NG' : 'OK';
+}
+function qvNgReset(list){
+  const wrap=document.getElementById('qvNgRows'); if(!wrap) return;
+  wrap.innerHTML='';
+  if(Array.isArray(list) && list.length) list.forEach(qvNgAddRow); else qvNgAddRow();
+  qvNgSync();
+}
+function qvFillMachines(){
+  const el=document.getElementById('qvMachine'); if(!el) return;
+  const cur=el.value;
+  el.innerHTML='<option value="">호기 선택</option>'+
+    (machines||[]).map(function(m){
+      return '<option value="'+escHtml(m.machine_code)+'">'+escHtml(m.machine_code)+(m.machine_name?' · '+escHtml(m.machine_name):'')+'</option>';
+    }).join('');
+  if(cur && [].some.call(el.options,function(o){return o.value===cur;})) el.value=cur;
+  else if(sel.machine) el.value=sel.machine.machine_code||'';
+}
+function qvMachineName(code){
+  const m=(machines||[]).find(function(x){ return x.machine_code===code; });
+  return m ? (m.machine_name||'') : '';
+}
 function qualityVal(id){ const e=document.getElementById(id); return e ? String(e.value||'').trim() : ''; }
 function qualitySave(type){
   const p=qualityPrefix(type);
@@ -8429,11 +8534,19 @@ function qualitySave(type){
     if(!row.measure_name){ alert('측정항목을 입력하세요'); document.getElementById('qmName')?.focus(); return; }
     if(!row.value){ alert('측정값을 입력하세요'); document.getElementById('qmValue')?.focus(); return; }
   }else{
+    row.prod_date=qualityVal('qvProdDate');
+    row.machine_code=qualityVal('qvMachine');
+    row.machine_name=qvMachineName(row.machine_code);
+    if(!row.prod_date){ alert('생산일자를 입력하세요'); document.getElementById('qvProdDate')?.focus(); return; }
+    if(!row.machine_code){ alert('생산호기를 선택하세요'); document.getElementById('qvMachine')?.focus(); return; }
     row.inspect_qty=Math.max(0,parseInt(qualityVal('qvQty'))||0);
-    row.ng_qty=Math.max(0,parseInt(qualityVal('qvNgQty'))||0);
-    row.defect_type=qualityVal('qvType');
+    const ngList=qvNgList().filter(function(x){ return (Number(x.qty)||0)>0; });
+    row.defects=ngList;
+    row.ng_qty=ngList.reduce(function(a,b){ return a+(Number(b.qty)||0); },0);
+    row.defect_type=ngList.map(function(x){ return x.type+' '+x.qty; }).join(', ');
     if(!(row.inspect_qty>0)){ alert('검사수량을 입력하세요'); document.getElementById('qvQty')?.focus(); return; }
-    if(row.ng_qty>row.inspect_qty){ alert('불량수량은 검사수량보다 클 수 없습니다'); return; }
+    if(row.ng_qty>row.inspect_qty){ alert('불량수량 합계('+row.ng_qty+')는 검사수량('+row.inspect_qty+')보다 클 수 없습니다'); return; }
+    if(row.judge==='NG' && !ngList.length){ alert('판정이 NG입니다. 불량유형과 수량을 1건 이상 입력하세요'); return; }
   }
   qualityRecords.unshift(row);
   if(qualityRecords.length>3000) qualityRecords=qualityRecords.slice(0,3000);
@@ -8446,7 +8559,9 @@ function qualitySave(type){
     document.getElementById('qmJudge').value='OK';
   }else{
     ['qvNote'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
-    document.getElementById('qvQty').value=''; document.getElementById('qvNgQty').value='0'; document.getElementById('qvType').value=''; document.getElementById('qvJudge').value='OK';
+    document.getElementById('qvQty').value='';
+    const jv=document.getElementById('qvJudge'); if(jv){ jv.value='OK'; delete jv.dataset.manual; }
+    qvNgReset();
   }
   layoutToast('✅ '+(type==='measure'?'측정검사':'외관검사')+' · LOT '+lot+' 저장');
 }
@@ -8456,7 +8571,7 @@ function renderQualityHistory(type){
   const list=qualityRecords.filter(function(r){
     if(r.type!==type) return false;
     if(!q) return true;
-    return [r.lot,r.item,r.measure_name,r.spec,r.value,r.defect_type,r.note,r.worker,r.cert_no,Array.isArray(r.measurements)?r.measurements.map(x=>[x.name,x.spec,x.method].join(' ')).join(' '):''].join(' ').toLowerCase().indexOf(q)>=0;
+    return [r.lot,r.item,r.measure_name,r.spec,r.value,r.defect_type,r.machine_code,r.machine_name,r.prod_date,Array.isArray(r.defects)?r.defects.map(x=>x.type).join(' '):'',r.note,r.worker,r.cert_no,Array.isArray(r.measurements)?r.measurements.map(x=>[x.name,x.spec,x.method].join(' ')).join(' '):''].join(' ').toLowerCase().indexOf(q)>=0;
   });
   const cnt=document.getElementById(p+'Count'); if(cnt) cnt.textContent=list.length+'건';
   tb.innerHTML='';
@@ -8473,7 +8588,15 @@ function renderQualityHistory(type){
       }
     }else{
       const qty=Number(r.inspect_qty)||0, ng=Number(r.ng_qty)||0;
-      detail='<b>'+qty.toLocaleString()+'개 검사 · 불량 '+ng.toLocaleString()+'개</b><span class="q-sub">'+escHtml(r.defect_type||'외관 이상 없음')+'</span>';
+      const rate=qty>0?((ng/qty*100).toFixed(2).replace(/\.00$/,'')+'%'):'-';
+      let dtxt='';
+      if(Array.isArray(r.defects) && r.defects.length){
+        dtxt=r.defects.map(function(x){ return escHtml(x.type)+' '+(Number(x.qty)||0)+'개'; }).join(' · ');
+      }else{ dtxt=escHtml(r.defect_type||'외관 이상 없음'); }
+      const mtxt=r.machine_code?(escHtml(r.machine_code)+(r.machine_name?' '+escHtml(r.machine_name):'')):'';
+      detail='<b>'+qty.toLocaleString()+'개 검사 · 불량 '+ng.toLocaleString()+'개 ('+rate+')</b>'+
+             '<span class="q-sub">'+dtxt+'</span>'+
+             (mtxt||r.prod_date?'<span class="q-sub">🏭 '+mtxt+(r.prod_date?' · 생산 '+escHtml(r.prod_date):'')+'</span>':'');
     }
     tr.innerHTML='<td><b>'+escHtml(r.date||'-')+'</b><span class="q-sub">LOT '+escHtml(r.lot||'-')+'</span></td>'+ 
       '<td>'+escHtml(r.item||'-')+'<span class="q-sub">'+escHtml(r.worker||'-')+'</span></td>'+ 
