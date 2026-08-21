@@ -9332,5 +9332,44 @@ function measureFrameReady(){
 #t-work-order .wo-save{font-size:15px!important}
 #t-work-order .wo-clear{font-size:13.5px!important}
 </style>
+
+<style id="pc-workorder-ui-control-fix-v2">
+/* ===== PC 화면조절 2차 보정 =====
+   작업지시(t-work-order)처럼 #panelZone 바깥의 직접 tab-panel도
+   📐 화면 폭 / 글자 크기 설정을 동일하게 적용한다. */
+@media(min-width:1000px){
+  html.jp-menu-nav2:not(.jp-lay-mobile) #jpMain > .tab-panel{
+    zoom:var(--pd-font-scale,1)!important;
+    width:min(var(--pc-view-width,var(--pc-active-width,1180px)),calc(100% / var(--pd-font-scale,1)))!important;
+    max-width:calc(100% / var(--pd-font-scale,1))!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    transform-origin:top center;
+  }
+
+  /* panelZone 안쪽 화면(생산작업/생산일보)은 기존 방식 유지 */
+  html.jp-menu-nav2:not(.jp-lay-mobile) #panelZone{
+    zoom:var(--pd-font-scale,1)!important;
+    width:calc(100% / var(--pd-font-scale,1))!important;
+    max-width:calc(100% / var(--pd-font-scale,1))!important;
+  }
+  html.jp-menu-nav2:not(.jp-lay-mobile) #panelZone > .tab-panel{
+    zoom:1!important;
+    width:min(var(--pc-view-width,var(--pc-active-width,1180px)),100%)!important;
+    max-width:100%!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+}
+
+/* 모바일에서는 화면 폭은 100%, 글자 크기만 확대/축소 */
+@media(max-width:999px){
+  #jpMain > .tab-panel{
+    zoom:var(--pd-font-scale,1)!important;
+    width:calc(100% / var(--pd-font-scale,1))!important;
+    max-width:calc(100% / var(--pd-font-scale,1))!important;
+  }
+}
+</style>
 </body>
 </html>
