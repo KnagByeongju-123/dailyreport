@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.78</title>
+<title>프레스 생산관리 Rev.7.79</title>
 <style>
   /* 테두리 진하기(3단계) — 저해상도 모니터 가독성 대응 */
   :root{--bd1:#94a3b8;--bd2:#cbd5e1}
@@ -1369,7 +1369,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.78</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.79</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1416,7 +1416,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.78</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.79</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1587,7 +1587,7 @@
 <div class="tab-panel" id="t-measure">
   <div class="card measure-embed-card">
     <div class="sec-title">📏 측정검사 <span class="right">양식작성 · 치수측정 · 결과출력 · 출력설정 / 별도 측정DB</span></div>
-    <iframe id="measureInspFrame" class="measure-insp-frame" src="insp.html?embed=1&view=make" title="측정검사 성적서"></iframe>
+    <iframe id="measureInspFrame" class="measure-insp-frame" data-src="insp.html?embed=1&view=make" title="측정검사 성적서"></iframe>
   </div>
 
   <div class="card">
@@ -2998,6 +2998,26 @@ function switchSubTab(prefix, key) {
   if (isReg) ensureMaterialFrame(m.frame);
   else refreshMaterialFlowStatus(false);
 }
+/* [Rev.7.79] 측정검사(insp.html) 지연 로드
+   iframe을 문서 파싱 시점에 바로 띄우면 PIN 로그인 이전에 insp.html이 실행되고,
+   insp.html은 세션이 없으면 location.href='index1_2.html' 로 이동해 버린다.
+   → 로그인 완료 + 측정검사 탭 진입 시에만 src 를 넣는다. */
+function ensureMeasureFrame() {
+  const f = document.getElementById('measureInspFrame');
+  if (!f) return;
+  if (!worker || worker.role === 'guest') return;          // 로그인 전에는 로드하지 않음
+  let sessOk = false;
+  try {
+    const p = JSON.parse(localStorage.getItem(LS_PIN_SESSION) || 'null');
+    sessOk = !!(p && p.name && Number(p.exp) > Date.now());
+  } catch (e) {}
+  if (!sessOk) return;                                     // 세션이 실제로 기록된 뒤에만
+  if (f.getAttribute('data-loaded') === '1') return;
+  const u = f.getAttribute('data-src');
+  if (!u) return;
+  f.setAttribute('data-loaded', '1');
+  f.src = u;
+}
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.toggle('active', p.id === id); });
   setPCWidthView(id);
@@ -3013,7 +3033,7 @@ function switchTab(id, btn) {
   if (id === 't-mat-dispatch') { ensureMaterialFrame('matDispatchFrame'); refreshMaterialFlowStatus(false); }
   if (id === 't-iqc') { ensureMaterialFrame('matIqcFrame'); refreshMaterialFlowStatus(false); }
   if (id === 't-work-order') prepareWorkOrderView();
-  if (id === 't-measure') prepareQualityView('measure');
+  if (id === 't-measure') { ensureMeasureFrame(); prepareQualityView('measure'); }
   if (id === 't-visual') prepareQualityView('visual');
   if (id === 't-material') { renderMaterialPresets(); loadMaterialReceipts(); loadPendingCerts(false); }
   /* [Rev.7.47] 소재입고 메뉴 숨김 → 생산작업 진입 시 소재 LOT 목록을 직접 확보 */
@@ -3896,6 +3916,11 @@ function applyPinLogin(row, keepExp) {
   try { localStorage.setItem('mm_session', JSON.stringify({ name: worker.name, exp: exp })); } catch (e) {}
   renderWorkerChip();
   markDirty();
+  /* [Rev.7.79] 로그인 직후에만 측정검사 프레임 로드 허용 */
+  try {
+    const mp = document.getElementById('t-measure');
+    if (mp && mp.classList.contains('active')) ensureMeasureFrame();
+  } catch (e) {}
 }
 /* [Rev.7.76] 테마 셸(#jpMain)이 게이트를 감싸면 전체화면이 깨진다 → 항상 body 직속으로 되돌림 */
 function pgEnsureTop() {

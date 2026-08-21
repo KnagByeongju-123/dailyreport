@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ffffff">
-<title>검사성적서 — 금형제작관리</title>
+<title>검사성적서 — 금형제작관리 Rev.7.79</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -2902,8 +2902,34 @@ function inspRptPDF(id){
 
 
 /* ================= 초기화 ================= */
+/* [Rev.7.79] iframe(내장) 모드에서는 절대 location 이동을 하지 않는다.
+   부모(index1_2.html)의 PIN 로그인이 끝나기 전에 이 화면이 먼저 실행되면
+   iframe 본문에 index1_2.html 전체가 로드되어 화면이 중첩된다.
+   → 내장 모드에서는 세션이 생길 때까지 조용히 기다린다. */
+const IS_EMBED = (function(){
+  try{ if(window.self!==window.top) return true; }catch(e){ return true; }
+  return /[?&]embed=1/.test(location.search);
+})();
+function waitForSession(cb){
+  let n=0;
+  const t=setInterval(function(){
+    USER=readSession();
+    if(USER){ clearInterval(t); cb(); return; }
+    if(++n>150){ clearInterval(t); }   /* 약 75초 */
+  },500);
+}
 (async function init(){
-  if(!USER){ alert('로그인이 만료되었거나 필요합니다. 최초 비밀번호는 0000이며 로그인은 7일간 유효합니다.'); location.href='index1_2.html'; return; }
+  if(!USER){
+    if(IS_EMBED){
+      const b=document.getElementById('ubadge');
+      if(b) b.textContent='👤 로그인 대기 중…';
+      waitForSession(function(){ location.reload(); });
+      return;
+    }
+    alert('로그인이 만료되었거나 필요합니다. 최초 비밀번호는 0000이며 로그인은 7일간 유효합니다.');
+    location.href='index1_2.html';
+    return;
+  }
   document.getElementById('ubadge').textContent='👤 '+USER;
   try{ applyFontScale(localStorage.getItem(FS_KEY)||100,false); }catch(e){}
   try{
