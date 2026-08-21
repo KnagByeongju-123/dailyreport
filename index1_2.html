@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>프레스 생산관리 Rev.7.80</title>
+<title>프레스 생산관리 Rev.7.81</title>
 <style>
   /* 테두리 진하기(3단계) — 저해상도 모니터 가독성 대응 */
   :root{--bd1:#94a3b8;--bd2:#cbd5e1}
@@ -1369,7 +1369,7 @@
 
 <div class="top-bar">
   <button class="ham-btn" onclick="openDrawer()">☰<span class="tab-dot ham-dot"></span></button>
-  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.80</span></h1>
+  <h1>🏭 프레스 생산관리 <span class="cur-menu" id="curMenuName">생산작업</span><span class="rev-tag">Rev.7.81</span></h1>
   <div class="top-meta">
     <span class="worker-chip" id="workerChip" onclick="openWorkerModal()" style="cursor:pointer">확인중...</span>
     <span class="sync-badge" id="syncBadge">⏸ 대기</span>
@@ -1416,7 +1416,7 @@
 <div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
 <nav class="drawer" id="drawer">
   <div class="drawer-head">
-    <span>🏭 프레스 생산관리 <small>Rev.7.80</small></span>
+    <span>🏭 프레스 생산관리 <small>Rev.7.81</small></span>
     <button class="drawer-x" onclick="closeDrawer()">✕</button>
   </div>
   <div class="menueditnote" id="menuEditNote">편집 중에는 메뉴 영역을 위·아래로 밀어 스크롤하고, 오른쪽 ☰ 핸들을 잡아 원하는 위치로 이동하세요. 화면 가장자리에서는 자동으로 스크롤됩니다. 변경 순서는 이 브라우저에 자동 저장됩니다.</div>
@@ -1849,7 +1849,7 @@
       </div>
       <div class="card" style="padding-bottom:4px">
         <div class="sec-title">🔎 소재 수입검사</div>
-        <div class="flow-guide">업체가 등록한 소재를 공급자·재질·두께·폭 기준으로 묶어 검사하고, 결과는 <b>iqc_inspections</b>와 <b>inspection_certs</b> 판정에 반영됩니다. <b>내장 수입검사 화면(v4.2)</b>(검사 탭)이 이 파일에 포함되어 있으며 독립 DB만 사용합니다.</div>
+        <div class="flow-guide">업체가 등록한 소재를 공급자·재질·두께·폭 기준으로 묶어 검사하고, 결과는 <b>pd_iqc_inspections</b>와 <b>pd_inspection_certs</b> 판정에 반영됩니다. <b>내장 수입검사 화면(v4.2)</b>(검사 탭)이 이 파일에 포함되어 있으며 독립 DB만 사용합니다.</div>
         <div class="flow-actions">
           <a class="green" id="matIqcLink" href="#" onclick="openMatIqcWindow();return false;">↗ 수입검사 새 창</a>
           <button onclick="reloadMaterialFrame('matIqcFrame')">🔄 검사화면 새로고침</button>
@@ -1909,7 +1909,7 @@
 
 <!-- ===== 소재입고 ===== -->
 <div class="tab-panel" id="t-material">
-  <!-- [Rev.7.43] 소재발송(inspection_certs) → 소재입고 연동 -->
+  <!-- [Rev.7.43] 소재발송(pd_inspection_certs) → 소재입고 연동 -->
   <div class="card" id="pendCertCard">
     <div class="sec-title">📤 발송 도착 소재 <span class="right" id="pendCertCount">—</span></div>
     <div class="sel-hint" style="margin-bottom:8px">소재업체가 발송 등록한 성적서입니다. 항목을 누르면 아래 입고 폼에 자동 입력됩니다.</div>
@@ -2459,7 +2459,7 @@
    통합 DB : pllwltojbofjaftcemvn
      - 마스터 : pd_machine / pd_mold / pd_work_log / pd_material_lot
      - 카운팅 : shot_count (설정 탭에서 변경 가능)
-     - 소재   : inspection_certs / iqc_inspections
+     - 소재   : pd_inspection_certs / pd_iqc_inspections
    ============================================================ */
 const PD_URL = 'https://pllwltojbofjaftcemvn.supabase.co';
 const PD_KEY = 'sb_publishable_9dYJzdz472b888EcqdBBaA_Ncwk0yvT';
@@ -3364,8 +3364,8 @@ async function refreshMaterialFlowStatus(force) {
   }
   try {
     const h = { 'apikey': MATERIAL_SB_KEY, 'Authorization': 'Bearer ' + MATERIAL_SB_KEY, 'Content-Type':'application/json' };
-    const certUrl = MATERIAL_SB_URL + '/rest/v1/inspection_certs?select=supplier,material_type,thickness,width_mm,lot_no,receipt_date,final_judge,created_at&order=created_at.desc&limit=1000';
-    const inspUrl = MATERIAL_SB_URL + '/rest/v1/iqc_inspections?select=supplier,material_type,thickness,width_mm,receipt_date,final_judge,insp_date,updated_at&order=updated_at.desc&limit=1000';
+    const certUrl = MATERIAL_SB_URL + '/rest/v1/pd_inspection_certs?select=supplier,material_type,thickness,width_mm,lot_no,receipt_date,final_judge,created_at&order=created_at.desc&limit=1000';
+    const inspUrl = MATERIAL_SB_URL + '/rest/v1/pd_iqc_inspections?select=supplier,material_type,thickness,width_mm,receipt_date,final_judge,insp_date,updated_at&order=updated_at.desc&limit=1000';
     const rr = await Promise.all([fetch(certUrl,{headers:h}), fetch(inspUrl,{headers:h}).catch(function(){return null;})]);
     if (!rr[0].ok) throw new Error('발송자료 조회 HTTP ' + rr[0].status);
     const certs = await rr[0].json();
@@ -3379,7 +3379,7 @@ async function refreshMaterialFlowStatus(force) {
   }
 }
 /* [Rev.7.32] IQC computeWaitGroups() 와 동일한 완료 판정
-   완료 = 수요자 검사 발행(iqc_inspections) 존재 + 발행시각 이후 신규 성적서 없음 */
+   완료 = 수요자 검사 발행(pd_iqc_inspections) 존재 + 발행시각 이후 신규 성적서 없음 */
 var MAT_V33_CUTOFF = new Date('2026-07-27T00:00:00+09:00').getTime();
 function applyMaterialFlowStatus(certs, insps) {
   certs = Array.isArray(certs) ? certs : [];
@@ -5944,7 +5944,7 @@ function applyMaterialPreset(key) {
   document.getElementById('matMatchHint').innerHTML = '🧩 연결 금형 <b>' + escHtml(moldTxt || '-') + '</b><br>🏷 품번 <b>' + escHtml(itemTxt || '-') + '</b>';
 }
 /* ============================================================
-   [Rev.7.43] 발송 도착 소재 (inspection_certs) → 소재입고 연동
+   [Rev.7.43] 발송 도착 소재 (pd_inspection_certs) → 소재입고 연동
    ============================================================ */
 let pendingCerts = [];
 let _pendCertLoadedAt = 0;
@@ -5955,7 +5955,7 @@ async function loadPendingCerts(force) {
   const cnt = document.getElementById('pendCertCount');
   try {
     const h = { 'apikey': MATERIAL_SB_KEY, 'Authorization': 'Bearer ' + MATERIAL_SB_KEY, 'Content-Type':'application/json' };
-    const url = MATERIAL_SB_URL + '/rest/v1/inspection_certs?select=id,supplier,material_type,thickness,width_mm,lot_no,heat_no,weight,coil_count,receipt_date,final_judge,received_at&received_at=is.null&order=receipt_date.desc,id.desc&limit=300';
+    const url = MATERIAL_SB_URL + '/rest/v1/pd_inspection_certs?select=id,supplier,material_type,thickness,width_mm,lot_no,heat_no,weight,coil_count,receipt_date,final_judge,received_at&received_at=is.null&order=receipt_date.desc,id.desc&limit=300';
     const res = await fetch(url, { headers: h });
     if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).substring(0,120));
     pendingCerts = await res.json();
@@ -5966,7 +5966,7 @@ async function loadPendingCerts(force) {
     if (cnt) cnt.textContent = '조회 실패';
     /* received_at 컬럼 미생성 시 안내 */
     const tb = document.querySelector('#pendCertTable tbody');
-    if (tb) tb.innerHTML = '<tr><td colspan="4" class="empty">조회 실패 — inspection_certs 에 received_at 컬럼이 있는지 확인하세요</td></tr>';
+    if (tb) tb.innerHTML = '<tr><td colspan="4" class="empty">조회 실패 — pd_inspection_certs 에 received_at 컬럼이 있는지 확인하세요</td></tr>';
     return;
   }
   renderPendingCerts();
@@ -6034,7 +6034,7 @@ async function markCertReceived(certId) {
   if (!certId) return;
   try {
     const h = { 'apikey': MATERIAL_SB_KEY, 'Authorization': 'Bearer ' + MATERIAL_SB_KEY, 'Content-Type':'application/json', 'Prefer':'return=minimal' };
-    const res = await fetch(MATERIAL_SB_URL + '/rest/v1/inspection_certs?id=eq.' + encodeURIComponent(certId), {
+    const res = await fetch(MATERIAL_SB_URL + '/rest/v1/pd_inspection_certs?id=eq.' + encodeURIComponent(certId), {
       method: 'PATCH', headers: h, body: JSON.stringify({ received_at: kstNowISO() })
     });
     if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).substring(0,120));

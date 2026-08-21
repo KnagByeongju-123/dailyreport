@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>소재발송 등록 (Rev7.6)</title>
+  <title>소재발송 등록 (Rev7.7)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -131,7 +131,7 @@
 </head>
 <body>
 <div class="hdr" style="position:relative">
-  <h1>📤 소재발송 등록 (Rev7.6)</h1>
+  <h1>📤 소재발송 등록 (Rev7.7)</h1>
   <p>소재업체 템플릿 업로드 → DB 저장 · <span style="color:#ffeb3b;font-weight:700">성적서 · 밀시트 서버 저장 (자동 압축)</span></p>
   <div class="vsmenu" id="vsMenu">
     <button id="vsBtn" class="vsbtn" type="button" title="글자 크기 · 테두리 설정" aria-label="글자 크기 · 테두리 설정" aria-expanded="false" onclick="toggleViewPopup(event)">📐</button>
@@ -332,7 +332,7 @@
     <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
     <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
   </div>
-  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:14px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid var(--bd1,#ddd);border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid var(--bd1,#ddd);border-radius:8px;font-size:12px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS move_history_tj (
+  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:14px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid var(--bd1,#ddd);border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid var(--bd1,#ddd);border-radius:8px;font-size:12px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS pd_move_history_tj (
   id bigint generated always as identity primary key,
   move_date date, move_time text, process text,
   departure text, destination text,
@@ -344,9 +344,9 @@
   general_model text, material_info text,
   created_at timestamptz default now()
 );
-ALTER TABLE move_history_tj ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "anon_all" ON move_history_tj;
-CREATE POLICY "anon_all" ON move_history_tj FOR ALL TO anon USING (true) WITH CHECK (true);</pre></details>
+ALTER TABLE pd_move_history_tj ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "anon_all" ON pd_move_history_tj;
+CREATE POLICY "anon_all" ON pd_move_history_tj FOR ALL TO anon USING (true) WITH CHECK (true);</pre></details>
   <button class="btn btn-blue" onclick="saveAllSettings()" style="margin-bottom:8px">💾 모든 설정 서버에 저장</button>
   <div style="text-align:center"><span id="stgSaveStatus" style="font-size:13px;color:#888"></span></div>
   <div class="card" style="margin-top:8px"><div class="card-tit">ℹ️ 연결 상태</div><div id="connStatusInfo" style="font-size:14px;color:#555;line-height:1.8"></div></div>
@@ -375,8 +375,9 @@ CREATE POLICY "anon_all" ON move_history_tj FOR ALL TO anon USING (true) WITH CH
 <!-- PIN 키패드 모달 -->
 <div id="pinLock" style="display:none;position:fixed;inset:0;background:linear-gradient(180deg,#181b26,#0f1117);z-index:99999;flex-direction:column;align-items:center;justify-content:center;padding:20px">
   <div style="font-size:25px;font-weight:800;color:#e2b04a;margin-bottom:6px;text-align:center">🔒 설정 메뉴 접속</div>
-  <div style="font-size:14px;color:#8b8fa3;margin-bottom:32px">본인의 PIN을 입력하세요</div>
-  <div id="pinDots" style="display:flex;gap:12px;margin-bottom:24px">
+  <div style="font-size:14px;color:#8b8fa3;margin-bottom:14px">본인의 PIN 4자리를 입력하세요</div>
+  <div style="font-size:12px;font-weight:700;color:#cbd5e1;margin-bottom:6px;width:324px;max-width:90vw">로그인 번호 (4자리)</div>
+  <div id="pinDots" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:324px;max-width:90vw;margin-bottom:20px">
     <div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div>
   </div>
   <div id="pinLockoutMsg" style="display:none;color:#ef4444;font-size:15px;font-weight:600;text-align:center;margin-bottom:16px"></div>
@@ -384,9 +385,9 @@ CREATE POLICY "anon_all" ON move_history_tj FOR ALL TO anon USING (true) WITH CH
   <div style="margin-top:28px"><button onclick="closePinLock()" style="background:transparent;border:none;color:#8b8fa3;font-size:14px;padding:8px 16px;cursor:pointer;font-family:inherit">✕ 취소</button></div>
 </div>
 <style>
-#pinLock .pd{width:12px;height:12px;border-radius:50%;background:#2a2e3d;border:2px solid #2a2e3d;transition:all .15s}
-#pinLock .pd.filled{background:#e2b04a;border-color:#e2b04a;box-shadow:0 0 10px rgba(226,176,74,.4)}
-#pinLock .pd.err{background:#ef4444;border-color:#ef4444;animation:pinshake .4s}
+#pinLock .pd{height:50px;border-radius:8px;background:#1a1d27;border:1.5px solid #3a4152;transition:all .15s;display:flex;align-items:center;justify-content:center;color:#f8fafc;font-family:ui-monospace,monospace;font-size:24px;font-weight:900;font-style:normal}
+#pinLock .pd.filled{background:#202638;border-color:#e2b04a;box-shadow:0 0 0 2px rgba(226,176,74,.12)}
+#pinLock .pd.err{border-color:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,.12);animation:pinshake .4s}
 @keyframes pinshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 #pinLock .pk{width:72px;height:72px;border-radius:50%;background:#1a1d27;border:1.5px solid #2a2e3d;color:#e8eaf0;font-size:29px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s;display:flex;align-items:center;justify-content:center;font-family:inherit}
 #pinLock .pk:active{background:#2a2e3d;transform:scale(.92)}
@@ -478,6 +479,7 @@ function _renderPinKeypad(){
 function _updatePinDots(){
   document.querySelectorAll('#pinDots .pd').forEach((d,i)=>{
     d.classList.remove('err');
+    d.textContent=_pinCur[i]||'';
     if(i<_pinCur.length)d.classList.add('filled');
     else d.classList.remove('filled');
   });
@@ -532,7 +534,7 @@ async function _pinComplete(){
     }
     const hash=await _sha256hex(_pinCur);
     const SB_URL=getSbUrl(),SB_KEY=getSbKey();
-    const res=await fetch(SB_URL+'/rest/v1/user_pin?select=name&pin_hash=eq.'+hash,{
+    const res=await fetch(SB_URL+'/rest/v1/pd_user_pin?select=name&pin_hash=eq.'+hash,{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
     });
     if(!res.ok)throw new Error(res.status);
@@ -747,7 +749,7 @@ async function doRegister(){
           const ctrl=new AbortController();
           const tid=setTimeout(()=>ctrl.abort(),15000);
           try{
-            const res=await fetch(SB_URL+'/rest/v1/raw_material_receipt',{
+            const res=await fetch(SB_URL+'/rest/v1/pd_raw_material_receipt',{
               method:'POST',
               headers:{
                 'Content-Type':'application/json',
@@ -805,7 +807,7 @@ async function doRegister(){
         const postCerts=async(payloads)=>{
           /* [Rev6.1] 중복 입고 방지 : lot_no+heat_no+receipt_date 기준 upsert */
           const doPost=async(useConflict)=>{
-            const res=await fetch(SB_URL+'/rest/v1/inspection_certs'+(useConflict?CERT_CONFLICT:''),{
+            const res=await fetch(SB_URL+'/rest/v1/pd_inspection_certs'+(useConflict?CERT_CONFLICT:''),{
               method:'POST',
               headers:{
                 'Content-Type':'application/json',
@@ -935,10 +937,10 @@ let _tt;function showToast(m){const el=document.getElementById('toast');el.textC
 
 function getHHMM(){const n=new Date();return String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')}
 function initHistDates(){const t=new Date(),m=new Date();m.setMonth(m.getMonth()-1);document.getElementById('histEnd').value=t.toISOString().split('T')[0];document.getElementById('histStart').value=m.toISOString().split('T')[0]}
-async function histFetch(){const sd=document.getElementById('histStart').value,ed=document.getElementById('histEnd').value;if(!sd||!ed)return{ok:false,msg:'날짜 선택'};let url=getSbUrl()+'/rest/v1/move_history_tj?select=*&order=move_date.desc,move_time.desc&limit=5000&move_date=gte.'+sd+'&move_date=lte.'+ed;const co=document.getElementById('histCompany').value.trim();if(co)url+='&material_info=ilike.*'+encodeURIComponent(co)+'*';try{const r=await fetch(url,{headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(!r.ok)throw new Error(r.status);return{ok:true,data:await r.json()}}catch(e){return{ok:false,msg:e.message}}}
+async function histFetch(){const sd=document.getElementById('histStart').value,ed=document.getElementById('histEnd').value;if(!sd||!ed)return{ok:false,msg:'날짜 선택'};let url=getSbUrl()+'/rest/v1/pd_move_history_tj?select=*&order=move_date.desc,move_time.desc&limit=5000&move_date=gte.'+sd+'&move_date=lte.'+ed;const co=document.getElementById('histCompany').value.trim();if(co)url+='&material_info=ilike.*'+encodeURIComponent(co)+'*';try{const r=await fetch(url,{headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}});if(!r.ok)throw new Error(r.status);return{ok:true,data:await r.json()}}catch(e){return{ok:false,msg:e.message}}}
 async function histQuery(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const st=document.getElementById('histStatus'),area=document.getElementById('histArea');st.textContent='조회 중...';area.innerHTML='';const r=await histFetch();if(!r.ok){st.textContent='❌ '+r.msg;st.style.color='#c62828';return}if(!r.data.length){st.textContent='⚠ 이력 없음';st.style.color='#e65100';return}st.textContent='✅ '+r.data.length+'건';st.style.color='#2e7d32';let h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e8eaf6"><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">일자</th><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">소재</th><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">LOT</th><th style="padding:5px 4px;border-bottom:1px solid var(--bd1,#ddd)">수량</th></tr>';r.data.slice(0,100).forEach(d=>{h+='<tr style="border-bottom:1px solid var(--bd2,#eee)"><td style="padding:4px">'+d.move_date+'</td><td style="padding:4px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.material_info||'-')+'</td><td style="padding:4px">'+(d.lot||'-')+'</td><td style="padding:4px">'+(d.qty||'-')+'</td></tr>'});area.innerHTML=h+'</table>'}
 async function histExcel(){const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}const hd=['일자','시간','공정','출발지','도착지','LOT','수량','소재정보','작업자','비고'];const rows=r.data.map(d=>[d.move_date,d.move_time,d.process,d.departure,d.destination,d.lot,d.qty,d.material_info,d.worker,d.note]);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([hd,...rows]),'소재입고');XLSX.writeFile(wb,'소재입고_'+document.getElementById('histStart').value.replace(/-/g,'')+'_'+document.getElementById('histEnd').value.replace(/-/g,'')+'.xlsx');showToast('📥 다운로드 완료')}
-async function histDelete(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}if(!confirm(r.data.length+'건 삭제?'))return;const ids=r.data.map(d=>d.id);for(let i=0;i<ids.length;i+=50){await fetch(getSbUrl()+'/rest/v1/move_history_tj?id=in.('+ids.slice(i,i+50).join(',')+')',{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}document.getElementById('histStatus').textContent='✅ 삭제 완료';document.getElementById('histArea').innerHTML=''}
+async function histDelete(){const pw=prompt('암호를 입력하세요:');if(!pw||pw!==getHHMM()){showToast('❌ 암호 불일치');return}const r=await histFetch();if(!r.ok||!r.data.length){showToast('데이터 없음');return}if(!confirm(r.data.length+'건 삭제?'))return;const ids=r.data.map(d=>d.id);for(let i=0;i<ids.length;i+=50){await fetch(getSbUrl()+'/rest/v1/pd_move_history_tj?id=in.('+ids.slice(i,i+50).join(',')+')',{method:'DELETE',headers:{'apikey':getSbKey(),'Authorization':'Bearer '+getSbKey()}})}document.getElementById('histStatus').textContent='✅ 삭제 완료';document.getElementById('histArea').innerHTML=''}
 
 const NTFY_LS='PD_MAT_NTFY_RULES';const NTFY_SV='https://ntfy.sh';
 function getNtfyRules(){try{return JSON.parse(localStorage.getItem(NTFY_LS)||'[]')}catch(e){return[]}}
@@ -1670,8 +1672,8 @@ function readCertModalData(){
   c.certData=data;
 }
 
-/* [Rev6.1] inspection_certs 중복 방지 upsert 설정
-   DB 전제 : ALTER TABLE inspection_certs ADD CONSTRAINT uq_cert_lot UNIQUE (lot_no,heat_no,receipt_date);
+/* [Rev6.1] pd_inspection_certs 중복 방지 upsert 설정
+   DB 전제 : ALTER TABLE pd_inspection_certs ADD CONSTRAINT uq_cert_lot UNIQUE (lot_no,heat_no,receipt_date);
    제약이 없으면 42P10 응답 → 자동으로 일반 INSERT 폴백 */
 const CERT_CONFLICT='?on_conflict=lot_no,heat_no,receipt_date';
 const CERT_NOCONSTRAINT=/42P10|no unique or exclusion constraint|ON CONFLICT/i;
@@ -1907,7 +1909,7 @@ async function certSaveCurrent(){
   async function tryInsert(payload){
     /* [Rev6.1] 중복 입고 방지 : lot_no+heat_no+receipt_date 기준 upsert */
     const doPost=async(useConflict)=>{
-      const res=await fetch(SB_URL+'/rest/v1/inspection_certs'+(useConflict?CERT_CONFLICT:''),{
+      const res=await fetch(SB_URL+'/rest/v1/pd_inspection_certs'+(useConflict?CERT_CONFLICT:''),{
         method:'POST',
         headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
                  'Prefer':useConflict?'resolution=merge-duplicates,return=representation':'return=representation'},
@@ -1967,7 +1969,7 @@ async function certSaveCurrent(){
       if(savedId){
         savedCertId=savedId;
         /* id로 GET 검증 */
-        const vRes=await fetch(SB_URL+'/rest/v1/inspection_certs?id=eq.'+savedId+'&select=id,supplier,lot_no,created_at',{
+        const vRes=await fetch(SB_URL+'/rest/v1/pd_inspection_certs?id=eq.'+savedId+'&select=id,supplier,lot_no,created_at',{
           headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
         });
         if(vRes.ok){
@@ -1982,7 +1984,7 @@ async function certSaveCurrent(){
         }
       }else{
         /* id 못 받음 → lot+heat로 GET 검증 */
-        const vRes=await fetch(SB_URL+'/rest/v1/inspection_certs?lot_no=eq.'+encodeURIComponent(c.lot)+'&heat_no=eq.'+encodeURIComponent(c.heat_no)+'&select=id,created_at&order=created_at.desc&limit=1',{
+        const vRes=await fetch(SB_URL+'/rest/v1/pd_inspection_certs?lot_no=eq.'+encodeURIComponent(c.lot)+'&heat_no=eq.'+encodeURIComponent(c.heat_no)+'&select=id,created_at&order=created_at.desc&limit=1',{
           headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
         });
         if(vRes.ok){
@@ -1994,7 +1996,7 @@ async function certSaveCurrent(){
           }else{
             verifyMsg=`⚠ POST 200 반환했지만 DB에 행 없음 - RLS 차단 의심`;
             console.error('[CERT] POST 성공인데 DB에 없음! lot=',c.lot,'heat=',c.heat_no);
-            alert('⚠ 이상: POST는 성공인데 DB에 행이 없습니다.\n→ Supabase RLS 정책이 INSERT는 허용하지만 SELECT는 차단할 가능성.\n→ 또는 Trigger가 ROLLBACK 했을 수 있음.\n\n→ Supabase 콘솔에서 inspection_certs 테이블 직접 확인 필요.');
+            alert('⚠ 이상: POST는 성공인데 DB에 행이 없습니다.\n→ Supabase RLS 정책이 INSERT는 허용하지만 SELECT는 차단할 가능성.\n→ 또는 Trigger가 ROLLBACK 했을 수 있음.\n\n→ Supabase 콘솔에서 pd_inspection_certs 테이블 직접 확인 필요.');
           }
         }
       }
@@ -2003,7 +2005,7 @@ async function certSaveCurrent(){
       verifyMsg='⚠ 검증 단계 오류';
     }
     showToast('✅ 성적서 저장 완료 '+verifyMsg);
-    /* [Rev6.0] 밀시트 서버 저장 (millsheet_files) */
+    /* [Rev6.0] 밀시트 서버 저장 (pd_millsheet_files) */
     if(millsheetImg){
       try{
         await saveMillsheetToServer(c,millsheetImg,savedCertId);
@@ -2028,7 +2030,7 @@ async function certSaveCurrent(){
   else{alert('🎉 모든 성적서 작성 완료!');closeCertModal()}
 }
 
-/* [Rev6.0] 밀시트 → Supabase millsheet_files 테이블 저장 */
+/* [Rev6.0] 밀시트 → Supabase pd_millsheet_files 테이블 저장 */
 async function saveMillsheetToServer(c,ms,certId){
   const SB_URL=getSbUrl(),SB_KEY=getSbKey();
   const payload={
@@ -2043,7 +2045,7 @@ async function saveMillsheetToServer(c,ms,certId){
     data_b64:ms.dataUrl,
     created_at:kstISOString(new Date())
   };
-  const res=await fetch(SB_URL+'/rest/v1/millsheet_files',{
+  const res=await fetch(SB_URL+'/rest/v1/pd_millsheet_files',{
     method:'POST',
     headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
     body:JSON.stringify(payload)
