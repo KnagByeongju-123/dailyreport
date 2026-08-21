@@ -1827,27 +1827,30 @@ function loadMeasureDbCfg(){
 function measureDbReady(){return !!(MDB.url&&MDB.key)}
 loadMeasureDbCfg();
 
-/* ================= 세션 (index.html과 공유) ================= */
-const SESS_KEY='mm_session', SESS_DAYS=7;
+/* ================= 세션 (index1_2.html과 공유 · 7일 고정 만료) ================= */
+const SESS_KEY='mm_session', MAIN_SESS_KEY='pdPinSession_v1', SESS_DAYS=7;
 function readSession(){
+  const now=Date.now();
+  /* 1순위: 메인 생산관리 PIN 로그인 세션 */
+  try{
+    const p=JSON.parse(localStorage.getItem(MAIN_SESS_KEY)||'null');
+    if(p&&p.name&&Number(p.exp)>now){
+      localStorage.setItem(SESS_KEY,JSON.stringify({name:p.name,exp:Number(p.exp)}));
+      sessionStorage.setItem('mm_user',p.name);
+      return p.name;
+    }
+    if(p&&Number(p.exp)<=now)localStorage.removeItem(MAIN_SESS_KEY);
+  }catch(e){}
+  /* 2순위: 측정검사 세션. 접속할 때마다 만료를 연장하지 않고 최초 로그인 시각 기준 7일만 유효 */
   try{
     const o=JSON.parse(localStorage.getItem(SESS_KEY)||'null');
-    if(o&&o.exp>Date.now()){
-      localStorage.setItem(SESS_KEY,JSON.stringify({name:o.name,exp:Date.now()+SESS_DAYS*864e5}));
+    if(o&&o.name&&Number(o.exp)>now){
       sessionStorage.setItem('mm_user',o.name);
       return o.name;
     }
     if(o)localStorage.removeItem(SESS_KEY);
   }catch(e){}
-  const mm=sessionStorage.getItem('mm_user');
-  if(mm)return mm;
-  /* index1_2.html 안에 임베드될 때는 생산관리 작업자명을 로그인 사용자로 사용 */
-  try{
-    if(new URLSearchParams(location.search).get('embed')==='1'){
-      const w=JSON.parse(localStorage.getItem('pdWorker_v1')||'null');
-      return (w&&w.name)?w.name:'게스트';
-    }
-  }catch(e){}
+  sessionStorage.removeItem('mm_user');
   return null;
 }
 let USER=readSession();
@@ -2900,7 +2903,7 @@ function inspRptPDF(id){
 
 /* ================= 초기화 ================= */
 (async function init(){
-  if(!USER){ alert('로그인이 필요합니다.'); location.href='index.html'; return; }
+  if(!USER){ alert('로그인이 만료되었거나 필요합니다. 최초 비밀번호는 0000이며 로그인은 7일간 유효합니다.'); location.href='index1_2.html'; return; }
   document.getElementById('ubadge').textContent='👤 '+USER;
   try{ applyFontScale(localStorage.getItem(FS_KEY)||100,false); }catch(e){}
   try{
