@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ffffff">
-<title>검사성적서 — 프레스 생산관리 Rev.8.1</title>
+<title>검사성적서 — 프레스 생산관리 Rev.8.2</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -1569,7 +1569,7 @@ html.insp-embed .modal{zoom:1!important}
   </div>
   <div class="hright">
     <span class="ubadge" id="ubadge"></span>
-    <span class="rev">v1.9</span>
+    <span class="rev">v2.0</span>
     <div class="pcwmenu" id="pcWidthMenu">
       <button id="pcWidthBtn" class="pcwbtn" type="button" title="글자 크기 설정" onclick="togglePCWidthPopup(event)">📐</button>
       <div id="pcWidthPopup" class="pcwpopup" role="dialog" onclick="event.stopPropagation()">
@@ -1926,9 +1926,14 @@ function FM(flow){return MASTER.filter(m=>(m.flow||'신작')===flow)}
 /* [프레스 전용] pd_mold 에는 신작/수리 구분이 없다 → 공정 흐름은 항상 '신작' */
 function pflow(p){return '신작'}
 function mName(c){const m=MASTER.find(x=>x.op_code===c);return m?m.process_name:''}
+/* [v2.0] 프레스 측정검사 공정은 자주검사 / 공정검사 2종으로 고정.
+   기존 금형용 공정(초물·중간·종물·출하)은 사용하지 않는다. */
+const PRESS_INSP_OPS=[
+  {op_code:'OP10', process_name:'자주검사', seq:10, flow:'신작', tasks:[]},
+  {op_code:'OP20', process_name:'공정검사', seq:20, flow:'신작', tasks:[]}
+];
 async function loadMaster(){
-  MASTER=await api("/pd_insp_process?select=*&order=seq");
-  MASTER.forEach(m=>{if(typeof m.tasks==='string'){try{m.tasks=JSON.parse(m.tasks)}catch(e){m.tasks=[]}}});
+  MASTER=PRESS_INSP_OPS.map(m=>Object.assign({},m));
 }
 
 /* ---------- 금형 목록 ---------- */
