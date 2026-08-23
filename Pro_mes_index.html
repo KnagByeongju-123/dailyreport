@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro_mes - 생산관리 통합포털</title>
+<style>
+:root{
+  --top1-h:36px;--top2-h:72px;--left-w:210px;--tab-h:32px;
+  --blue:#2d66ad;--blue-dark:#1f4f8c;--blue-soft:#dce8f6;
+  --line:#a9b6c4;--line2:#c8d1da;--panel:#eef2f5;--header:#e7edf3;
+  --text:#25313d;--muted:#667483;--shadow:rgba(24,45,67,.15);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:12px;color:var(--text);background:#dfe5ea;overflow:hidden}
+button,input,select{font:inherit}button{cursor:pointer}
+/* 1차 메뉴 */
+.top-level-1{position:fixed;left:0;right:0;top:0;height:var(--top1-h);z-index:100;display:flex;align-items:stretch;background:linear-gradient(#f9fbfc,#e4eaf0);border-bottom:1px solid #8d9aaa;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.app-mark{width:92px;display:flex;align-items:center;justify-content:center;border-right:1px solid #b7c1cb;background:#f1f4f7;font-weight:900;color:#b63b30;letter-spacing:.5px}
+.l1-menu{display:flex;align-items:stretch;overflow:auto;white-space:nowrap}
+.l1-btn{min-width:96px;padding:0 14px;border:0;border-right:1px solid #c6ced6;background:transparent;color:#3d4a58;font-weight:700}
+.l1-btn:hover{background:#edf3f9;color:var(--blue-dark)}
+.l1-btn.active{background:#dce8f5;color:var(--blue-dark);box-shadow:inset 0 -3px 0 var(--blue)}
+.top-status{margin-left:auto;display:flex;align-items:center;gap:10px;padding:0 12px;color:#6f7c89;font-size:11px;background:#f8fafc;border-left:1px solid #c6ced6;white-space:nowrap}
+.status-dot{width:7px;height:7px;background:#2f9d63;border-radius:50%}
+/* 2차 메뉴 */
+.top-level-2{position:fixed;top:var(--top1-h);left:0;right:0;height:var(--top2-h);z-index:90;display:flex;align-items:stretch;background:linear-gradient(#f7f9fb,#e8edf2);border-bottom:1px solid #929fad}
+.l2-title{width:92px;display:flex;align-items:center;justify-content:center;background:#eef2f6;border-right:1px solid #bdc7d0;color:#677482;font-weight:700}
+.l2-menu{display:flex;align-items:stretch;overflow:auto;min-width:0}
+.l2-btn{position:relative;min-width:88px;padding:8px 10px 6px;border:0;border-right:1px solid #ccd3da;background:transparent;color:#4b5967;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.l2-btn:hover{background:#fdfefe}.l2-btn.active{background:#fff;color:var(--blue-dark);box-shadow:inset 0 -3px 0 var(--blue)}
+.l2-icon{width:28px;height:28px;display:grid;place-items:center;font-size:18px;border:1px solid #bcc7d2;background:linear-gradient(#fff,#e9eef3);box-shadow:inset 0 0 0 1px #fff}.l2-label{font-weight:700;font-size:11px}
+/* 좌측 */
+.left-panel{position:fixed;top:calc(var(--top1-h) + var(--top2-h));left:0;bottom:0;width:var(--left-w);z-index:80;background:#f4f6f8;border-right:1px solid #8f9dab;box-shadow:2px 0 4px rgba(0,0,0,.04);display:flex;flex-direction:column}
+.left-head{height:34px;padding:0 10px;display:flex;align-items:center;gap:7px;background:linear-gradient(#edf2f6,#dbe3ea);border-bottom:1px solid #9eabb8;color:#314355;font-weight:800}.left-head .tiny{font-size:10px;color:#7a8793;margin-left:auto}
+.tree{padding:4px 0;overflow:auto;flex:1;background:#f8fafb}.tree-group{border-bottom:1px solid #d5dce3}.tree-caption{padding:7px 10px;background:#edf2f6;color:#546271;font-weight:800;display:flex;align-items:center;gap:6px}.tree-caption::before{content:"▾";font-size:10px;color:#738394}
+.tree-item{width:100%;border:0;background:transparent;text-align:left;padding:8px 8px 8px 26px;color:#475563;border-top:1px solid #f1f3f5;position:relative}.tree-item::before{content:"•";position:absolute;left:15px;color:#7d8b99}.tree-item:hover{background:#e8f0f8;color:#1f4f8c}.tree-item.active{background:#d6e5f6;color:#153f74;font-weight:800;box-shadow:inset 3px 0 0 var(--blue)}
+/* 본문 + 누적 탭 */
+.workspace{position:fixed;top:calc(var(--top1-h) + var(--top2-h));left:var(--left-w);right:0;bottom:0;background:#cdd5dc;display:flex;flex-direction:column;min-width:0}
+.tabbar{height:var(--tab-h);display:flex;align-items:flex-end;gap:2px;padding:4px 5px 0;background:linear-gradient(#e7ecf1,#cfd7df);border-bottom:1px solid #8493a2;overflow-x:auto;overflow-y:hidden;white-space:nowrap}
+.tab{height:28px;min-width:115px;max-width:210px;display:flex;align-items:center;border:1px solid #97a6b5;border-bottom:0;background:linear-gradient(#f5f7f9,#d9e0e7);color:#566371;padding:0 5px 0 9px;box-shadow:0 -1px 0 rgba(255,255,255,.7) inset}.tab.active{background:#fff;color:#234d7f;font-weight:800;border-color:#7990a8;position:relative;z-index:2}.tab .tab-title{overflow:hidden;text-overflow:ellipsis}.tab .close{margin-left:auto;width:20px;height:20px;border:0;background:transparent;color:#7e8994;font-size:14px;line-height:18px;padding:0}.tab .close:hover{background:#e1e7ed;color:#b23030}.tab-home .close{display:none}
+.content-shell{flex:1;min-height:0;padding:7px 7px 29px;background:#dfe4e9}.page-frame{width:100%;height:100%;border:1px solid #8f9cab;background:#fff;box-shadow:0 1px 3px var(--shadow);display:block}
+.bottom-status{position:fixed;left:var(--left-w);right:0;bottom:0;height:22px;display:flex;align-items:center;padding:0 8px;background:#e7ecf0;border-top:1px solid #9aa8b5;color:#6f7b87;font-size:10px;z-index:85;pointer-events:none}.bottom-status .right{margin-left:auto}
+
+/* 로그인 인트로 */
+.login-intro{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#dfe7ef 0%,#eef3f7 45%,#d7e0e8 100%)}
+.login-intro.hidden{display:none}
+.login-card{width:min(420px,100%);background:#fff;border:1px solid #9eacba;box-shadow:0 18px 55px rgba(31,79,140,.22);border-radius:10px;overflow:hidden}
+.login-head{padding:24px 26px 20px;background:linear-gradient(#f8fafc,#e8eef4);border-bottom:1px solid #b3bec9;text-align:center}
+.login-logo{display:inline-flex;align-items:center;justify-content:center;min-width:116px;height:38px;padding:0 16px;margin-bottom:12px;border:1px solid #9aa8b6;background:#f4f7fa;color:#b63b30;font-weight:900;font-size:16px;letter-spacing:.6px;box-shadow:inset 0 0 0 1px #fff}
+.login-head h1{margin:0;color:#30475f;font-size:21px}.login-head p{margin:7px 0 0;color:#71808e;font-size:12px}
+.login-body{padding:24px 28px 28px}
+.login-field{margin-bottom:15px}.login-field label{display:block;margin-bottom:6px;color:#4b5c6d;font-weight:800;font-size:12px}
+.login-field input,.login-field select{width:100%;height:40px;padding:0 11px;border:1px solid #aab6c2;border-radius:4px;background:#fff;color:#25313d;font-size:14px;outline:none}
+.login-field input:focus,.login-field select:focus{border-color:#2d66ad;box-shadow:0 0 0 2px rgba(45,102,173,.12)}
+.login-hint{margin-top:5px;color:#7b8793;font-size:10.5px}.login-error{min-height:18px;margin:2px 0 10px;color:#b42318;font-size:11px;font-weight:700}
+.login-btn{width:100%;height:42px;border:1px solid #24578f;border-radius:4px;background:linear-gradient(#4f84c0,#2e67a8);color:#fff;font-size:14px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.login-btn:hover{background:linear-gradient(#5a91cd,#285d9a)}
+.user-login-status{display:inline-flex;align-items:center;gap:5px;color:#405163;font-weight:700}.logout-btn{height:22px;padding:0 7px;border:1px solid #aab6c2;background:linear-gradient(#fff,#e7ecf1);color:#596776;font-size:10px;border-radius:3px}.logout-btn:hover{border-color:#7f91a3;color:#234d7f}
+
+/* 사용자 계정 설정 */
+.parent-page{width:100%;height:100%;border:1px solid #8f9cab;background:#fff;box-shadow:0 1px 3px var(--shadow);overflow:auto;display:none}
+.parent-page.active{display:block}
+.usercfg-head{height:38px;display:flex;align-items:center;gap:8px;padding:0 10px;background:linear-gradient(#fbfcfd,#e8edf2);border-bottom:1px solid #a9b6c2}
+.usercfg-head h2{font-size:14px;margin:0;color:#41556a}.usercfg-head .sub{font-size:10px;color:#83909c}.role-chip{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:10px;border:1px solid #aab6c2;background:#f7f9fb;color:#536272;font-size:10px;font-weight:800}
+.role-chip.master{border-color:#c59b36;background:#fff7df;color:#805d00}.role-chip.admin{border-color:#6c8fc0;background:#eef5ff;color:#285b9c}.role-chip.manager{border-color:#6fa47f;background:#eef9f1;color:#2b6b3f}
+.usercfg-wrap{padding:10px}.usercfg-note{margin-bottom:9px;padding:8px 10px;border:1px solid #c7d3df;background:#f6f9fc;color:#596978;line-height:1.6}.usercfg-note b{color:#234d7f}
+.usercfg-form{display:grid;grid-template-columns:110px minmax(130px,1fr) 110px minmax(120px,1fr) 100px minmax(120px,1fr) auto;align-items:center;border:1px solid #a9b6c3;background:#f7f9fb;margin-bottom:9px}
+.usercfg-form label{height:34px;display:flex;align-items:center;padding:0 8px;background:#edf2f6;border-right:1px solid #d1d9e0;font-weight:800;color:#526171}
+.usercfg-form .ufield{padding:4px 6px;border-right:1px solid #e0e5ea}.usercfg-form input,.usercfg-form select{width:100%;height:26px;border:1px solid #aeb9c4;background:#fff;padding:0 6px;color:#42515f}.usercfg-actions{padding:4px 6px;display:flex;gap:4px}
+.erp-mini{height:26px;padding:0 10px;border:1px solid #9aa8b6;background:linear-gradient(#fff,#e1e7ec);color:#405163;font-weight:700}.erp-mini.primary{background:linear-gradient(#4f84c0,#2e67a8);color:#fff;border-color:#24578f}.erp-mini.danger{color:#a12828}.erp-mini:disabled{opacity:.45;cursor:not-allowed}
+.usercfg-table-wrap{border:1px solid #8494a4;overflow:auto}.usercfg-table{width:100%;min-width:720px;border-collapse:collapse;table-layout:fixed}.usercfg-table th{height:29px;background:linear-gradient(#f3f6f8,#dce3e9);border-right:1px solid #aab7c3;border-bottom:1px solid #91a0af;color:#4a5968}.usercfg-table td{height:31px;border-right:1px solid #d0d7de;border-bottom:1px solid #d9dfe5;padding:0 7px}.usercfg-table tr:nth-child(even) td{background:#fafbfc}.usercfg-table tr:hover td{background:#e8f1fa}.usercfg-table .center{text-align:center}.usercfg-msg{min-height:22px;padding:5px 2px;color:#2f6e49;font-weight:700}.usercfg-msg.err{color:#b42318}
+@media(max-width:980px){.usercfg-form{grid-template-columns:90px 1fr 90px 1fr}.usercfg-actions{grid-column:1/-1;justify-content:flex-end;border-top:1px solid #e0e5ea}.usercfg-form label:nth-of-type(3){border-top:1px solid #d1d9e0}.usercfg-form .ufield.role-field{border-top:1px solid #e0e5ea}}
+
+@media(max-width:900px){:root{--left-w:175px}.app-mark,.l2-title{width:78px}.l1-btn{min-width:78px;padding:0 10px}.l2-btn{min-width:74px}}
+@media(max-width:680px){:root{--left-w:145px;--top2-h:64px}.top-status span:not(.status-dot){display:none}.app-mark{width:66px}.l2-title{width:66px}.l1-btn{min-width:72px}.l2-btn{min-width:68px;padding-left:6px;padding-right:6px}.tree-item{padding-left:21px}.tree-item::before{left:11px}.tab{min-width:100px}.left-head{padding:0 7px}}
+
+
+/* ===== Pro_mes classic MES/ERP shell ===== */
+:root{
+  --top1-h:42px;
+  --top2-h:74px;
+  --left-w:274px;
+  --tab-h:31px;
+  --brand-w:188px;
+  --mes-blue:#357fba;
+  --mes-blue-dark:#245f94;
+  --mes-line:#b7c7d5;
+  --mes-line-dark:#8fa6b8;
+  --mes-pale:#f4f7f9;
+  --mes-head:#eef3f6;
+}
+body{background:#edf2f5;color:#34495b;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:12px}
+/* top 1 : classic ERP text menu */
+.top-level-1{height:var(--top1-h);background:#f8fafb;border-bottom:1px solid #b8c6d1;box-shadow:none}
+.app-mark{width:var(--brand-w);min-width:var(--brand-w);justify-content:flex-start;padding-left:12px;background:#fbfcfd;border-right:1px solid #c3ced7;color:#2f6eb0;font-family:"Segoe UI",Arial,sans-serif;font-size:25px;font-style:italic;font-weight:800;letter-spacing:-1.2px;text-shadow:0 1px #fff}
+.l1-menu{height:100%;border-right:1px solid #c3ced7}
+.l1-btn{min-width:78px;height:100%;padding:0 16px;background:#f8fafb;border:0;border-right:1px solid #d0d8df;color:#34495b;font-size:12px;font-weight:700}
+.l1-btn:hover{background:#eef5fa;color:#1e5e95}.l1-btn.active{background:#eef4f8;color:#1d5d91;box-shadow:inset 0 -2px 0 var(--mes-blue)}
+.top-status{height:100%;margin-left:auto;padding:0 14px;background:#fff;border-left:0;gap:6px;color:#6d7f8e;font-size:11px}
+.top-status .status-dot,.top-status>span:nth-child(2){display:none}
+.user-login-status{gap:3px;color:#70818f;font-weight:400}
+.user-login-status .role-chip{height:auto;padding:0;border:0;background:transparent!important;color:#70818f!important;font-size:11px;font-weight:400}
+.user-login-status .role-chip::before{content:"("}.user-login-status .role-chip::after{content:")"}
+.top-link-btn{height:auto;padding:0 2px;border:0;background:transparent;color:#0059b3;font-size:11px;font-weight:700;text-decoration:underline;cursor:pointer}
+.top-link-btn:hover{color:#003f80}.logout-link{margin-left:0}
+#clock{margin-left:8px;color:#8b98a3;font-size:10px;text-decoration:none}
+/* top 2 : icon ribbon */
+.top-level-2{top:var(--top1-h);height:var(--top2-h);background:#f3f7f9;border-bottom:1px solid #a9bac8;box-shadow:inset 0 -1px #fff}
+.l2-title{display:none}
+.l2-menu{width:100%;align-items:stretch;background:#f3f7f9}
+.l2-btn{min-width:66px;width:66px;padding:7px 4px 5px;border:0;border-right:1px solid #cbd5dd;background:#f3f7f9;color:#3f5364;gap:4px}
+.l2-btn:hover{background:#fff}.l2-btn.active{background:#fff;color:#245f94;box-shadow:inset 0 -3px 0 var(--mes-blue)}
+.l2-icon{width:34px;height:34px;border:0;background:transparent;box-shadow:none;font-size:25px;color:#264f7a;display:grid;place-items:center}
+.l2-label{font-size:11px;font-weight:700;white-space:nowrap}
+/* left navigation */
+.left-panel{top:calc(var(--top1-h) + var(--top2-h));width:var(--left-w);background:#f6f8fa;border-right:1px solid #8fa5b6;box-shadow:none}
+.left-head{height:31px;padding:0 8px;background:linear-gradient(#f8fafb,#e7edf2);border-bottom:1px solid #a9b8c5;color:#41576a;font-size:12px;font-weight:800}
+.left-head::before{content:"−";display:grid;place-items:center;width:18px;height:18px;margin-right:2px;border:1px solid #9eafbd;background:#fff;color:#2f5f86;font-size:13px;line-height:1}
+.left-head .tiny{font-size:9px;color:#8a98a3;font-weight:400}
+.tree{padding:0;background:#f7f9fa}
+.tree-group{border-bottom:0}
+.tree-caption{height:27px;padding:0 7px;background:#f5f7f9;border-bottom:1px solid #d7e0e6;color:#485d6e;font-size:12px;font-weight:700}
+.tree-caption::before{content:"⊟";font-size:12px;color:#4a6f8f}
+.tree-item{height:26px;padding:0 8px 0 24px;border:0;border-bottom:1px solid #eef2f5;background:#fbfcfd;color:#405466;font-size:12px}
+.tree-item::before{content:"▫";left:8px;color:#5b7488;font-size:14px;top:4px}
+.tree-item:hover{background:#eaf3fa;color:#205e92}
+.tree-item.active{background:#3b84bb;color:#fff;font-weight:700;box-shadow:none;border-color:#3274a6}
+.tree-item.active::before{content:"⊟";color:#fff;font-size:11px;top:5px}
+/* workspace / accumulated tab */
+.workspace{top:calc(var(--top1-h) + var(--top2-h));left:var(--left-w);background:#edf1f4}
+.tabbar{height:var(--tab-h);align-items:flex-end;padding:3px 4px 0;background:#e8eef2;border-bottom:1px solid #8ea4b5;gap:2px}
+.tab{height:28px;min-width:122px;max-width:220px;padding:0 7px 0 10px;border:1px solid #99adbd;border-bottom:0;background:linear-gradient(#fafcfd,#e6edf2);color:#4f6576;box-shadow:none;font-size:12px}
+.tab.active{background:#fff;color:#245f94;border-color:#7d9ab0;font-weight:800;box-shadow:inset 0 2px 0 #fff}
+.tab .close{width:18px;height:18px;font-size:12px;color:#7f8d98}
+.content-shell{padding:0 0 22px;background:#fff}
+.page-frame,.parent-page{border:0;border-top:1px solid #b9c7d2;box-shadow:none;background:#fff}
+.bottom-status{left:var(--left-w);height:22px;background:#eef2f5;border-top:1px solid #a9b8c5;color:#71818e;z-index:85}
+/* login follows same visual language */
+.login-intro{background:#eef3f6}
+.login-card{border-radius:2px;border:1px solid #9caebb;box-shadow:0 12px 35px rgba(41,69,91,.18)}
+.login-head{padding:22px 26px 18px;background:#f4f7f9;border-bottom:1px solid #b9c7d2}
+.login-logo{min-width:0;height:auto;padding:0;margin-bottom:8px;border:0;background:transparent;box-shadow:none;color:#2f6eb0;font-family:"Segoe UI",Arial,sans-serif;font-size:29px;font-style:italic;font-weight:800;letter-spacing:-1.3px}
+.login-head h1{font-size:18px;color:#3d5365}.login-body{padding:22px 26px 25px}
+.login-field input,.login-field select{border-radius:0;border-color:#aebdca;height:38px}.login-btn{border-radius:0;background:#357fba;border-color:#286b9f}.login-btn:hover{background:#2f73aa}
+/* user settings page uses grid-heavy MES treatment */
+.usercfg-head{height:38px;background:#fff;border-bottom:2px solid #3b84bb}.usercfg-head h2{font-size:18px;font-weight:400;color:#486276}
+.usercfg-wrap{padding:8px 12px}.usercfg-note{border-color:#c4d1db;background:#f7fafc}
+.usercfg-form{background:#f7f9fb;border-color:#aebdca}.usercfg-form label{background:#eef3f6;border-color:#d1dbe3}
+.usercfg-table-wrap{border-color:#98adbd}.usercfg-table th{background:#dceaf4!important;color:#435b6e!important;border-color:#b7c8d5!important}
+.usercfg-table td{border-color:#cbd6df!important}
+@media(max-width:1000px){:root{--left-w:220px;--brand-w:150px}.app-mark{font-size:21px}.l1-btn{min-width:72px;padding:0 10px}.l2-btn{width:62px;min-width:62px}}
+@media(max-width:760px){:root{--left-w:170px;--brand-w:112px;--top2-h:66px}.app-mark{font-size:18px;padding-left:8px}.l1-btn{min-width:66px;padding:0 8px;font-size:11px}.l2-btn{width:58px;min-width:58px}.l2-icon{height:29px;font-size:21px}.tree-item{padding-left:20px}.top-status{padding-right:6px}.top-status #clock{display:none}}
+
+</style>
+</head>
+<body>
+<div class="login-intro" id="loginIntro" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="login-card">
+    <div class="login-head">
+      <div class="login-logo">Pro_mes</div>
+      <h1 id="loginTitle">MES 사용자 로그인</h1>
+      <p>사용자 이름과 6자리 숫자 비밀번호를 입력하세요.</p>
+    </div>
+    <form class="login-body" id="loginForm" autocomplete="off">
+      <div class="login-field">
+        <label for="loginName">사용자 이름</label>
+        <input id="loginName" name="username" type="text" maxlength="30" placeholder="이름을 입력하세요" autocomplete="username" value="hcsmart" autofocus>
+      </div>
+      <div class="login-field">
+        <label for="loginPin">비밀번호</label>
+        <input id="loginPin" name="password" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="6자리 숫자" autocomplete="current-password" value="123456">
+        <div class="login-hint">초기 master 계정: <b>hcsmart / 123456</b> · 비밀번호는 숫자 6자리입니다.</div>
+      </div>
+      <div class="login-error" id="loginError" aria-live="polite"></div>
+      <button class="login-btn" type="submit">로그인</button>
+    </form>
+  </div>
+</div>
+<header class="top-level-1">
+  <div class="app-mark">Pro_mes</div>
+  <nav class="l1-menu" id="l1Menu"></nav>
+  <div class="top-status"><span class="status-dot"></span><span>MES Connected</span><span class="user-login-status" id="userLoginStatus"></span><button class="top-link-btn" id="passwordChangeBtn" type="button">비밀번호 변경</button><button class="top-link-btn logout-link" id="logoutBtn" type="button" title="로그아웃">로그아웃</button><span id="clock"></span></div>
+</header>
+<section class="top-level-2">
+  <div class="l2-title">업무메뉴</div><nav class="l2-menu" id="l2Menu"></nav>
+</section>
+<aside class="left-panel">
+  <div class="left-head"><span id="leftTitle">생산실행</span><span class="tiny">MENU</span></div>
+  <div class="tree" id="treeMenu"></div>
+</aside>
+<main class="workspace">
+  <div class="tabbar" id="tabbar"></div>
+  <div class="content-shell">
+    <iframe id="mesFrame" name="donguMesContent" class="page-frame" src="index1_2.html?dongu_embed=1&view=prod" title="프레스 생산관리"></iframe>
+    <section id="userConfigPage" class="parent-page" aria-label="사용자 계정 설정">
+      <div class="usercfg-head"><h2>사용자 계정 설정</h2><span class="sub">사용자 이름 · 6자리 비밀번호 · 등급 관리</span></div>
+      <div class="usercfg-wrap">
+        <div class="usercfg-note">초기 기본 계정은 <b>hcsmart / 123456 / master</b> 입니다. 계정 등급은 <b>관리자 · admin · master</b> 중에서 지정합니다. 기본 master 계정의 이름과 등급은 보호됩니다.</div>
+        <form id="userConfigForm" class="usercfg-form" autocomplete="off">
+          <label for="cfgUserName">사용자 이름</label><div class="ufield"><input id="cfgUserName" maxlength="30" placeholder="사용자 이름"></div>
+          <label for="cfgUserPin">비밀번호</label><div class="ufield"><input id="cfgUserPin" type="password" inputmode="numeric" maxlength="6" placeholder="숫자 6자리"></div>
+          <label for="cfgUserRole">등급</label><div class="ufield role-field"><select id="cfgUserRole"><option value="관리자">관리자</option><option value="admin">admin</option><option value="master">master</option></select></div>
+          <div class="usercfg-actions"><button class="erp-mini primary" type="submit" id="cfgSaveBtn">계정 추가</button><button class="erp-mini" type="button" id="cfgCancelBtn">입력 초기화</button></div>
+        </form>
+        <div class="usercfg-msg" id="userCfgMsg"></div>
+        <div class="usercfg-table-wrap"><table class="usercfg-table"><thead><tr><th style="width:70px">번호</th><th>사용자 이름</th><th style="width:140px">등급</th><th style="width:150px">비밀번호</th><th style="width:170px">관리</th></tr></thead><tbody id="userCfgBody"></tbody></table></div>
+      </div>
+    </section>
+  </div>
+</main>
+<div class="bottom-status"><span>시스템: Pro_mes · 프레스 생산관리 Rev.7.84</span><span style="margin-left:18px" id="activeStatus">화면: 생산작업</span><span class="right">Ready</span></div>
+<script>
+const loginIntro=document.getElementById('loginIntro');
+const loginForm=document.getElementById('loginForm');
+const loginName=document.getElementById('loginName');
+const loginPin=document.getElementById('loginPin');
+const loginError=document.getElementById('loginError');
+const userLoginStatus=document.getElementById('userLoginStatus');
+const logoutBtn=document.getElementById('logoutBtn');
+const passwordChangeBtn=document.getElementById('passwordChangeBtn');
+const USER_STORE_KEY='dongu_mes_users_v1';
+const DEFAULT_MASTER={name:'hcsmart',pin:'123456',role:'master',protected:true};
+const USER_ROLES=['관리자','admin','master'];
+let loginUser='',loginRole='';
+function loadUsers(){
+ let arr=[];
+ try{arr=JSON.parse(localStorage.getItem(USER_STORE_KEY)||'[]')}catch(e){arr=[]}
+ if(!Array.isArray(arr))arr=[];
+ let master=arr.find(u=>String(u.name||'').toLowerCase()==='hcsmart');
+ if(!master){arr.unshift({...DEFAULT_MASTER});saveUsers(arr)}
+ else{
+  let changed=false;
+  if(master.role!=='master'){master.role='master';changed=true}
+  if(!/^\d{6}$/.test(String(master.pin||''))){master.pin='123456';changed=true}
+  if(master.protected!==true){master.protected=true;changed=true}
+  if(changed)saveUsers(arr);
+ }
+ return arr;
+}
+function saveUsers(users){try{localStorage.setItem(USER_STORE_KEY,JSON.stringify(users))}catch(e){}}
+function findUser(name){return loadUsers().find(u=>String(u.name||'').toLowerCase()===String(name||'').trim().toLowerCase())||null}
+function roleClass(role){return role==='master'?'master':role==='admin'?'admin':'manager'}
+function showLogin(){
+ loginIntro.classList.remove('hidden');loginError.textContent='';
+ if(!loginName.value.trim())loginName.value='hcsmart';
+ loginPin.value=loginName.value.trim().toLowerCase()==='hcsmart'?'123456':'';
+ setTimeout(()=>loginName.focus(),0);
+}
+function completeLogin(user){
+ loginUser=user.name;loginRole=user.role;
+ userLoginStatus.innerHTML=escapeHtml(user.name)+' <span class="role-chip '+roleClass(user.role)+'">'+escapeHtml(user.role)+'</span>';
+ loginIntro.classList.add('hidden');loginError.textContent='';
+ try{sessionStorage.setItem('dongu_mes_user',user.name);sessionStorage.setItem('dongu_mes_role',user.role)}catch(e){}
+ try{document.getElementById('mesFrame')?.contentWindow?.postMessage({type:'dongu-login-user',name:user.name,role:user.role},'*')}catch(e){}
+}
+loginPin.addEventListener('input',()=>{loginPin.value=loginPin.value.replace(/\D/g,'').slice(0,6);loginError.textContent=''});
+loginName.addEventListener('input',()=>{loginError.textContent='';if(loginName.value.trim().toLowerCase()!=='hcsmart'&&loginPin.value==='123456')loginPin.value=''});
+loginForm.addEventListener('submit',ev=>{
+ ev.preventDefault();const name=loginName.value.trim(),pin=loginPin.value.trim();
+ if(!name){loginError.textContent='사용자 이름을 입력하세요.';loginName.focus();return}
+ if(!/^\d{6}$/.test(pin)){loginError.textContent='비밀번호는 숫자 6자리로 입력하세요.';loginPin.focus();loginPin.select();return}
+ const user=findUser(name);
+ if(!user||String(user.pin)!==pin){loginError.textContent='사용자 이름 또는 비밀번호가 올바르지 않습니다.';loginPin.focus();loginPin.select();return}
+ completeLogin(user);
+});
+passwordChangeBtn?.addEventListener('click',()=>{
+ openPage('users',false);
+ const u=findUser(loginUser);
+ if(u)setTimeout(()=>editUserAccount(encodeURIComponent(u.name)),0);
+});
+logoutBtn.addEventListener('click',()=>{
+ try{sessionStorage.removeItem('dongu_mes_user');sessionStorage.removeItem('dongu_mes_role')}catch(e){}
+ loginUser='';loginRole='';userLoginStatus.textContent='';loginName.value='hcsmart';loginPin.value='123456';showLogin();
+});
+loadUsers();
+const savedLoginUser=(()=>{try{return sessionStorage.getItem('dongu_mes_user')||''}catch(e){return ''}})();
+if(savedLoginUser){const u=findUser(savedLoginUser);if(u){loginName.value=u.name;completeLogin(u)}else showLogin()}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const MENU=[
+ {key:'production',name:'생산관리',second:[
+   {key:'material',name:'소재관리',icon:'▨',groups:[{name:'소재 업무',items:[['mat-order','소재발주'],['mat-dispatch','소재발송']]}]},
+   {key:'execution',name:'생산실행',icon:'⚙',groups:[{name:'작업 실행',items:[['work-order','작업지시'],['prod','생산작업'],['report','생산일보']]}]}
+ ]},
+ {key:'quality',name:'품질관리',second:[
+   {key:'inspection',name:'검사관리',icon:'✓',groups:[{name:'품질 검사',items:[['iqc','수입검사'],['measure','측정검사'],['visual','외관검사']]}]}
+ ]},
+ {key:'master',name:'기준정보',second:[
+   {key:'prod-master',name:'생산기준',icon:'▦',groups:[{name:'설비 / 금형',items:[['master','호기설정'],['mold','금형설정']]}]}
+ ]},
+ {key:'system',name:'시스템',second:[
+   {key:'sys-config',name:'시스템설정',icon:'▣',groups:[{name:'운영 설정',items:[['users','사용자설정'],['pin','PIN설정'],['config','DB설정'],['help','사용안내']]}]}
+ ]}
+];
+const PAGE_META={
+ 'mat-order':['소재발주','소재 발주 등록 및 현황'], 'mat-dispatch':['소재발송','소재업체 발송 등록'],
+ 'work-order':['작업지시','프레스 작업지시'], 'prod':['생산작업','프레스 설비 생산 실행'], 'report':['생산일보','생산 실적 및 일보'],
+ 'iqc':['수입검사','소재 수입검사'], 'measure':['측정검사','검사성적서 · 치수측정'], 'visual':['외관검사','LOT 외관검사'],
+ 'master':['호기설정','프레스 호기 기준정보'], 'mold':['금형설정','금형 기준정보'],
+ 'users':['사용자설정','계정 · 비밀번호 · 등급 관리'], 'pin':['PIN설정','사용자 PIN 관리'], 'config':['DB설정','연결 및 시스템 설정'], 'help':['사용안내','프레스 생산관리 사용안내']
+};
+let currentL1='production',currentL2='execution',activeTab='prod';
+const openTabs=new Map([['prod',{id:'prod',title:'생산작업'}]]);
+function byId(id){return document.getElementById(id)}
+function getL1(){return MENU.find(x=>x.key===currentL1)||MENU[0]}
+function getL2(){return getL1().second.find(x=>x.key===currentL2)||getL1().second[0]}
+function findNav(view){
+ for(const l1 of MENU)for(const l2 of l1.second)for(const g of l2.groups)for(const it of g.items)if(it[0]===view)return {l1:l1.key,l2:l2.key};
+ return null;
+}
+function buildL1(){byId('l1Menu').innerHTML=MENU.map(m=>`<button class="l1-btn ${m.key===currentL1?'active':''}" onclick="selectL1('${m.key}')">${m.name}</button>`).join('')}
+function buildL2(){const l1=getL1();byId('l2Menu').innerHTML=l1.second.map(m=>`<button class="l2-btn ${m.key===currentL2?'active':''}" onclick="selectL2('${m.key}')"><span class="l2-icon">${m.icon}</span><span class="l2-label">${m.name}</span></button>`).join('')}
+function buildTree(){const l2=getL2();byId('leftTitle').textContent=l2.name;byId('treeMenu').innerHTML=l2.groups.map(g=>`<div class="tree-group"><div class="tree-caption">${g.name}</div>${g.items.map(([id,label])=>`<button class="tree-item ${id===activeTab?'active':''}" onclick="openPage('${id}')">${label}</button>`).join('')}</div>`).join('')}
+function selectL1(key){currentL1=key;currentL2=getL1().second[0].key;buildL1();buildL2();buildTree()}
+function selectL2(key){currentL2=key;buildL2();buildTree()}
+function syncNavToView(id){const n=findNav(id);if(!n)return;currentL1=n.l1;currentL2=n.l2;buildL1();buildL2();buildTree()}
+function openPage(id,send=true){const meta=PAGE_META[id]||[id,''];if(!openTabs.has(id))openTabs.set(id,{id,title:meta[0]});activeTab=id;syncNavToView(id);renderTabs();setStatus(id);showLocalPage(id);if(id==='users'){renderUserConfig();return}if(send)sendView(id)}
+function showLocalPage(id){
+ const local=id==='users';byId('mesFrame').style.display=local?'none':'block';byId('userConfigPage').classList.toggle('active',local);
+}
+let editingUser='';
+function setUserCfgMsg(msg,isErr=false){const el=byId('userCfgMsg');el.textContent=msg||'';el.classList.toggle('err',!!isErr)}
+function resetUserCfgForm(){editingUser='';byId('cfgUserName').value='';byId('cfgUserPin').value='';byId('cfgUserRole').value='관리자';byId('cfgUserName').disabled=false;byId('cfgUserRole').disabled=false;byId('cfgSaveBtn').textContent='계정 추가';setUserCfgMsg('')}
+function renderUserConfig(){
+ const users=loadUsers();
+ byId('userCfgBody').innerHTML=users.map((u,i)=>{
+  const isBase=String(u.name).toLowerCase()==='hcsmart';
+  return `<tr><td class="center">${i+1}</td><td><b>${escapeHtml(u.name)}</b>${isBase?' <span class="role-chip master">기본</span>':''}</td><td class="center"><span class="role-chip ${roleClass(u.role)}">${escapeHtml(u.role)}</span></td><td class="center">••••••</td><td class="center"><button class="erp-mini" onclick="editUserAccount('${encodeURIComponent(u.name)}')">수정</button> <button class="erp-mini danger" ${isBase?'disabled title="기본 master 계정은 삭제할 수 없습니다."':''} onclick="deleteUserAccount('${encodeURIComponent(u.name)}')">삭제</button></td></tr>`
+ }).join('');
+}
+function editUserAccount(encoded){
+ const name=decodeURIComponent(encoded),u=findUser(name);if(!u)return;
+ editingUser=u.name;byId('cfgUserName').value=u.name;byId('cfgUserPin').value=u.pin;byId('cfgUserRole').value=u.role;
+ const base=u.name.toLowerCase()==='hcsmart';byId('cfgUserName').disabled=base;byId('cfgUserRole').disabled=base;byId('cfgSaveBtn').textContent='변경 저장';setUserCfgMsg(base?'기본 master 계정은 비밀번호만 변경할 수 있습니다.':'');
+ byId('cfgUserPin').focus();
+}
+function deleteUserAccount(encoded){
+ const name=decodeURIComponent(encoded);if(name.toLowerCase()==='hcsmart'){setUserCfgMsg('기본 master 계정은 삭제할 수 없습니다.',true);return}
+ const users=loadUsers();const next=users.filter(u=>u.name.toLowerCase()!==name.toLowerCase());if(next.length===users.length)return;
+ saveUsers(next);renderUserConfig();resetUserCfgForm();setUserCfgMsg(name+' 계정을 삭제했습니다.');
+}
+byId('cfgUserPin').addEventListener('input',()=>{byId('cfgUserPin').value=byId('cfgUserPin').value.replace(/\D/g,'').slice(0,6);setUserCfgMsg('')});
+byId('cfgCancelBtn').addEventListener('click',resetUserCfgForm);
+byId('userConfigForm').addEventListener('submit',ev=>{
+ ev.preventDefault();
+ let name=byId('cfgUserName').value.trim(),pin=byId('cfgUserPin').value.trim(),role=byId('cfgUserRole').value;
+ if(!name){setUserCfgMsg('사용자 이름을 입력하세요.',true);byId('cfgUserName').focus();return}
+ if(!/^\d{6}$/.test(pin)){setUserCfgMsg('비밀번호는 숫자 6자리로 입력하세요.',true);byId('cfgUserPin').focus();return}
+ if(!USER_ROLES.includes(role)){setUserCfgMsg('사용자 등급을 확인하세요.',true);return}
+ const users=loadUsers();
+ if(editingUser){
+  const idx=users.findIndex(u=>u.name.toLowerCase()===editingUser.toLowerCase());if(idx<0){setUserCfgMsg('수정할 계정을 찾을 수 없습니다.',true);return}
+  const base=users[idx].name.toLowerCase()==='hcsmart';
+  if(!base&&name.toLowerCase()!==editingUser.toLowerCase()&&users.some((u,j)=>j!==idx&&u.name.toLowerCase()===name.toLowerCase())){setUserCfgMsg('같은 사용자 이름이 이미 있습니다.',true);return}
+  users[idx]={...users[idx],name:base?'hcsmart':name,pin,role:base?'master':role,protected:base};
+  saveUsers(users);renderUserConfig();resetUserCfgForm();setUserCfgMsg((base?'hcsmart':name)+' 계정을 수정했습니다.');
+ }else{
+  if(users.some(u=>u.name.toLowerCase()===name.toLowerCase())){setUserCfgMsg('같은 사용자 이름이 이미 있습니다.',true);return}
+  users.push({name,pin,role,protected:false});saveUsers(users);renderUserConfig();resetUserCfgForm();setUserCfgMsg(name+' 계정을 추가했습니다.');
+ }
+});
+function activateTab(id){openPage(id,true)}
+function closePage(id,ev){if(ev)ev.stopPropagation();if(id==='prod')return;const ids=[...openTabs.keys()],idx=ids.indexOf(id);openTabs.delete(id);if(activeTab===id){const next=ids[idx-1]||ids[idx+1]||'prod';activeTab=openTabs.has(next)?next:'prod';openPage(activeTab,true)}else renderTabs()}
+function renderTabs(){byId('tabbar').innerHTML=[...openTabs.values()].map(t=>`<div class="tab ${t.id===activeTab?'active':''} ${t.id==='prod'?'tab-home':''}" onclick="activateTab('${t.id}')"><span class="tab-title">${t.title}</span><button class="close" title="닫기" onclick="closePage('${t.id}',event)">×</button></div>`).join('');requestAnimationFrame(()=>byId('tabbar').querySelector('.tab.active')?.scrollIntoView({block:'nearest',inline:'nearest'}))}
+function sendView(id){
+ const f=byId('mesFrame'); if(!f)return;
+ const tabId=String(id||'prod').startsWith('t-')?String(id):'t-'+String(id||'prod');
+ let direct=false;
+ /* 같은 폴더에서 실행될 때는 자식 함수를 직접 호출 — file:// 실행에서도 가장 확실함 */
+ try{
+  const w=f.contentWindow,d=w&&w.document;
+  if(w&&typeof w.donguOpenView==='function'){w.donguOpenView(id);direct=true}
+  else if(w&&typeof w.switchTab==='function'){
+   const btn=d?d.querySelector('#drawer .tab-btn[data-tab="'+tabId+'"]'):null;
+   w.switchTab(tabId,btn||null);direct=true;
+  }else if(d){
+   const panel=d.getElementById(tabId);
+   if(panel){d.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===tabId));direct=true}
+  }
+ }catch(e){}
+ /* 브라우저 보안정책으로 직접 접근이 막히면 메시지 방식으로 재시도 */
+ try{f.contentWindow.postMessage({type:'dongu-open-view',view:id},'*')}catch(e){}
+ if(!direct)setTimeout(()=>{
+  try{
+   const w=f.contentWindow,d=w&&w.document;
+   if(w&&typeof w.donguOpenView==='function')w.donguOpenView(id);
+   else if(w&&typeof w.switchTab==='function')w.switchTab(tabId,d?d.querySelector('#drawer .tab-btn[data-tab="'+tabId+'"]'):null);
+  }catch(e){}
+ },120);
+}
+function setStatus(id){byId('activeStatus').textContent='화면: '+((PAGE_META[id]||[id])[0])}
+window.addEventListener('message',ev=>{
+ const d=ev.data||{};
+ if(d.type==='dongu-child-ready'){setTimeout(()=>sendView(activeTab),30);return}
+ if(d.type!=='dongu-child-view'||!PAGE_META[d.view])return;if(activeTab==='users')return;
+ if(!openTabs.has(d.view))openTabs.set(d.view,{id:d.view,title:PAGE_META[d.view][0]});
+ activeTab=d.view;syncNavToView(d.view);renderTabs();setStatus(d.view)
+});
+byId('mesFrame').addEventListener('load',()=>{setTimeout(()=>sendView(activeTab),60);setTimeout(()=>sendView(activeTab),260);if(loginUser){try{byId('mesFrame').contentWindow.postMessage({type:'dongu-login-user',name:loginUser,role:loginRole},'*')}catch(e){}}});
+function tick(){const d=new Date();byId('clock').textContent=d.toLocaleString('ko-KR',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+buildL1();buildL2();buildTree();renderTabs();setStatus(activeTab);showLocalPage(activeTab);tick();setInterval(tick,30000);
+</script>
+</body>
+</html>
