@@ -9593,8 +9593,15 @@ html.dongu-embed #drawerBg,
 html.dongu-embed #jpTopnav,
 html.dongu-embed #jpSidenav,
 html.dongu-embed #jpTopTabs{display:none!important}
-html.dongu-embed #jpShell{display:block!important;width:100%!important;max-width:none!important;min-height:100vh!important}
-html.dongu-embed #jpMain{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;padding:8px 10px 24px!important;margin:0!important;overflow-x:hidden!important}
+/* Pro_mes 외부 메뉴 사용 시 index1_2가 만드는 PC 2단 메뉴를 완전히 제거 */
+html.dongu-embed.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav,
+html.dongu-embed.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav,
+html.dongu-embed.jp-menu-nav2:not(.jp-lay-mobile) #jpTopTabs,
+html.dongu-embed.jp-menu-nav2:not(.jp-lay-mobile) body>.tabs{display:none!important}
+html.dongu-embed.jp-menu-nav2:not(.jp-lay-mobile) #jpShell,
+html.dongu-embed #jpShell{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;min-height:100vh!important}
+html.dongu-embed.jp-menu-nav2:not(.jp-lay-mobile) #jpMain,
+html.dongu-embed #jpMain{display:block!important;flex:none!important;width:100%!important;max-width:none!important;min-width:0!important;padding:8px 10px 24px!important;margin:0!important;overflow-x:hidden!important}
 html.dongu-embed #panelZone,
 html.dongu-embed #panelZone>.tab-panel,
 html.dongu-embed #jpMain>.tab-panel{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important}
