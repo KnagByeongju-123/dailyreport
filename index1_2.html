@@ -9582,5 +9582,73 @@ function measureFrameReady(){
   }
 }
 </style>
+
+<!-- ===== DONGU MES outer-shell bridge ===== -->
+<style id="dongu-embed-bridge-style">
+html.dongu-embed,html.dongu-embed body{width:100%!important;max-width:none!important;min-width:0!important;overflow-x:hidden!important;background:#fff!important}
+html.dongu-embed body{padding:0!important;margin:0!important}
+html.dongu-embed body>.top-bar,
+html.dongu-embed #drawer,
+html.dongu-embed #drawerBg,
+html.dongu-embed #jpTopnav,
+html.dongu-embed #jpSidenav,
+html.dongu-embed #jpTopTabs{display:none!important}
+html.dongu-embed #jpShell{display:block!important;width:100%!important;max-width:none!important;min-height:100vh!important}
+html.dongu-embed #jpMain{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;padding:8px 10px 24px!important;margin:0!important;overflow-x:hidden!important}
+html.dongu-embed #panelZone,
+html.dongu-embed #panelZone>.tab-panel,
+html.dongu-embed #jpMain>.tab-panel{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important}
+html.dongu-embed #panelZone,
+html.dongu-embed #jpMain>.tab-panel{zoom:1!important}
+html.dongu-embed .measure-insp-frame,
+html.dongu-embed .embed-frame{height:calc(100vh - 36px)!important;min-height:640px!important}
+@media(max-width:999px){
+  html.dongu-embed #jpMain{padding:6px 7px 18px!important}
+  html.dongu-embed .measure-insp-frame,
+  html.dongu-embed .embed-frame{min-height:560px!important}
+}
+</style>
+<script id="dongu-embed-bridge-script">
+(function(){
+  var qs=new URLSearchParams(location.search);
+  if(qs.get('dongu_embed')==='1') document.documentElement.classList.add('dongu-embed');
+  function menuIdFromTab(tabId){return String(tabId||'').replace(/^t-/,'');}
+  function sendState(tabId){
+    try{ if(window.parent&&window.parent!==window) window.parent.postMessage({type:'dongu-child-view',view:menuIdFromTab(tabId)},'*'); }catch(e){}
+  }
+  function openView(view){
+    var tabId=String(view||'prod'); if(!tabId.startsWith('t-')) tabId='t-'+tabId;
+    var btn=document.querySelector('#drawer .tab-btn[data-tab="'+tabId+'"]');
+    if(typeof window.switchTab==='function') window.switchTab(tabId,btn||null);
+    else if(btn) btn.click();
+    else {
+      var panel=document.getElementById(tabId);
+      if(panel) document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.toggle('active',p.id===tabId)});
+    }
+    sendState(tabId);
+  }
+  /* 부모 index.html에서 직접 호출할 수 있는 안정적인 공개 진입점 */
+  window.donguOpenView=openView;
+  window.addEventListener('message',function(ev){
+    var d=ev.data||{};
+    if(d.type==='dongu-open-view'&&d.view) openView(d.view);
+  });
+  window.addEventListener('DOMContentLoaded',function(){
+    try{ if(window.parent&&window.parent!==window) window.parent.postMessage({type:'dongu-child-ready'},'*'); }catch(e){}
+    var v=qs.get('view');
+    if(v) setTimeout(function(){openView(v)},120);
+    else setTimeout(function(){sendState((document.querySelector('#drawer .tab-btn.active')||{}).dataset?.tab||'t-prod')},180);
+    setTimeout(function(){
+      if(typeof window.switchTab==='function'&&!window.switchTab.__donguWrapped){
+        var orig=window.switchTab;
+        var wrapped=function(id,btn){var r=orig.apply(this,arguments);sendState(id);return r;};
+        wrapped.__donguWrapped=true;window.switchTab=wrapped;
+      }
+    },0);
+  });
+})();
+</script>
+<!-- ===== /DONGU MES outer-shell bridge ===== -->
+
 </body>
 </html>

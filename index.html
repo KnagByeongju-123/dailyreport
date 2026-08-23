@@ -106,10 +106,41 @@ function openPage(id,send=true){const meta=PAGE_META[id]||[id,''];if(!openTabs.h
 function activateTab(id){openPage(id,true)}
 function closePage(id,ev){if(ev)ev.stopPropagation();if(id==='prod')return;const ids=[...openTabs.keys()],idx=ids.indexOf(id);openTabs.delete(id);if(activeTab===id){const next=ids[idx-1]||ids[idx+1]||'prod';activeTab=openTabs.has(next)?next:'prod';openPage(activeTab,true)}else renderTabs()}
 function renderTabs(){byId('tabbar').innerHTML=[...openTabs.values()].map(t=>`<div class="tab ${t.id===activeTab?'active':''} ${t.id==='prod'?'tab-home':''}" onclick="activateTab('${t.id}')"><span class="tab-title">${t.title}</span><button class="close" title="닫기" onclick="closePage('${t.id}',event)">×</button></div>`).join('');requestAnimationFrame(()=>byId('tabbar').querySelector('.tab.active')?.scrollIntoView({block:'nearest',inline:'nearest'}))}
-function sendView(id){const f=byId('mesFrame');try{f.contentWindow.postMessage({type:'dongu-open-view',view:id},'*')}catch(e){}}
+function sendView(id){
+ const f=byId('mesFrame'); if(!f)return;
+ const tabId=String(id||'prod').startsWith('t-')?String(id):'t-'+String(id||'prod');
+ let direct=false;
+ /* 같은 폴더에서 실행될 때는 자식 함수를 직접 호출 — file:// 실행에서도 가장 확실함 */
+ try{
+  const w=f.contentWindow,d=w&&w.document;
+  if(w&&typeof w.donguOpenView==='function'){w.donguOpenView(id);direct=true}
+  else if(w&&typeof w.switchTab==='function'){
+   const btn=d?d.querySelector('#drawer .tab-btn[data-tab="'+tabId+'"]'):null;
+   w.switchTab(tabId,btn||null);direct=true;
+  }else if(d){
+   const panel=d.getElementById(tabId);
+   if(panel){d.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===tabId));direct=true}
+  }
+ }catch(e){}
+ /* 브라우저 보안정책으로 직접 접근이 막히면 메시지 방식으로 재시도 */
+ try{f.contentWindow.postMessage({type:'dongu-open-view',view:id},'*')}catch(e){}
+ if(!direct)setTimeout(()=>{
+  try{
+   const w=f.contentWindow,d=w&&w.document;
+   if(w&&typeof w.donguOpenView==='function')w.donguOpenView(id);
+   else if(w&&typeof w.switchTab==='function')w.switchTab(tabId,d?d.querySelector('#drawer .tab-btn[data-tab="'+tabId+'"]'):null);
+  }catch(e){}
+ },120);
+}
 function setStatus(id){byId('activeStatus').textContent='화면: '+((PAGE_META[id]||[id])[0])}
-window.addEventListener('message',ev=>{const d=ev.data||{};if(d.type!=='dongu-child-view'||!PAGE_META[d.view])return;if(!openTabs.has(d.view))openTabs.set(d.view,{id:d.view,title:PAGE_META[d.view][0]});activeTab=d.view;syncNavToView(d.view);renderTabs();setStatus(d.view)});
-byId('mesFrame').addEventListener('load',()=>setTimeout(()=>sendView(activeTab),180));
+window.addEventListener('message',ev=>{
+ const d=ev.data||{};
+ if(d.type==='dongu-child-ready'){setTimeout(()=>sendView(activeTab),30);return}
+ if(d.type!=='dongu-child-view'||!PAGE_META[d.view])return;
+ if(!openTabs.has(d.view))openTabs.set(d.view,{id:d.view,title:PAGE_META[d.view][0]});
+ activeTab=d.view;syncNavToView(d.view);renderTabs();setStatus(d.view)
+});
+byId('mesFrame').addEventListener('load',()=>{setTimeout(()=>sendView(activeTab),60);setTimeout(()=>sendView(activeTab),260)});
 function tick(){const d=new Date();byId('clock').textContent=d.toLocaleString('ko-KR',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
 buildL1();buildL2();buildTree();renderTabs();setStatus(activeTab);tick();setInterval(tick,30000);
 </script>
