@@ -544,8 +544,8 @@ tr.irpt-sub>td{background:rgba(226,176,74,.035);padding:6px 8px}
 /* SKETCH 번호 편집 */
 .skthumb{position:relative;display:inline-block;max-width:180px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;cursor:pointer;vertical-align:middle}
 .skthumb img{display:block;max-width:100%;height:auto}
-.skmk{position:absolute;transform:translate(-50%,-50%);border:1.5px solid #e23b3b;border-radius:50%;
-  background:#fff;color:#e23b3b;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1}
+.skmk{position:absolute;transform:translate(-50%,-50%);border:1.5px solid #000;border-radius:50%;
+  background:#ffd400;color:#000;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1}
 .skmk.big{width:26px;height:26px;font-size:12px;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.35)}
 .skacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:7px}
 .sk-cnt{font-size:11px;font-weight:800;color:var(--gold)}
@@ -1542,6 +1542,19 @@ html.insp-embed .modal{zoom:1!important}
   html.insp-embed .itabs{grid-template-columns:repeat(2,minmax(0,1fr))}
   html.insp-embed .itabs .itab{font-size:11.5px!important;padding:8px 6px!important;border-bottom:1px solid var(--line2)!important}
 }
+
+/* [수정] 도면 번호 마커 : 전역 *{border-radius:0!important} 때문에 사각형으로 보이던 문제 해결
+   항상 원형 · 테두리 검정 · 내부 노랑 · 글자 검정 */
+.skmk,.skmk.big{
+  border-radius:50%!important;
+  border:1.5px solid #000!important;
+  background:#ffd400!important;
+  color:#000!important;
+  box-shadow:none!important;
+  aspect-ratio:1/1!important;
+  padding:0!important;
+}
+.skmk.big{border-width:2px!important}
 </style>
 <script>
 (function(){
@@ -1913,7 +1926,7 @@ function today(){return new Date().toISOString().slice(0,10)}
 function g(id){const el=document.getElementById(id);return el?el.value.trim():''}
 function viewSketch(src,marks){
   const mk=(marks||[]).map(m=>
-    `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:22px;height:22px;border:2px solid #c00;border-radius:50%;background:#fff;color:#c00;font-size:12px;font-weight:800;line-height:19px;text-align:center">${m.n}</span>`).join('');
+    `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:22px;height:22px;border:2px solid #000;border-radius:50%;background:#ffd400;color:#000;font-size:12px;font-weight:800;line-height:19px;text-align:center;box-sizing:border-box">${m.n}</span>`).join('');
   const w=window.open('');
   w.document.write('<body style="margin:0;background:#111;display:flex;justify-content:center"><div style="position:relative;display:inline-block;max-width:100%"><img src="'+src+'" style="max-width:100%;height:auto;display:block">'+mk+'</div></body>');
 }
@@ -2878,7 +2891,7 @@ function inspPdfBody(hdr,rows){
     <tr><th>측정목적</th><td colspan="3">${purpose}</td></tr></table>`;
   if(hdr.sketch){
     const mk=(hdr.marks||[]).map(m=>
-      `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:15px;height:15px;border:1.4px solid #c00;border-radius:50%;background:#fff;color:#c00;font-size:9px;font-weight:700;line-height:13px;text-align:center">${m.n}</span>`).join('');
+      `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:15px;height:15px;border:1.4px solid #000;border-radius:50%;background:#ffd400;color:#000;font-size:9px;font-weight:700;line-height:12px;text-align:center;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact">${m.n}</span>`).join('');
     b+=`<div class="sect">SKETCH</div>
       <div style="border:1px solid #888;padding:6px;text-align:center;background:#fff">
         <div style="position:relative;display:inline-block;max-width:100%">
