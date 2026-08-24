@@ -1747,6 +1747,11 @@ html.insp-embed .modal{zoom:1!important}
       <button class="btn" type="button" onclick="skZoom(-0.25)">➖</button>
       <span class="mono" id="skzval">100%</span>
       <button class="btn" type="button" onclick="skZoom(0.25)">➕</button>
+      <span class="sk-tip" style="margin:0 2px 0 8px">번호크기</span>
+      <button class="btn" type="button" onclick="skMarkSize(-5)">➖</button>
+      <span class="mono" id="skmsval">100%</span>
+      <button class="btn" type="button" onclick="skMarkSize(5)">➕</button>
+      <button class="btn" type="button" onclick="skMarkSize(0,100)">기본</button>
       <button class="btn" type="button" onclick="skUndo()">↩ 되돌리기</button>
       <button class="btn" type="button" onclick="skClearMarks()">전체 삭제</button>
       <span class="sk-tip">도면을 누르면 번호가 순서대로 찍힙니다 · 번호를 누르면 삭제</span>
@@ -1892,6 +1897,29 @@ async function mapi(path,opt={}){
   if(r.status===204)return null;
   return r.json();
 }
+/* [수정] 측정DB 스키마에 없는 선택 컬럼(author 등) 때문에 저장이 실패하던 문제
+   PGRST204(Could not find the 'X' column) 응답이면 해당 컬럼을 빼고 자동 재시도한다. */
+function _missingCol(msg){
+  const m=/Could not find the '([^']+)' column/.exec(String(msg||''));
+  return m?m[1]:null;
+}
+async function mapiSave(path,payload,method){
+  let body=Array.isArray(payload)?payload.map(o=>Object.assign({},o)):Object.assign({},payload);
+  for(let i=0;i<6;i++){
+    try{
+      return await mapi(path,{method:method||'POST',body:JSON.stringify(body)});
+    }catch(e){
+      const col=_missingCol(e&&e.message);
+      if(!col)throw e;
+      const hit=Array.isArray(body)?body.some(o=>col in o):(col in body);
+      if(!hit)throw e;
+      console.warn('[측정DB] 없는 컬럼 제외 후 재시도:',col);
+      if(Array.isArray(body))body.forEach(o=>{delete o[col]});
+      else delete body[col];
+    }
+  }
+  throw new Error('저장 실패 — 측정DB 스키마를 확인하세요 (pd_measure_schema.sql)');
+}
 const api=coreApi;
 function setMdbStatus(msg,kind){const el=document.getElementById('mdb-status');if(!el)return;el.textContent=msg;el.classList.remove('ok','err');if(kind)el.classList.add(kind)}
 function drawMeasureDbSettings(){
@@ -1925,8 +1953,10 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 function today(){return new Date().toISOString().slice(0,10)}
 function g(id){const el=document.getElementById(id);return el?el.value.trim():''}
 function viewSketch(src,marks){
-  const mk=(marks||[]).map(m=>
-    `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:22px;height:22px;border:2px solid #000;border-radius:50%;background:#ffd400;color:#000;font-size:12px;font-weight:800;line-height:19px;text-align:center;box-sizing:border-box">${m.n}</span>`).join('');
+  const mk=(marks||[]).map(m=>{
+    const w=Math.round(22*((parseInt(m.s)||100)/100));
+    return `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:${w}px;height:${w}px;border:2px solid #000;border-radius:50%;background:#ffd400;color:#000;font-size:${Math.round(w*.55)}px;font-weight:800;line-height:${w-4}px;text-align:center;box-sizing:border-box">${m.n}</span>`;
+  }).join('');
   const w=window.open('');
   w.document.write('<body style="margin:0;background:#111;display:flex;justify-content:center"><div style="position:relative;display:inline-block;max-width:100%"><img src="'+src+'" style="max-width:100%;height:auto;display:block">'+mk+'</div></body>');
 }
@@ -2147,6 +2177,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closePCWidthPopup()}
 
 /* ===== 검사성적: 양식 만들기 → 작업자 작성 → 작성이력 ===== */
 let INSPTAB='make', FORMS=[], FEDIT=null, FITEMS=[], WFORM=null, WROWS=[], RPTS=[], SKFILE=null, SKDATA=null, SKURL=null, MARKS=[];
+let MKSIZE=100;               /* 도면 번호 원 크기 (%) · 5% 단위 · 50~300 */
+const MK_MIN=50, MK_MAX=300, MK_STEP=5;
+function mkScale(m){ const v=parseInt((m&&m.s)||MKSIZE); return (v>=MK_MIN&&v<=MK_MAX?v:100)/100; }
 const INSP_JUDGE=['','OK','NG','조건부 OK'];
 const INSP_X=['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10'];
 const FROWS_DEF=15;
@@ -2209,7 +2242,7 @@ async function renderInsp(){
 function blankFItem(){return{item:'',method:'',spec:'',memo:''}}
 function newForm(){
   FEDIT=null;FITEMS=Array.from({length:FROWS_DEF},blankFItem);
-  SKURL=null;SKFILE=null;SKDATA=null;MARKS=[];
+  SKURL=null;SKFILE=null;SKDATA=null;MARKS=[];MKSIZE=100;
   const fi=document.getElementById('ih-sketch');if(fi)fi.value='';
   drawSketch();
   const tg=document.getElementById('fedit-tag');if(tg)tg.textContent='';
@@ -2500,14 +2533,16 @@ function rmSketch(){
 }
 function clearSketchAll(){
   if(!confirm('도면과 번호를 모두 지울까요?'))return;
-  SKFILE=null;SKDATA=null;SKURL=null;MARKS=[];
+  SKFILE=null;SKDATA=null;SKURL=null;MARKS=[];MKSIZE=100;
   const el=document.getElementById('ih-sketch');if(el)el.value='';
   drawSketch();
 }
 /* 번호 오버레이 HTML */
 function markLayer(marks,size){
-  return (marks||[]).map(m=>
-    `<span class="skmk" style="left:${m.x}%;top:${m.y}%;width:${size}px;height:${size}px;font-size:${Math.round(size*.6)}px">${m.n}</span>`).join('');
+  return (marks||[]).map(m=>{
+    const w=Math.round(size*mkScale(m));
+    return `<span class="skmk" style="left:${m.x}%;top:${m.y}%;width:${w}px;height:${w}px;font-size:${Math.round(w*.6)}px">${m.n}</span>`;
+  }).join('');
 }
 function drawSketch(){
   const pv=document.getElementById('ih-skpv');if(!pv)return;
@@ -2546,9 +2581,11 @@ function drawSkEdit(){
   const box=document.getElementById('skcanvas');if(!box)return;
   document.getElementById('skzval').textContent=Math.round(SKZOOM*100)+'%';
   document.getElementById('skmcnt').textContent='번호 '+MARKS.length+'개';
+  const ms=document.getElementById('skmsval');if(ms)ms.textContent=MKSIZE+'%';
+  const px=Math.round(26*MKSIZE/100), fs=Math.round(px*0.5);
   box.innerHTML=`<div class="skstage" style="width:${SKZOOM*100}%" onclick="skClick(event,this)">
       <img src="${skSrc()}">${MARKS.map(m=>
-        `<span class="skmk big" style="left:${m.x}%;top:${m.y}%" onclick="event.stopPropagation();skDel(${m.n})">${m.n}</span>`).join('')}
+        `<span class="skmk big" style="left:${m.x}%;top:${m.y}%;width:${px}px;height:${px}px;font-size:${fs}px" onclick="event.stopPropagation();skDel(${m.n})">${m.n}</span>`).join('')}
     </div>`;
 }
 function skClick(e,stage){
@@ -2556,11 +2593,17 @@ function skClick(e,stage){
   const x=((e.clientX-r.left)/r.width)*100;
   const y=((e.clientY-r.top)/r.height)*100;
   if(x<0||x>100||y<0||y>100)return;
-  MARKS.push({n:MARKS.length+1,x:Math.round(x*10)/10,y:Math.round(y*10)/10});
+  MARKS.push({n:MARKS.length+1,x:Math.round(x*10)/10,y:Math.round(y*10)/10,s:MKSIZE});
   drawSkEdit();
 }
 function skDel(n){
-  MARKS=MARKS.filter(m=>m.n!==n).map((m,i)=>({n:i+1,x:m.x,y:m.y}));
+  MARKS=MARKS.filter(m=>m.n!==n).map((m,i)=>({n:i+1,x:m.x,y:m.y,s:m.s||MKSIZE}));
+  drawSkEdit();
+}
+function skMarkSize(d,abs){
+  const v = (abs!=null) ? abs : MKSIZE + d;
+  MKSIZE = Math.min(MK_MAX, Math.max(MK_MIN, Math.round(v/MK_STEP)*MK_STEP));
+  MARKS = MARKS.map(m=>({n:m.n,x:m.x,y:m.y,s:MKSIZE}));
   drawSkEdit();
 }
 function skUndo(){ MARKS.pop(); drawSkEdit(); }
@@ -2584,8 +2627,8 @@ async function saveForm(){
   const body={project_id:pid,op_code:op,title:title,
     sketch:sketch||null,marks:MARKS,items:items,author:USER||null};
   try{
-    if(FEDIT)await mapi(`/pd_measure_forms?id=eq.${FEDIT}`,{method:"PATCH",body:JSON.stringify(body)});
-    else await mapi("/pd_measure_forms",{method:"POST",body:JSON.stringify(body)});
+    if(FEDIT)await mapiSave(`/pd_measure_forms?id=eq.${FEDIT}`,body,'PATCH');
+    else await mapiSave("/pd_measure_forms",body,'POST');
     toast(FEDIT?'양식을 수정했습니다':'성적서 양식을 등록했습니다');
     newForm();
     await renderInsp();
@@ -2595,7 +2638,8 @@ function formOf(id){return FORMS.find(x=>String(x.id)===String(id))}
 function fillForm(f,copy){
   document.getElementById('im-op').value=f.op_code||'';
   SKFILE=null;SKDATA=null;SKURL=f.sketch||null;
-  MARKS=Array.isArray(f.marks)?f.marks.map(m=>({n:m.n,x:m.x,y:m.y})):[];
+  MARKS=Array.isArray(f.marks)?f.marks.map(m=>({n:m.n,x:m.x,y:m.y,s:m.s||100})):[];
+  MKSIZE=(MARKS[0]&&MARKS[0].s)||100;
   const fi2=document.getElementById('ih-sketch');if(fi2)fi2.value='';
   drawSketch();
   FITEMS=(f.items||[]).map(r=>({item:r.item||'',method:r.method||'',spec:r.spec||'',memo:r.memo||''}));
@@ -2763,16 +2807,18 @@ async function saveWrite(){
   const ng=tg.filter(r=>r.judge==='NG').length;
   try{
     const hdr=Object.assign(writeHdr(),{item_cnt:tg.length,ng_cnt:ng});
-    const [rpt]=await mapi("/pd_measure_reports",{method:"POST",body:JSON.stringify(hdr)});
+    const [rpt]=await mapiSave("/pd_measure_reports",hdr,'POST');
     const rows=tg.map(r=>({project_id:pid,rpt_id:rpt.id,op_code:hdr.op_code,item:r.item,
       method:r.method||null,spec:r.spec||null,
       x1:r.x1||null,x2:r.x2||null,x3:r.x3||null,x4:r.x4||null,x5:r.x5||null,
       x6:r.x6||null,x7:r.x7||null,x8:r.x8||null,x9:r.x9||null,x10:r.x10||null,
       actual:INSP_X.map(k=>r[k]).filter(Boolean).join(' / ')||null,
       judge:r.judge||'OK',worker:worker,memo:r.memo||null}));
-    await mapi("/pd_measure_rows",{method:"POST",body:JSON.stringify(rows)});
-    await mapi("/pd_measure_history",{method:"POST",body:JSON.stringify({project_id:pid,op_code:hdr.op_code,action:'검사',
-      detail:`검사성적서 작성 [${hdr.form_title||''}] ${tg.length}항목${ng?' · NG '+ng:''}`,worker:worker})});
+    await mapiSave("/pd_measure_rows",rows,'POST');
+    try{
+      await mapiSave("/pd_measure_history",{project_id:pid,op_code:hdr.op_code,action:'검사',
+        detail:`검사성적서 작성 [${hdr.form_title||''}] ${tg.length}항목${ng?' · NG '+ng:''}`,worker:worker},'POST');
+    }catch(e){console.warn('[측정DB] 이력 저장 생략',e);}
     toast(`성적서 저장 완료 — ${tg.length}항목`+(ng?` · NG ${ng}건, NCR 등록 권장`:''));
     cancelWrite();
     await renderInsp();
@@ -2890,8 +2936,10 @@ function inspPdfBody(hdr,rows){
     <tr><th>공 정</th><td>${hdr.op_code?opN(hdr.op_code)+' '+esc(mName(hdr.op_code)):esc(hdr.form_title||'-')}</td><th>검 사 자</th><td>${esc(hdr.inspector||'-')}</td></tr>
     <tr><th>측정목적</th><td colspan="3">${purpose}</td></tr></table>`;
   if(hdr.sketch){
-    const mk=(hdr.marks||[]).map(m=>
-      `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:15px;height:15px;border:1.4px solid #000;border-radius:50%;background:#ffd400;color:#000;font-size:9px;font-weight:700;line-height:12px;text-align:center;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact">${m.n}</span>`).join('');
+    const mk=(hdr.marks||[]).map(m=>{
+      const w=Math.round(15*((parseInt(m.s)||100)/100)*10)/10;
+      return `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:${w}px;height:${w}px;border:1.4px solid #000;border-radius:50%;background:#ffd400;color:#000;font-size:${Math.round(w*.6)}px;font-weight:700;line-height:${w-2.6}px;text-align:center;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact">${m.n}</span>`;
+    }).join('');
     b+=`<div class="sect">SKETCH</div>
       <div style="border:1px solid #888;padding:6px;text-align:center;background:#fff">
         <div style="position:relative;display:inline-block;max-width:100%">
