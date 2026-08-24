@@ -127,6 +127,9 @@
       .cert-charge-grid{grid-template-columns:1fr !important;gap:8px !important}
       #certCharge,#certSign,#certFinalJ{font-size:13px}
     }
+  /* 업체코드 입력칸 : 예시 글자는 연하게 */
+  #vendorCode::placeholder{color:#b6c2d1;font-weight:400;letter-spacing:0;font-family:inherit;opacity:1}
+  #vendorCode::-webkit-input-placeholder{color:#b6c2d1;font-weight:400;letter-spacing:0;font-family:inherit}
   </style>
 </head>
 <body>
@@ -285,7 +288,7 @@
       <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
         <div class="fg" style="margin-bottom:0"><label style="font-size:12px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: aaa" style="font-size:13px;padding:10px 12px"></div>
-        <div class="fg" style="margin-bottom:0"><label style="font-size:12px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="TG" maxlength="10" style="font-size:13px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:12px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="업체코드" maxlength="10" style="font-size:13px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
       </div>
       <input type="hidden" id="vendorEditId">
       <div class="btn-row" style="margin-bottom:0">
