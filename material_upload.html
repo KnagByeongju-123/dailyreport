@@ -17,21 +17,21 @@
     html.bd-3{--bd1:#8a92a0;--bd2:#b0b6c0}
     .main-pnl{zoom:var(--mv-fs,1)}
     .vsmenu{position:absolute;right:12px;top:10px;z-index:60}
-    .vsbtn{width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.15);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;font-family:inherit;padding:0;transition:.15s}
+    .vsbtn{width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.15);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;font-family:inherit;padding:0;transition:.15s}
     .vsbtn:hover,.vsbtn.on{background:#fff;color:#1a237e}
     .vspopup{position:absolute;right:0;top:calc(100% + 10px);width:min(300px,calc(100vw - 26px));padding:13px 14px 12px;border:1px solid var(--bd1,#ddd);border-radius:13px;background:#fff;box-shadow:0 14px 38px rgba(15,23,42,.25);opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top right;transition:opacity .14s ease,transform .14s ease,visibility .14s;z-index:12000;color:#212121;text-align:left}
     .vspopup.show{opacity:1;visibility:visible;transform:none}
     .vspopup:before{content:'';position:absolute;right:9px;top:-6px;width:10px;height:10px;background:#fff;border-left:1px solid var(--bd1,#ddd);border-top:1px solid var(--bd1,#ddd);transform:rotate(45deg)}
     .vshead{display:flex;align-items:center;gap:8px;padding-bottom:9px;margin-bottom:10px;border-bottom:1px solid var(--bd2,#eee)}
-    .vshead b{font-size:13px;color:#1a237e;font-weight:700}
-    .vsclose{margin-left:auto;width:24px;height:24px;border:none;background:transparent;color:#888;font-size:18px;line-height:1;cursor:pointer;border-radius:6px}
+    .vshead b{font-size:12px;color:#1a237e;font-weight:700}
+    .vsclose{margin-left:auto;width:24px;height:24px;border:none;background:transparent;color:#888;font-size:14px;line-height:1;cursor:pointer;border-radius:6px}
     .vsclose:hover{background:#f1f5f9;color:#212121}
-    .vsrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;font-size:12px;color:#666;font-weight:600}
-    .vsrow b{font-family:monospace;color:#1a237e;font-size:13px}
+    .vsrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;font-size:11.5px;color:#666;font-weight:600}
+    .vsrow b{font-family:monospace;color:#1a237e;font-size:12px}
     .vsrange{width:100%;height:26px;accent-color:#1a237e;cursor:pointer;display:block}
     .vsscale{display:flex;justify-content:space-between;font-size:10px;color:#aaa;font-family:monospace;margin-top:-2px}
     .vsquick{display:flex;gap:6px;margin-top:8px}
-    .vsquick button{flex:1;padding:8px 4px;border:1px solid var(--bd1,#ddd);border-radius:8px;background:#fafafa;color:#555;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;width:auto}
+    .vsquick button{flex:1;padding:8px 4px;border:1px solid var(--bd1,#ddd);border-radius:8px;background:#fafafa;color:#555;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;width:auto}
     .vsquick button:hover{border-color:#1a237e;color:#1a237e}
     .vsquick button.on{background:#e8eaf6;border-color:#1a237e;color:#1a237e}
     .vsbdrow{margin-top:12px}
@@ -42,46 +42,46 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Noto Sans KR',sans-serif;background:#f0f2f5;color:#212121;min-height:100vh}
     .hdr{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:14px 16px;text-align:center}
-    .hdr h1{font-size:20px;font-weight:700}.hdr p{font-size:12px;opacity:.7;margin-top:2px}
+    .hdr h1{font-size:15px;font-weight:700}.hdr p{font-size:11.5px;opacity:.7;margin-top:2px}
     .wrap{max-width:640px;margin:0 auto;padding:12px 12px 80px}
     .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-    .card-tit{font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .card-tit{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .fg{margin-bottom:12px}
-    .fg label{display:block;font-size:14px;font-weight:600;color:#555;margin-bottom:4px}
-    .fg select,.fg input{width:100%;padding:12px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-size:16px;font-family:inherit;background:#fff}
-    .btn{padding:14px;border:none;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
+    .fg label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:4px}
+    .fg select,.fg input{width:100%;padding:12px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-size:13px;font-family:inherit;background:#fff}
+    .btn{padding:14px;border:none;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
     .btn:active{transform:scale(.97)}
     .btn-green{background:linear-gradient(135deg,#00c853,#00e676);color:#000}
     .btn-blue{background:linear-gradient(135deg,#1565c0,#42a5f5);color:#fff}
     .btn-gray{background:#f5f5f5;color:#555;border:1px solid var(--bd1,#ddd)}
-    .btn-sm{padding:8px 14px;font-size:14px;width:auto;border-radius:8px}
+    .btn-sm{padding:8px 14px;font-size:12px;width:auto;border-radius:8px}
     .btn-row{display:flex;gap:8px;margin-bottom:12px}
     .step{display:flex;gap:0;margin-bottom:14px;border-radius:10px;overflow:hidden;border:2px solid var(--bd1,#ddd)}
-    .step-item{flex:1;padding:10px 6px;text-align:center;font-size:14px;font-weight:700;color:#aaa;background:#f5f5f5;transition:all .2s}
+    .step-item{flex:1;padding:10px 6px;text-align:center;font-size:12px;font-weight:700;color:#aaa;background:#f5f5f5;transition:all .2s}
     .step-item.active{background:#1a237e;color:#fff}
     .step-item.done{background:#e8f5e9;color:#2e7d32}
-    .info-box{padding:10px 12px;border-radius:8px;font-size:14px;line-height:1.7;margin-bottom:10px}
+    .info-box{padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.7;margin-bottom:10px}
     .info-box.blue{background:#e3f2fd;border:1px solid #bbdefb;color:#1565c0}
     .info-box.green{background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32}
     .info-box.orange{background:#fff3e0;border:1px solid #ffe0b2;color:#e65100}
-    .preview-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .preview-tbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
     .preview-tbl th{padding:7px 8px;background:#e8eaf6;border:1px solid var(--bd1,#ddd);white-space:nowrap;color:#1a237e;font-weight:700}
     .preview-tbl td{padding:6px 8px;border:1px solid var(--bd2,#eee);white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:18px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
-    .back-link{display:inline-block;padding:10px 0;font-size:14px;color:#888;text-decoration:none}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:18px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
+    .back-link{display:inline-block;padding:10px 0;font-size:12px;color:#888;text-decoration:none}
     .back-link:hover{color:#1a237e}
     .tabs{display:flex;background:#fff;border-bottom:2px solid var(--bd1,#ddd);position:sticky;top:0;z-index:50}
-    .tab{flex:1;padding:10px;text-align:center;font-size:15px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#888}
+    .tab{flex:1;padding:10px;text-align:center;font-size:12.5px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:#888}
     .tab.on{color:#1a237e;border-bottom-color:#1a237e}
     .main-pnl{display:none}.main-pnl.on{display:block}
     .file-drop{border:2.5px dashed var(--bd1,#ddd);border-radius:12px;padding:30px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
     .file-drop:hover,.file-drop.dragover{border-color:#1a237e;background:#e8eaf6}
-    .file-drop .fd-icon{font-size:36px;margin-bottom:6px}
-    .file-drop .fd-text{font-size:15px;font-weight:600;color:#555}
-    .file-drop .fd-sub{font-size:13px;color:#999;margin-top:4px}
+    .file-drop .fd-icon{font-size:24px;margin-bottom:6px}
+    .file-drop .fd-text{font-size:12.5px;font-weight:600;color:#555}
+    .file-drop .fd-sub{font-size:12px;color:#999;margin-top:4px}
     .stat-row{display:flex;gap:8px;margin-bottom:8px}
     .stat-card{flex:1;padding:10px;border-radius:8px;text-align:center}
-    .stat-card .sv{font-size:22px;font-weight:700}.stat-card .sl{font-size:12px;color:#888;margin-top:2px}
+    .stat-card .sv{font-size:16.5px;font-weight:700}.stat-card .sl{font-size:11.5px;color:#888;margin-top:2px}
 
     /* ===== 검사성적서 모달 - 정보 박스 그리드 (모바일 자동 1컬럼) ===== */
     .cert-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}
@@ -105,27 +105,27 @@
       .cert-info-grid{grid-template-columns:1fr;gap:6px}
       .cert-info-row{padding:4px 0;border-bottom:1px solid #e0e7ff}
       .cert-info-row:last-child{border-bottom:none}
-      .cert-info-row .ci-label{min-width:80px;font-size:15px}
-      .cert-info-row .ci-value{font-size:16px}
+      .cert-info-row .ci-label{min-width:80px;font-size:12.5px}
+      .cert-info-row .ci-value{font-size:13px}
       /* 모달 본문 패딩 축소 */
       #certModal > div > div{padding:14px 16px !important}
       /* 측정값 표 - 모바일에서 더 컴팩트 (격자 유지) */
       .cert-table-wrap #certMeasTable{min-width:480px}
-      #certMeasTable th{padding:6px 3px !important;font-size:14px !important}
-      #certMeasTable td{font-size:14px !important;height:32px !important}
-      #certMeasTable td:first-child{font-size:14px !important;padding:4px 6px !important}
+      #certMeasTable th{padding:6px 3px !important;font-size:12px !important}
+      #certMeasTable td{font-size:12px !important;height:32px !important}
+      #certMeasTable td:first-child{font-size:12px !important;padding:4px 6px !important}
       #certMeasTable input[type="text"],
       #certMeasTable input[type="number"]{
-        padding:5px 3px !important;font-size:14px !important;min-width:50px;
+        padding:5px 3px !important;font-size:12px !important;min-width:50px;
       }
-      #certMeasTable input.spec-input{font-size:13px !important;padding:5px 6px !important}
-      #certMeasTable label{font-size:13px !important;padding:2px 2px !important;margin:0 1px !important}
+      #certMeasTable input.spec-input{font-size:12px !important;padding:5px 6px !important}
+      #certMeasTable label{font-size:12px !important;padding:2px 2px !important;margin:0 1px !important}
       #certMeasTable input[type="radio"]{width:12px !important;height:12px !important}
       /* 정보 박스 자체 패딩 축소 */
-      #certInfoBox{padding:12px 14px !important;font-size:15px !important;line-height:1.6 !important}
+      #certInfoBox{padding:12px 14px !important;font-size:12.5px !important;line-height:1.6 !important}
       /* 담당자/판정 그리드도 1컬럼으로 */
       .cert-charge-grid{grid-template-columns:1fr !important;gap:8px !important}
-      #certCharge,#certSign,#certFinalJ{font-size:16px}
+      #certCharge,#certSign,#certFinalJ{font-size:13px}
     }
   </style>
 </head>
@@ -212,41 +212,41 @@
         <div class="stat-card" style="background:#e8f5e9"><div class="sv" id="pvCompany">-</div><div class="sl">업체명</div></div>
         <div class="stat-card" style="background:#fff3e0"><div class="sv" id="pvDate">-</div><div class="sl">입고일자</div></div>
       </div>
-      <div id="pvSettings" class="info-box blue" style="font-size:13px"></div>
+      <div id="pvSettings" class="info-box blue" style="font-size:12px"></div>
       <div style="overflow-x:auto"><table class="preview-tbl" id="pvTable"></table></div>
-      <div id="pvMore" style="text-align:center;padding:6px;color:#888;font-size:12px"></div>
+      <div id="pvMore" style="text-align:center;padding:6px;color:#888;font-size:11.5px"></div>
     </div>
     <!-- 성적서 작성 카드 (최종등록 전 작성 가능) -->
     <div class="card" style="background:#fff3e0;border:2px solid #fb8c00">
-      <div style="font-size:16px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 (선택)</div>
-      <div style="font-size:14px;color:#555;line-height:1.5;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 (선택)</div>
+      <div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:10px">
         등록 전에 성적서를 작성하실 수 있습니다.<br>
         <b>재질 · 두께 · 폭 · LOT</b>가 같으면 1건으로 자동 묶이며 (코일수·합계 중량으로 합산),<br>
         측정값과 밀시트 사진만 입력하시면 됩니다.
       </div>
-      <button class="btn btn-orange" style="width:100%;font-size:17px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistrationFromStep3()">📝 성적서 작성하기 (<span id="certCntBadgeStep3">0</span>건)</button>
+      <button class="btn btn-orange" style="width:100%;font-size:13.5px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistrationFromStep3()">📝 성적서 작성하기 (<span id="certCntBadgeStep3">0</span>건)</button>
     </div>
     <div class="btn-row">
       <button class="btn btn-gray btn-sm" onclick="goStep(2)" style="flex:0 0 auto;width:auto">← 수정</button>
-      <button class="btn btn-green" onclick="doRegister()" id="btnRegister" style="flex:1;font-size:18px">✅ <span id="pvRegCnt">0</span>건 최종등록</button>
+      <button class="btn btn-green" onclick="doRegister()" id="btnRegister" style="flex:1;font-size:14px">✅ <span id="pvRegCnt">0</span>건 최종등록</button>
     </div>
-    <div id="regStatus" style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:600;text-align:center"></div>
+    <div id="regStatus" style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600;text-align:center"></div>
   </div>
   <div id="pnlStep4" style="display:none">
     <div class="card" style="text-align:center;padding:30px 16px">
-      <div style="font-size:48px;margin-bottom:10px">✅</div>
-      <div style="font-size:20px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="doneTitle">완료</div>
-      <div style="font-size:15px;color:#555" id="doneSummary"></div>
-      <div id="autoReturnMsg" style="margin-top:20px;padding:10px;background:#e3f2fd;border-radius:8px;font-size:14px;color:#1565c0;font-weight:600"><span id="autoReturnSec">10</span>초 후 등록 화면으로 돌아갑니다</div>
+      <div style="font-size:30.5px;margin-bottom:10px">✅</div>
+      <div style="font-size:15px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="doneTitle">완료</div>
+      <div style="font-size:12.5px;color:#555" id="doneSummary"></div>
+      <div id="autoReturnMsg" style="margin-top:20px;padding:10px;background:#e3f2fd;border-radius:8px;font-size:12px;color:#1565c0;font-weight:600"><span id="autoReturnSec">10</span>초 후 등록 화면으로 돌아갑니다</div>
     </div>
     <!-- 성적서 등록 안내 -->
     <div class="card" style="background:#fff3e0;border:2px solid #fb8c00;margin-top:8px">
-      <div style="font-size:16px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 등록</div>
-      <div style="font-size:14px;color:#555;line-height:1.5;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#e65100;margin-bottom:8px">📋 검사 성적서 등록</div>
+      <div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:10px">
         등록한 소재별로 검사 성적서를 작성하고 밀시트를 첨부할 수 있습니다.<br>
         <b>재질 · 두께 · 폭</b>이 자동으로 채워지며 측정값과 밀시트만 입력하시면 됩니다.
       </div>
-      <button class="btn btn-orange" style="width:100%;font-size:17px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistration()">📝 성적서 작성하기 (<span id="certCntBadge">0</span>건)</button>
+      <button class="btn btn-orange" style="width:100%;font-size:13.5px;padding:12px;background:#fb8c00;color:#fff" onclick="openCertRegistration()">📝 성적서 작성하기 (<span id="certCntBadge">0</span>건)</button>
     </div>
     <div class="btn-row"><button class="btn btn-blue" onclick="resetAll()">🔄 지금 새 등록하기</button></div>
   </div>
@@ -255,8 +255,8 @@
 
 <div class="main-pnl" id="mainPnl1">
 <div class="wrap">
-  <div id="settingsUserBar" style="display:none;padding:8px 12px;background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;border-radius:10px;font-size:14px;font-weight:600;margin-bottom:12px;text-align:center">
-    🔓 <span id="settingsUserName"></span> 님 접속중 · <span style="opacity:.8;font-size:13px">10분 후 자동 잠금</span>
+  <div id="settingsUserBar" style="display:none;padding:8px 12px;background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:12px;text-align:center">
+    🔓 <span id="settingsUserName"></span> 님 접속중 · <span style="opacity:.8;font-size:12px">10분 후 자동 잠금</span>
   </div>
   <div class="card">
     <div class="card-tit">📊 이력 관리</div>
@@ -270,69 +270,69 @@
       <button class="btn btn-sm btn-green" onclick="histExcel()">📥 엑셀</button>
     </div>
     <button class="btn btn-sm" onclick="histDelete()" style="width:100%;background:#fff3e0;color:#e65100;border:1.5px solid #ffe0b2">🗑 선택범위 삭제</button>
-    <div id="histStatus" style="font-size:13px;margin-top:6px;color:#888"></div>
+    <div id="histStatus" style="font-size:12px;margin-top:6px;color:#888"></div>
     <div id="histArea" style="margin-top:10px;max-height:300px;overflow-y:auto"></div>
   </div>
   <div class="card">
     <div class="card-tit" style="display:flex;align-items:center;gap:8px">
       <span>🏢 출발지 (소재업체) 관리</span>
-      <span id="vendorCountBadge" style="background:#1a237e;color:#fff;font-size:13px;padding:2px 10px;border-radius:10px;font-weight:600">0</span>
+      <span id="vendorCountBadge" style="background:#1a237e;color:#fff;font-size:12px;padding:2px 10px;border-radius:10px;font-weight:600">0</span>
     </div>
-    <div class="info-box blue" style="font-size:12px">💡 등록한 업체는 <b>등록 탭의 출발지 드롭다운</b>에 표시됩니다.<br>업체코드는 발송 데이터의 <b>업체 식별자</b>로 저장됩니다 (예: AA, BB).<br>순서는 ▲▼ 버튼으로 변경 가능합니다.</div>
-    <div style="font-size:14px;font-weight:700;color:#1a237e;margin:8px 0 6px 2px;padding-left:6px;border-left:3px solid #1a237e">📋 등록된 업체 목록</div>
+    <div class="info-box blue" style="font-size:11.5px">💡 등록한 업체는 <b>등록 탭의 출발지 드롭다운</b>에 표시됩니다.<br>업체코드는 발송 데이터의 <b>업체 식별자</b>로 저장됩니다 (예: AA, BB).<br>순서는 ▲▼ 버튼으로 변경 가능합니다.</div>
+    <div style="font-size:12px;font-weight:700;color:#1a237e;margin:8px 0 6px 2px;padding-left:6px;border-left:3px solid #1a237e">📋 등록된 업체 목록</div>
     <div id="vendorList" style="margin-bottom:10px;max-height:420px;overflow-y:auto;padding:4px;background:#fafafa;border-radius:8px;border:1px solid var(--bd2,#eee)"></div>
     <div style="border-top:2px solid var(--bd1,#ddd);padding-top:14px;margin-top:12px">
-      <div style="font-size:14px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
+      <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px" id="vendorFormTitle">➕ 업체 추가</div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
-        <div class="fg" style="margin-bottom:0"><label style="font-size:13px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: aaa" style="font-size:16px;padding:10px 12px"></div>
-        <div class="fg" style="margin-bottom:0"><label style="font-size:13px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="TG" maxlength="10" style="font-size:16px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:12px;white-space:nowrap">업체명</label><input type="text" id="vendorName" placeholder="예: aaa" style="font-size:13px;padding:10px 12px"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:12px;white-space:nowrap">코드 (VENDOR_SITE_ID)</label><input type="text" id="vendorCode" placeholder="TG" maxlength="10" style="font-size:13px;padding:10px 12px;text-transform:uppercase;text-align:center;font-weight:700;letter-spacing:1px;font-family:monospace"></div>
       </div>
       <input type="hidden" id="vendorEditId">
       <div class="btn-row" style="margin-bottom:0">
         <button class="btn btn-sm btn-blue" onclick="saveVendor()" id="vendorSaveBtn" style="flex:1">💾 등록</button>
         <button class="btn btn-sm btn-gray" onclick="cancelVendorEdit()" id="vendorCancelBtn" style="display:none">취소</button>
       </div>
-      <div id="vendorStatus" style="font-size:13px;margin-top:6px;color:#888"></div>
+      <div id="vendorStatus" style="font-size:12px;margin-top:6px;color:#888"></div>
     </div>
   </div>
   <div class="card">
     <div class="card-tit">📢 공지사항 (접속 시 팝업)</div>
-    <div class="info-box blue" style="font-size:12px">💡 입력한 공지가 페이지 접속 시 자동 팝업됩니다.<br>비워두고 저장하면 팝업이 표시되지 않습니다. 사용자가 "오늘 하루 보지 않기" 선택 가능.</div>
+    <div class="info-box blue" style="font-size:11.5px">💡 입력한 공지가 페이지 접속 시 자동 팝업됩니다.<br>비워두고 저장하면 팝업이 표시되지 않습니다. 사용자가 "오늘 하루 보지 않기" 선택 가능.</div>
     <div class="fg">
       <label>제목</label>
-      <input type="text" id="noticeTitle" placeholder="예: 추석 연휴 입고 일정 안내" style="padding:10px 12px;font-size:16px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box">
+      <input type="text" id="noticeTitle" placeholder="예: 추석 연휴 입고 일정 안내" style="padding:10px 12px;font-size:13px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box">
     </div>
     <div class="fg">
       <label>내용 (줄바꿈 가능)</label>
-      <textarea id="noticeBody" rows="5" placeholder="예: 9/15(월) ~ 9/17(수) 입고 불가&#10;9/18(목)부터 정상 운영" style="padding:10px 12px;font-size:15px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6"></textarea>
+      <textarea id="noticeBody" rows="5" placeholder="예: 9/15(월) ~ 9/17(수) 입고 불가&#10;9/18(목)부터 정상 운영" style="padding:10px 12px;font-size:12.5px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6"></textarea>
     </div>
     <div class="btn-row">
       <button class="btn btn-sm btn-blue" onclick="saveNotice()" style="flex:1">💾 공지 저장</button>
       <button class="btn btn-sm btn-gray" onclick="clearNotice()" style="flex:0 0 auto">🗑 삭제</button>
       <button class="btn btn-sm" onclick="previewNotice()" style="background:#10b981;color:#fff;flex:0 0 auto">👁 미리보기</button>
     </div>
-    <div id="noticeStatus" style="font-size:13px;margin-top:6px;color:#888"></div>
+    <div id="noticeStatus" style="font-size:12px;margin-top:6px;color:#888"></div>
   </div>
   <div class="card">
     <div class="card-tit">🔔 ntfy 알림</div>
-    <div class="info-box blue" style="font-size:12px">💡 <b>소재업체에서 파일 업로드 완료 시</b> 등록된 ntfy 방으로 자동 발송됩니다.</div>
+    <div class="info-box blue" style="font-size:11.5px">💡 <b>소재업체에서 파일 업로드 완료 시</b> 등록된 ntfy 방으로 자동 발송됩니다.</div>
     <div id="ntfyRuleList"></div>
     <div style="display:flex;gap:6px;margin-top:8px">
-      <input type="text" id="ntfyNewTopic" placeholder="방이름 (예: tj-mat)" style="flex:1;padding:8px;font-size:14px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit">
+      <input type="text" id="ntfyNewTopic" placeholder="방이름 (예: tj-mat)" style="flex:1;padding:8px;font-size:12px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit">
       <button class="btn btn-sm btn-blue" onclick="addNtfyRule()" style="flex-shrink:0">+</button>
     </div>
     <div class="btn-row" style="margin-top:8px">
-      <input type="text" id="ntfyTestMsg" value="ntfy 테스트" style="flex:1;padding:8px;font-size:14px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit">
+      <input type="text" id="ntfyTestMsg" value="ntfy 테스트" style="flex:1;padding:8px;font-size:12px;border:1.5px solid var(--bd1,#ddd);border-radius:8px;font-family:inherit">
       <button class="btn btn-sm" onclick="testNtfyAll()" style="background:#ef4444;color:#fff;flex-shrink:0">🔔 테스트</button>
     </div>
-    <div id="ntfyStatus" style="font-size:13px;margin-top:4px;color:#888"></div>
+    <div id="ntfyStatus" style="font-size:12px;margin-top:4px;color:#888"></div>
   </div>
   <div class="card">
     <div class="card-tit">🔧 Supabase 설정</div>
-    <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
-    <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:16px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
+    <div class="fg"><label>URL</label><div style="padding:10px 12px;font-size:13px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:1px;user-select:none;pointer-events:none">https://•••••••••••••••.supabase.co</div></div>
+    <div class="fg"><label>Anon Key</label><div style="padding:10px 12px;font-size:13px;background:#eee;border:1.5px solid var(--bd1,#ddd);border-radius:8px;color:#999;letter-spacing:2px;user-select:none;pointer-events:none">••••••••••••••••••••••••••••••••••••••</div></div>
   </div>
-  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:14px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid var(--bd1,#ddd);border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid var(--bd1,#ddd);border-radius:8px;font-size:12px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS pd_move_history_tj (
+  <details style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:#1565c0;padding:10px 14px;background:#fff;border:1px solid var(--bd1,#ddd);border-radius:12px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">▶ 📋 Supabase SQL (테이블 생성)</summary><pre style="margin-top:6px;padding:12px;background:#f5f5f5;border:1px solid var(--bd1,#ddd);border-radius:8px;font-size:11.5px;color:#2e7d32;overflow-x:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace">CREATE TABLE IF NOT EXISTS pd_move_history_tj (
   id bigint generated always as identity primary key,
   move_date date, move_time text, process text,
   departure text, destination text,
@@ -348,24 +348,24 @@ ALTER TABLE pd_move_history_tj ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "anon_all" ON pd_move_history_tj;
 CREATE POLICY "anon_all" ON pd_move_history_tj FOR ALL TO anon USING (true) WITH CHECK (true);</pre></details>
   <button class="btn btn-blue" onclick="saveAllSettings()" style="margin-bottom:8px">💾 모든 설정 서버에 저장</button>
-  <div style="text-align:center"><span id="stgSaveStatus" style="font-size:13px;color:#888"></span></div>
-  <div class="card" style="margin-top:8px"><div class="card-tit">ℹ️ 연결 상태</div><div id="connStatusInfo" style="font-size:14px;color:#555;line-height:1.8"></div></div>
+  <div style="text-align:center"><span id="stgSaveStatus" style="font-size:12px;color:#888"></span></div>
+  <div class="card" style="margin-top:8px"><div class="card-tit">ℹ️ 연결 상태</div><div id="connStatusInfo" style="font-size:12px;color:#555;line-height:1.8"></div></div>
 </div>
 </div>
 
 <!-- 공지사항 팝업 모달 -->
 <div id="noticeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:calc(16px / var(--mv-fs,1));box-sizing:border-box;zoom:var(--mv-fs,1)">
   <div style="background:#fff;max-width:520px;width:100%;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);max-height:90vh;display:flex;flex-direction:column">
-    <div style="background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;padding:16px 20px;font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px">
+    <div style="background:linear-gradient(135deg,#1a237e,#3f51b5);color:#fff;padding:16px 20px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px">
       <span>📢</span><span id="noticeModalTitle">공지사항</span>
     </div>
-    <div id="noticeModalBody" style="padding:20px 22px;font-size:16px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;overflow-y:auto;flex:1;max-height:calc(60vh / var(--mv-fs,1))"></div>
+    <div id="noticeModalBody" style="padding:20px 22px;font-size:13px;line-height:1.7;color:#333;white-space:pre-wrap;word-break:break-word;overflow-y:auto;flex:1;max-height:calc(60vh / var(--mv-fs,1))"></div>
     <div style="padding:12px 20px;background:#f7f8fc;border-top:1px solid var(--bd1,#ddd);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-      <label style="font-size:14px;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer">
+      <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer">
         <input type="checkbox" id="noticeHideToday" style="width:16px;height:16px;cursor:pointer">
         오늘 하루 보지 않기
       </label>
-      <button onclick="closeNoticeModal()" style="background:#1a237e;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:16px;cursor:pointer">확인</button>
+      <button onclick="closeNoticeModal()" style="background:#1a237e;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">확인</button>
     </div>
   </div>
 </div>
@@ -374,24 +374,24 @@ CREATE POLICY "anon_all" ON pd_move_history_tj FOR ALL TO anon USING (true) WITH
 
 <!-- PIN 키패드 모달 -->
 <div id="pinLock" style="display:none;position:fixed;inset:0;background:linear-gradient(180deg,#181b26,#0f1117);z-index:99999;flex-direction:column;align-items:center;justify-content:center;padding:20px">
-  <div style="font-size:25px;font-weight:800;color:#e2b04a;margin-bottom:6px;text-align:center">🔒 설정 메뉴 접속</div>
-  <div style="font-size:14px;color:#8b8fa3;margin-bottom:14px">본인의 PIN 4자리를 입력하세요</div>
-  <div style="font-size:12px;font-weight:700;color:#cbd5e1;margin-bottom:6px;width:324px;max-width:90vw">로그인 번호 (4자리)</div>
+  <div style="font-size:18px;font-weight:800;color:#e2b04a;margin-bottom:6px;text-align:center">🔒 설정 메뉴 접속</div>
+  <div style="font-size:12px;color:#8b8fa3;margin-bottom:14px">본인의 PIN 4자리를 입력하세요</div>
+  <div style="font-size:11.5px;font-weight:700;color:#cbd5e1;margin-bottom:6px;width:324px;max-width:90vw">로그인 번호 (4자리)</div>
   <div id="pinDots" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:324px;max-width:90vw;margin-bottom:20px">
     <div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div>
   </div>
-  <div id="pinLockoutMsg" style="display:none;color:#ef4444;font-size:15px;font-weight:600;text-align:center;margin-bottom:16px"></div>
+  <div id="pinLockoutMsg" style="display:none;color:#ef4444;font-size:12.5px;font-weight:600;text-align:center;margin-bottom:16px"></div>
   <div id="pinKeypad" style="display:grid;grid-template-columns:repeat(3,72px);gap:14px;justify-content:center"></div>
-  <div style="margin-top:28px"><button onclick="closePinLock()" style="background:transparent;border:none;color:#8b8fa3;font-size:14px;padding:8px 16px;cursor:pointer;font-family:inherit">✕ 취소</button></div>
+  <div style="margin-top:28px"><button onclick="closePinLock()" style="background:transparent;border:none;color:#8b8fa3;font-size:12px;padding:8px 16px;cursor:pointer;font-family:inherit">✕ 취소</button></div>
 </div>
 <style>
-#pinLock .pd{height:50px;border-radius:8px;background:#1a1d27;border:1.5px solid #3a4152;transition:all .15s;display:flex;align-items:center;justify-content:center;color:#f8fafc;font-family:ui-monospace,monospace;font-size:24px;font-weight:900;font-style:normal}
+#pinLock .pd{height:50px;border-radius:8px;background:#1a1d27;border:1.5px solid #3a4152;transition:all .15s;display:flex;align-items:center;justify-content:center;color:#f8fafc;font-family:ui-monospace,monospace;font-size:17.5px;font-weight:900;font-style:normal}
 #pinLock .pd.filled{background:#202638;border-color:#e2b04a;box-shadow:0 0 0 2px rgba(226,176,74,.12)}
 #pinLock .pd.err{border-color:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,.12);animation:pinshake .4s}
 @keyframes pinshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-#pinLock .pk{width:72px;height:72px;border-radius:50%;background:#1a1d27;border:1.5px solid #2a2e3d;color:#e8eaf0;font-size:29px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+#pinLock .pk{width:72px;height:72px;border-radius:50%;background:#1a1d27;border:1.5px solid #2a2e3d;color:#e8eaf0;font-size:20px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s;display:flex;align-items:center;justify-content:center;font-family:inherit}
 #pinLock .pk:active{background:#2a2e3d;transform:scale(.92)}
-#pinLock .pk.fn{background:transparent;border:none;font-size:20px;color:#8b8fa3}
+#pinLock .pk.fn{background:transparent;border:none;font-size:15px;color:#8b8fa3}
 </style>
 
 <script>
@@ -2088,24 +2088,24 @@ window.updateCertBadge=function(){
   <div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:calc(95vh / var(--mv-fs,1));overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.4)">
     <!-- 헤더 -->
     <div style="padding:18px 24px;background:#fff;color:#000;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000;border-radius:14px 14px 0 0">
-      <div style="font-size:20px;font-weight:700;letter-spacing:-0.3px;color:#000">
+      <div style="font-size:15px;font-weight:700;letter-spacing:-0.3px;color:#000">
         검사 성적서 작성
-        <span style="font-size:15px;font-weight:500;color:#555;margin-left:10px;border:1px solid #888;padding:3px 10px;border-radius:4px">
+        <span style="font-size:12.5px;font-weight:500;color:#555;margin-left:10px;border:1px solid #888;padding:3px 10px;border-radius:4px">
           <span id="certNavInfo">1 / 1</span>
         </span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button onclick="fillCertDefaults()" title="외관·재질=OK / 폭·두께는 SPEC 기본값 자동 입력" style="background:#fef3c7;border:1.5px solid #f59e0b;color:#92400e;font-size:15px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:6px;transition:all 0.2s" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">🪄 기본값</button>
-        <button onclick="closeCertModal()" style="background:#fff;border:1px solid #888;color:#000;font-size:22px;cursor:pointer;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">×</button>
+        <button onclick="fillCertDefaults()" title="외관·재질=OK / 폭·두께는 SPEC 기본값 자동 입력" style="background:#fef3c7;border:1.5px solid #f59e0b;color:#92400e;font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:6px;transition:all 0.2s" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">🪄 기본값</button>
+        <button onclick="closeCertModal()" style="background:#fff;border:1px solid #888;color:#000;font-size:16.5px;cursor:pointer;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.2s" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">×</button>
       </div>
     </div>
     
     <div style="padding:22px 26px">
       <!-- 정보 박스 (단순화) -->
-      <div id="certInfoBox" style="padding:14px 18px;background:#fafafa;border:1px solid var(--bd1,#ddd);border-radius:6px;font-size:16px;line-height:1.8;color:#000;margin-bottom:18px"></div>
+      <div id="certInfoBox" style="padding:14px 18px;background:#fafafa;border:1px solid var(--bd1,#ddd);border-radius:6px;font-size:13px;line-height:1.8;color:#000;margin-bottom:18px"></div>
       
       <!-- 측정값 표 제목 -->
-      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:8px">
+      <div style="font-size:13.5px;font-weight:700;color:#000;margin-bottom:8px">
         측정값 (공급자 측정치)
       </div>
       <!-- 격자표 CSS - 강제 적용 -->
@@ -2120,7 +2120,7 @@ window.updateCertBadge=function(){
           background:#fff !important;
           border:1px solid #000 !important;
           width:100% !important;
-          font-size:16px !important;
+          font-size:13px !important;
           margin-bottom:20px !important;
           table-layout:fixed !important;
         }
@@ -2134,7 +2134,7 @@ window.updateCertBadge=function(){
           text-align:center !important;
           color:#000 !important;
           font-weight:700 !important;
-          font-size:16px !important;
+          font-size:13px !important;
           display:table-cell !important;
         }
         #certMeasTable tbody td{
@@ -2142,7 +2142,7 @@ window.updateCertBadge=function(){
           border:1px solid #000 !important;
           text-align:center !important;
           background:#fff !important;
-          font-size:16px !important;
+          font-size:13px !important;
           color:#000 !important;
           height:36px !important;
           display:table-cell !important;
@@ -2152,7 +2152,7 @@ window.updateCertBadge=function(){
           font-weight:700 !important;
           color:#000 !important;
           background:#fff !important;
-          font-size:16px !important;
+          font-size:13px !important;
           padding:6px 8px !important;
           text-align:center !important;
           white-space:nowrap !important;
@@ -2165,7 +2165,7 @@ window.updateCertBadge=function(){
           border-width:0 !important;
           border-style:none !important;
           border-radius:0 !important;
-          font-size:16px !important;
+          font-size:13px !important;
           font-family:inherit !important;
           font-weight:500 !important;
           color:#000 !important;
@@ -2203,7 +2203,7 @@ window.updateCertBadge=function(){
         #certMeasTable input.spec-input{
           text-align:left !important;
           padding:6px 8px !important;
-          font-size:15px !important;
+          font-size:12.5px !important;
           font-weight:500 !important;
         }
         #certMeasTable input.optional{color:#888 !important}
@@ -2216,7 +2216,7 @@ window.updateCertBadge=function(){
           display:inline-flex !important;
           align-items:center !important;
           gap:3px !important;
-          font-size:14px !important;
+          font-size:12px !important;
           font-weight:600 !important;
           color:#000 !important;
           margin:0 2px !important;
@@ -2235,15 +2235,15 @@ window.updateCertBadge=function(){
         /* 모바일 */
         @media (max-width:640px){
           #certMeasTable{min-width:480px !important}
-          #certMeasTable thead th{padding:6px 3px !important;font-size:14px !important}
-          #certMeasTable tbody td{font-size:14px !important;height:32px !important}
-          #certMeasTable tbody td:first-child{font-size:14px !important;padding:4px 6px !important}
+          #certMeasTable thead th{padding:6px 3px !important;font-size:12px !important}
+          #certMeasTable tbody td{font-size:12px !important;height:32px !important}
+          #certMeasTable tbody td:first-child{font-size:12px !important;padding:4px 6px !important}
           #certMeasTable input[type="text"],
           #certMeasTable input[type="number"]{
-            padding:5px 3px !important;font-size:14px !important;min-height:30px !important;
+            padding:5px 3px !important;font-size:12px !important;min-height:30px !important;
           }
-          #certMeasTable input.spec-input{font-size:13px !important;padding:5px 6px !important}
-          #certMeasTable label{font-size:13px !important;padding:2px 2px !important;margin:0 1px !important}
+          #certMeasTable input.spec-input{font-size:12px !important;padding:5px 6px !important}
+          #certMeasTable label{font-size:12px !important;padding:2px 2px !important;margin:0 1px !important}
           #certMeasTable input[type="radio"]{width:12px !important;height:12px !important}
         }
       </style>
@@ -2265,16 +2265,16 @@ window.updateCertBadge=function(){
       <!-- 담당자 / 판정 (단순화) -->
       <div class="cert-charge-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px">
         <div>
-          <label style="font-size:15px;color:#000;font-weight:600;display:block;margin-bottom:5px">담당자</label>
-          <input type="text" id="certCharge" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:16px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
+          <label style="font-size:12.5px;color:#000;font-weight:600;display:block;margin-bottom:5px">담당자</label>
+          <input type="text" id="certCharge" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:13px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
         </div>
         <div>
-          <label style="font-size:15px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 서명자</label>
-          <input type="text" id="certSign" placeholder="작성/검토/승인자" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:16px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
+          <label style="font-size:12.5px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 서명자</label>
+          <input type="text" id="certSign" placeholder="작성/검토/승인자" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:13px;font-family:inherit;color:#000;font-weight:500;background:#fff" onfocus="this.style.background='#fffbe6'" onblur="this.style.background='#fff'">
         </div>
         <div>
-          <label style="font-size:15px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 판정</label>
-          <select id="certFinalJ" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:16px;font-family:inherit;font-weight:600;color:#000;background:#fff;cursor:pointer">
+          <label style="font-size:12.5px;color:#000;font-weight:600;display:block;margin-bottom:5px">공급자 판정</label>
+          <select id="certFinalJ" style="width:100%;padding:9px 12px;border:1.5px solid #000;border-radius:4px;font-size:13px;font-family:inherit;font-weight:600;color:#000;background:#fff;cursor:pointer">
             <option>OK</option>
             <option>NG</option>
           </select>
@@ -2282,23 +2282,23 @@ window.updateCertBadge=function(){
       </div>
       
       <!-- 밀시트 첨부 -->
-      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #000">
+      <div style="font-size:13.5px;font-weight:700;color:#000;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #000">
         📎 밀시트 첨부 (선택)
       </div>
       <div style="background:#fafafa;padding:12px 14px;border:1px solid var(--bd1,#ddd);border-radius:4px;margin-bottom:8px">
-        <input type="file" id="certMillFile" accept="image/*,application/pdf,.pdf" onchange="certMillsheetUpload(this)" style="font-size:16px;font-family:inherit">
-        <div style="font-size:14px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 서버 저장용은 자동 압축, 메일은 원본 첨부 (최대 10 MB)</div>
+        <input type="file" id="certMillFile" accept="image/*,application/pdf,.pdf" onchange="certMillsheetUpload(this)" style="font-size:13px;font-family:inherit">
+        <div style="font-size:12px;color:#555;margin-top:5px">📌 사진(JPG/PNG) 또는 PDF — 서버 저장용은 자동 압축, 메일은 원본 첨부 (최대 10 MB)</div>
       </div>
       <div id="certMillPreview"></div>
     </div>
     
     <!-- 하단 버튼 (단순화) -->
     <div style="padding:16px 26px;background:#fafafa;border-radius:0 0 14px 14px;display:flex;gap:10px;flex-wrap:wrap;border-top:1.5px solid #000">
-      <button id="certBtnPrev" onclick="certNavPrev()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">◀ 이전</button>
-      <button onclick="certSkipCurrent()" style="padding:10px 20px;background:#fff;color:#666;border:1.5px solid #888;border-radius:4px;font-size:16px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">건너뛰기</button>
+      <button id="certBtnPrev" onclick="certNavPrev()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">◀ 이전</button>
+      <button onclick="certSkipCurrent()" style="padding:10px 20px;background:#fff;color:#666;border:1.5px solid #888;border-radius:4px;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">건너뛰기</button>
       <div style="flex:1"></div>
-      <button onclick="certSaveCurrent()" style="padding:11px 26px;background:#000;color:#fff;border:1.5px solid #000;border-radius:4px;font-size:17px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">💾 저장 후 다음</button>
-      <button id="certBtnNext" onclick="certNavNext()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">다음 ▶</button>
+      <button onclick="certSaveCurrent()" style="padding:11px 26px;background:#000;color:#fff;border:1.5px solid #000;border-radius:4px;font-size:13.5px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">💾 저장 후 다음</button>
+      <button id="certBtnNext" onclick="certNavNext()" style="padding:10px 20px;background:#fff;color:#000;border:1.5px solid #000;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:inherit" onmouseover="if(!this.disabled)this.style.background='#f0f0f0'" onmouseout="if(!this.disabled)this.style.background='#fff'">다음 ▶</button>
     </div>
   </div>
 </div>
@@ -2707,7 +2707,7 @@ body{
   background:var(--erp05-bg)!important;
   color:var(--erp05-ink)!important;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",Arial,sans-serif!important;
-  font-size:15px;
+  font-size:12px;
   line-height:1.5;
 }
 button,input,select,textarea{font-family:inherit!important}
@@ -2727,7 +2727,7 @@ body>.hdr, body>.top-bar{
   position:relative!important;
   z-index:1000!important;
 }
-body>.hdr h1,body>.top-bar h1{color:var(--erp05-primary)!important;font-size:18px!important;font-weight:900!important;letter-spacing:-.25px!important}
+body>.hdr h1,body>.top-bar h1{color:var(--erp05-primary)!important;font-size:14px!important;font-weight:900!important;letter-spacing:-.25px!important}
 body>.hdr p,body>.hdr .sub,body>.top-bar .cur-menu{color:var(--erp05-sub)!important}
 body>.top-bar .rev-tag,.rev-tag{border:1px solid var(--erp05-line)!important;background:var(--erp05-surface2)!important;color:var(--erp05-muted)!important;border-radius:0!important}
 .worker-chip,.sync-badge,.user-info{border-radius:0!important;box-shadow:none!important}
@@ -2737,7 +2737,7 @@ body>.top-bar .rev-tag,.rev-tag{border:1px solid var(--erp05-line)!important;bac
 .vsbtn,.pcwbtn,#menuOrderBtn,.menuordbtn{
   width:38px!important;height:38px!important;border-radius:0!important;
   border:1px solid var(--erp05-line)!important;background:var(--erp05-surface)!important;
-  color:var(--erp05-primary)!important;font-size:17px!important;box-shadow:none!important;
+  color:var(--erp05-primary)!important;font-size:13.5px!important;box-shadow:none!important;
 }
 .vsbtn:hover,.vsbtn.on,.pcwbtn:hover,.pcwbtn.on,#menuOrderBtn:hover,.menuordbtn:hover{
   background:var(--erp05-primary-bg)!important;border-color:var(--erp05-primary)!important;color:var(--erp05-primary)!important;
@@ -2773,7 +2773,7 @@ body>.top-bar .rev-tag,.rev-tag{border:1px solid var(--erp05-line)!important;bac
   }
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav .tb{
     height:44px!important;padding:0 18px!important;border-right:1px solid var(--erp05-line2)!important;
-    color:var(--erp05-sub)!important;font-size:13px!important;font-weight:800!important;border-radius:0!important;
+    color:var(--erp05-sub)!important;font-size:12px!important;font-weight:800!important;border-radius:0!important;
   }
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav .tb:hover{background:var(--erp05-primary-bg)!important;color:var(--erp05-primary)!important}
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav .tb.on{background:var(--erp05-primary)!important;color:#fff!important;border-bottom-color:var(--erp05-primary)!important}
@@ -2784,11 +2784,11 @@ body>.top-bar .rev-tag,.rev-tag{border:1px solid var(--erp05-line)!important;bac
   }
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav .shd{
     padding:12px 14px!important;background:var(--erp05-surface2)!important;color:var(--erp05-primary)!important;
-    border-bottom:1px solid var(--erp05-line)!important;font-size:12px!important;font-weight:900!important;
+    border-bottom:1px solid var(--erp05-line)!important;font-size:11.5px!important;font-weight:900!important;
   }
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav .sitem{
     padding:11px 14px!important;color:var(--erp05-sub)!important;border-bottom:1px solid var(--erp05-line2)!important;
-    font-size:13px!important;font-weight:700!important;
+    font-size:12px!important;font-weight:700!important;
   }
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav .sitem:hover,
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav .sitem.on{background:var(--erp05-primary-bg)!important;color:var(--erp05-primary)!important}
@@ -2801,7 +2801,7 @@ body>.top-bar .rev-tag,.rev-tag{border:1px solid var(--erp05-line)!important;bac
 @media(max-width:1180px) and (min-width:1000px){
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpSidenav{flex-basis:176px!important;width:176px!important}
   html.jp-menu-nav2:not(.jp-lay-mobile) #jpMain{max-width:calc(100vw - 176px)!important}
-  html.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav .tb{padding:0 13px!important;font-size:12.5px!important}
+  html.jp-menu-nav2:not(.jp-lay-mobile) #jpTopnav .tb{padding:0 13px!important;font-size:11.5px!important}
 }
 
 /* ===== cards / panels / forms ===== */
@@ -2817,7 +2817,7 @@ body>.top-bar .rev-tag,.rev-tag{border:1px solid var(--erp05-line)!important;bac
   color:var(--erp05-primary)!important;font-weight:900!important;
 }
 .card-header{background:var(--erp05-surface2)!important;border-bottom:1px solid var(--erp05-line)!important}
-.card-tit,.sec-title{font-size:14px!important}
+.card-tit,.sec-title{font-size:12px!important}
 
 input:not([type="checkbox"]):not([type="radio"]),select,textarea,
 .fg input,.fg select,.form-item input,.form-item select,.form-item textarea,.fld input,.fld select,.sel-input{
@@ -2851,22 +2851,22 @@ iframe,.embed-frame{max-width:100%!important}
 /* ===== mobile ===== */
 @media(max-width:999px){
   body>.hdr,body>.top-bar{min-height:60px!important;padding:9px 10px!important}
-  body>.hdr h1,body>.top-bar h1{font-size:16px!important}
+  body>.hdr h1,body>.top-bar h1{font-size:13px!important}
   #vsPopup,#pcWidthPopup,.vspopup,.pcwpopup{top:66px!important;right:8px!important;width:min(330px,calc(100vw - 16px))!important;max-width:calc(100vw - 16px)!important;max-height:calc(100vh - 76px)!important}
   #vsPopup:before,#pcWidthPopup:before,.vspopup:before,.pcwpopup:before{top:61px!important;right:20px!important}
   .card{margin-bottom:8px!important}
 }
 @media(max-width:560px){
-  body{font-size:15px!important}
+  body{font-size:12px!important}
   .card{padding:10px!important}
   .card-header{padding:10px!important}
-  input:not([type="checkbox"]):not([type="radio"]),select,textarea{font-size:15px!important}
+  input:not([type="checkbox"]):not([type="radio"]),select,textarea{font-size:12.5px!important}
 }
 </style>
 
 
 <style id="erp05-upload-specific">
-body{font-size:calc(15px * var(--mv-fs,1))!important}
+body{font-size:calc(12px * var(--mv-fs,1))!important}
 .main-pnl{
   zoom:var(--mv-fs,1)!important;
   width:calc(100% / var(--mv-fs,1))!important;
@@ -2878,26 +2878,26 @@ body{font-size:calc(15px * var(--mv-fs,1))!important}
 }
 .hdr{display:flex!important;align-items:center!important;gap:12px!important;text-align:left!important}
 .hdr h1{margin:0!important;flex:1!important;min-width:0!important}
-.hdr p{margin:0!important;font-size:12px!important;max-width:56vw!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.hdr p{margin:0!important;font-size:11.5px!important;max-width:56vw!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 .vsmenu{position:relative!important;right:auto!important;top:auto!important;margin-left:auto!important;flex-shrink:0!important}
 .tabs{background:var(--erp05-surface)!important;border-bottom:1px solid var(--erp05-line)!important}
-.tab{padding:11px 16px!important;color:var(--erp05-sub)!important;font-size:14px!important;border-bottom:3px solid transparent!important}
+.tab{padding:11px 16px!important;color:var(--erp05-sub)!important;font-size:12px!important;border-bottom:3px solid transparent!important}
 .tab.on{background:var(--erp05-primary-bg)!important;color:var(--erp05-primary)!important;border-bottom-color:var(--erp05-primary)!important}
 .step{border:1px solid var(--erp05-line)!important;background:var(--erp05-surface)!important}
 .step-item{background:var(--erp05-surface2)!important;color:var(--erp05-sub)!important;border-right:1px solid var(--erp05-line2)!important}
 .step-item.active{background:var(--erp05-primary)!important;color:#fff!important}
 .step-item.done{background:#eaf7f0!important;color:var(--erp05-green)!important}
 .card{padding:14px!important}
-.fg label{font-size:13px!important;color:var(--erp05-sub)!important;font-weight:800!important}
-.fg input,.fg select{font-size:14px!important;padding:9px 10px!important}
-.btn{font-size:14px!important;min-height:40px!important;padding:9px 14px!important}
+.fg label{font-size:12px!important;color:var(--erp05-sub)!important;font-weight:800!important}
+.fg input,.fg select{font-size:12px!important;padding:9px 10px!important}
+.btn{font-size:12px!important;min-height:40px!important;padding:9px 14px!important}
 .file-drop{border:1.5px dashed var(--erp05-line3)!important;background:var(--erp05-surface2)!important;padding:24px 14px!important}
 .file-drop:hover,.file-drop.dragover{border-color:var(--erp05-primary)!important;background:var(--erp05-primary-bg)!important}
-.preview-tbl{min-width:760px!important;font-size:13px!important}
+.preview-tbl{min-width:760px!important;font-size:12px!important}
 .preview-tbl th,.preview-tbl td{padding:8px 9px!important}
 .info-box{border:1px solid var(--erp05-line)!important;background:var(--erp05-surface2)!important;color:var(--erp05-sub)!important}
 .info-box.blue{border-left:4px solid var(--erp05-primary)!important}.info-box.green{border-left:4px solid var(--erp05-green)!important}.info-box.orange{border-left:4px solid var(--erp05-orange)!important}
-@media(max-width:760px){.hdr p{display:none!important}.wrap{padding:10px 10px 70px!important}.step-item{font-size:12px!important;padding:9px 4px!important}}
+@media(max-width:760px){.hdr p{display:none!important}.wrap{padding:10px 10px 70px!important}.step-item{font-size:11.5px!important;padding:9px 4px!important}}
 </style>
 
 </body>
