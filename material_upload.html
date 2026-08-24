@@ -583,25 +583,23 @@ function openPinLock(){
   el.style.display='flex';
 }
 
-/* [Rev6.2] 포털 임베드 표시 모드 (window.name)
-   matUploadReg = 등록 전용(설정 탭 숨김, 소재발송 메뉴용)
-   matUploadCfg = 설정 전용(등록 숨김, 포털 DB설정 메뉴용)
-   그 외        = 단독 실행: 두 탭 모두 표시 */
+/* 포털 임베드 표시 모드 (window.name)
+   matUploadCfg = 시스템 > 소재발송설정 전용
+   그 외        = 소재발송 등록 전용 (설정은 외부/업체 화면에 노출하지 않음) */
 document.addEventListener('DOMContentLoaded',()=>{
   const m=(window.name||'').trim();
-  if(m==='matUploadReg'){
-    /* [Rev6.3] 소재발송 메뉴 : 설정 탭 완전 삭제 (탭바 자체 제거) */
-    const bar=document.querySelector('.tabs');if(bar)bar.remove();
-    const pnl=document.getElementById('mainPnl1');if(pnl)pnl.remove();
-  }else if(m==='matUploadCfg'){
-    /* DB설정 메뉴 : 설정 화면만 표시 */
+  if(m==='matUploadCfg'){
+    /* 시스템 내부 설정 화면만 표시 */
     const bar=document.querySelector('.tabs');if(bar)bar.remove();
     const h=document.querySelector('.hdr');if(h)h.remove();
     const pnl0=document.getElementById('mainPnl0');if(pnl0)pnl0.remove();
-    /* mainPnl0 제거 후에는 인덱스 기반 swMainTab 사용 불가 → 직접 활성화 */
     _settingsUnlocked=true;_settingsUnlockedBy='';
     const pnl1=document.getElementById('mainPnl1');if(pnl1)pnl1.classList.add('on');
     loadSettingsUI();
+  }else{
+    /* 소재발송 업무/단독 접속 : 등록 기능만 표시 */
+    const bar=document.querySelector('.tabs');if(bar)bar.remove();
+    const pnl=document.getElementById('mainPnl1');if(pnl)pnl.remove();
   }
 });
 
