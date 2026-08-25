@@ -2966,6 +2966,14 @@ function renderInspLog(){
     </tr><tr class="irpt-sub hide" id="irs-${r.id}"><td colspan="6" id="irsb-${r.id}"></td></tr>`;
   }).join('')||'<tr><td colspan="6" class="empty">작성된 성적서가 없습니다</td></tr>';
 }
+/* [수정] x1~x5 컬럼이 없는 측정DB에서는 actual(" / " 로 이어붙인 값)만 저장된다.
+   조회·출력 시 다시 X1~X5 로 분리해 각 칸에 배치한다. */
+function xVals(r){
+  const xs=INSP_X.map(k=>r[k]==null?'':String(r[k]));
+  if(xs.some(v=>v!==''))return xs;
+  const a=String(r.actual||'').split('/').map(v=>v.trim()).filter(v=>v!=='');
+  return INSP_X.map((k,i)=>a[i]||'');
+}
 function rptRowsOf(id){
   if(String(id).startsWith('L')){const l=inspLogList().find(x=>x.id===id);return l?l.rows:[]}
   return INSP.filter(r=>r.rpt_id===Number(id)).slice().reverse();
@@ -2982,7 +2990,7 @@ function inspSubTable(rows){
       <td><b>${esc(r.item)}</b></td>
       <td>${esc(r.method||'-')}</td>
       <td class="mono">${esc(r.spec||'-')}</td>
-      ${INSP_X.map((k,x)=>`<td class="mono">${esc(r[k]||(x===0&&!anyX(r)?(r.actual||''):''))}</td>`).join('')}
+      ${xVals(r).map(v=>`<td class="mono">${esc(v)}</td>`).join('')}
       <td class="${r.judge==='NG'?'jd-ng':r.judge==='OK'?'jd-ok':'jd-cond'}">${esc(r.judge||'')}</td>
       <td style="font-size:10.5px;color:var(--gray)">${esc(r.memo||'')}</td></tr>`).join('')+
     '</tbody></table>';
@@ -3038,7 +3046,7 @@ function inspPdfBody(hdr,rows){
     <td>${esc(r.item||'')}${r.memo?'<br><span style="font-size:8.5px;color:#666">'+esc(r.memo)+'</span>':''}</td>
     <td>${esc(r.method||'')}</td>
     <td class="mono">${esc(r.spec||'')}</td>
-    ${INSP_X.map((k,x)=>`<td class="mono" style="text-align:center">${esc(r[k]||(x===0&&!(r.x1||r.x2||r.x3||r.x4||r.x5)?(r.actual||''):''))}</td>`).join('')}
+    ${xVals(r).map(v=>`<td class="mono" style="text-align:center">${esc(v)}</td>`).join('')}
     <td class="${r.judge==='NG'?'ng':r.judge?'ok':''}" style="text-align:center">${esc(r.judge||'')}</td></tr>`).join('')}</tbody></table>`;
   return b;
 }
