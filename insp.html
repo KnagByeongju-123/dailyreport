@@ -650,9 +650,9 @@ tr.irpt-sub>td{background:rgba(226,176,74,.035);padding:6px 8px}
 }
 /* [수정] 치수측정 : 표 형태 · 헤더 1행 + 항목당 1행 · 비고는 하단 1개 */
 .wrow2{display:grid;
-  grid-template-columns:26px minmax(76px,1.3fr) minmax(84px,1.2fr) 58px minmax(210px,1.5fr) 66px;
+  grid-template-columns:26px minmax(64px,.95fr) minmax(76px,1fr) minmax(92px,1.1fr) minmax(210px,1.5fr) 66px;
   gap:0 6px;align-items:center}
-.ifm-row.v2.wrow2{grid-template-columns:26px minmax(76px,1.3fr) minmax(84px,1.2fr) 58px minmax(210px,1.5fr) 66px!important;
+.ifm-row.v2.wrow2{grid-template-columns:26px minmax(64px,.95fr) minmax(76px,1fr) minmax(92px,1.1fr) minmax(210px,1.5fr) 66px!important;
   gap:0 6px!important;padding:5px 6px!important;align-items:center!important}
 .wrow2.whead{padding:7px 6px!important;border-bottom:1.5px solid var(--line);margin-bottom:2px}
 .wrow2.whead .hc{font-size:12px;font-weight:800;color:var(--sub);text-align:center}
@@ -1943,15 +1943,27 @@ function _missingCol(msg){
 /* 측정DB 스키마 버전이 낮아 컬럼이 없을 때의 처리.
    아래 핵심 컬럼이 없으면 성적서가 성립하지 않으므로 오류를 알리고,
    그 밖의 부가 컬럼은 자동으로 제외한 뒤 저장을 계속한다. */
-const MAPI_REQUIRED_COLS=['project_id','rpt_id','form_id','item','title','op_code',
-  'insp_date','judge','sketch','marks','items'];
+const MAPI_REQUIRED_COLS=['project_id','rpt_id'];
+/* 스키마 버전에 따라 컬럼명이 다른 경우 순서대로 바꿔 재시도한다 */
+const MAPI_ALIAS={
+  item:['item_name','insp_item','name','title'],
+  spec:['spec_text','standard','std','spec_value'],
+  method:['tool','instrument','method_name','gauge'],
+  judge:['result','judgement','judgment'],
+  memo:['note','remark','remarks'],
+  worker:['inspector','user_name'],
+  insp_date:['inspection_date','check_date','work_date'],
+  form_title:['title'],
+  sketch:['drawing','image','sketch_url'],
+  marks:['mark_list','sketch_marks']
+};
 async function mapiSave(path,payload,method){
   let body=Array.isArray(payload)?payload.map(o=>Object.assign({},o)):Object.assign({},payload);
-  const dropped=[];
-  for(let i=0;i<30;i++){
+  const dropped=[], tried=[];
+  for(let i=0;i<40;i++){
     try{
       const r=await mapi(path,{method:method||'POST',body:JSON.stringify(body)});
-      if(dropped.length)toast('저장됨 — 측정DB에 없는 컬럼은 제외: '+dropped.join(', '));
+      if(dropped.length)toast('저장됨 — 측정DB에 없는 컬럼은 제외: '+dropped.join(', ')+'  · pd_measure_schema.sql 실행 권장');
       return r;
     }catch(e){
       const col=_missingCol(e&&e.message);
@@ -1960,6 +1972,15 @@ async function mapiSave(path,payload,method){
       if(!hit)throw e;
       if(MAPI_REQUIRED_COLS.indexOf(col)>=0){
         throw new Error('측정DB 테이블에 필수 컬럼 ['+col+'] 이 없습니다.\nSupabase SQL Editor 에서 pd_measure_schema.sql 을 실행하세요.');
+      }
+      /* 이름이 다른 같은 뜻의 컬럼이 있으면 그쪽으로 바꿔 재시도 */
+      const alias=(MAPI_ALIAS[col]||[]).filter(n=>tried.indexOf(n)<0);
+      if(alias.length){
+        const to=alias[0]; tried.push(to);
+        console.warn('[측정DB] 컬럼명 대체 시도:',col,'→',to);
+        const mv=o=>{ if(col in o){ o[to]=o[col]; delete o[col]; } };
+        if(Array.isArray(body))body.forEach(mv); else mv(body);
+        continue;
       }
       dropped.push(col);
       console.warn('[측정DB] 없는 컬럼 제외 후 재시도:',col);
