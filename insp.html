@@ -650,21 +650,21 @@ tr.irpt-sub>td{background:rgba(226,176,74,.035);padding:6px 8px}
 }
 /* [수정] 치수측정 입력행 : 검사항목 1건을 한 행에 모두 배치 */
 .ifm-row.v2.wrow2{
-  grid-template-columns:26px minmax(96px,1.25fr) minmax(84px,1fr) minmax(84px,1fr)
-    minmax(292px,1.5fr) 88px minmax(88px,1fr)!important;
+  grid-template-columns:22px minmax(72px,1.15fr) minmax(74px,1fr) minmax(74px,1fr)
+    minmax(230px,1.45fr) 76px minmax(70px,.9fr)!important;
   gap:6px 9px!important;padding:11px 6px!important;align-items:end}
 .wrow2 .idx{grid-column:1!important;font-size:13px!important;font-weight:800;color:var(--ink);padding:0 0 10px!important;text-align:center!important}
 .wrow2 .wtop{display:contents!important}
 .wrow2 .wtop .f,.wrow2 .f.xs,.wrow2 .f.jd,.wrow2 .f.memo{grid-column:auto!important}
 .wrow2 .f label{font-size:12px!important;font-weight:800!important;color:var(--sub)!important;letter-spacing:0}
 .wrow2 .f .ro{font-size:15px!important;font-weight:400!important;padding:10px 12px!important;line-height:1.35}
-.wrow2 .f .ro.mono{font-size:15px!important;font-weight:400!important}
-.wrow2 .f.xs .xw{gap:6px}
-.wrow2 .f.xs .xw input{font-size:13.5px!important;font-weight:400!important;padding:10px 3px!important;min-width:52px}
+.wrow2 .f .ro.mono{font-size:15px!important;font-weight:400!important;font-family:inherit!important;color:var(--ink)!important;letter-spacing:0!important}
+.wrow2 .f.xs .xw{gap:4px}
+.wrow2 .f.xs .xw input{font-size:13px!important;font-weight:400!important;padding:10px 2px!important;min-width:40px}
 .wrow2 .f.xs .xw input::placeholder{color:#c3ccd8!important;font-weight:400!important;opacity:1}
-.wrow2 .f.jd select,.wrow2 .f.memo input{font-size:13.5px!important;font-weight:400!important;padding:10px 11px!important}
+.wrow2 .f.jd select,.wrow2 .f.memo input{font-size:13px!important;font-weight:400!important;padding:10px 11px!important}
 /* 좁은 화면 : 항목 / 측정값 / 판정·비고 를 단으로 접는다 */
-@media(max-width:1180px){
+@media(max-width:900px){
   .ifm-row.v2.wrow2{grid-template-columns:26px minmax(0,1fr)!important;align-items:stretch!important}
   .wrow2 .idx{padding:0 0 2px!important;text-align:left!important}
   .wrow2 .wtop{display:grid!important;grid-column:2!important;
