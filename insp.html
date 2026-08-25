@@ -1918,14 +1918,15 @@ function _missingCol(msg){
   const m=/Could not find the '([^']+)' column/.exec(String(msg||''));
   return m?m[1]:null;
 }
-/* 자동 생략해도 성적서 내용에 영향이 없는 부가 컬럼만 허용.
-   도면(sketch·marks)·항목(items) 같은 핵심 컬럼은 절대 생략하지 않고 오류를 그대로 알린다. */
-const MAPI_OPTIONAL_COLS=['author','worker','created_by','updated_at','updated_by','kind','memo',
-  'item_cnt','ng_cnt','purpose','actual','form_title','detail','action'];
+/* 측정DB 스키마 버전이 낮아 컬럼이 없을 때의 처리.
+   아래 핵심 컬럼이 없으면 성적서가 성립하지 않으므로 오류를 알리고,
+   그 밖의 부가 컬럼은 자동으로 제외한 뒤 저장을 계속한다. */
+const MAPI_REQUIRED_COLS=['project_id','rpt_id','form_id','item','title','op_code',
+  'insp_date','judge','sketch','marks','items'];
 async function mapiSave(path,payload,method){
   let body=Array.isArray(payload)?payload.map(o=>Object.assign({},o)):Object.assign({},payload);
   const dropped=[];
-  for(let i=0;i<8;i++){
+  for(let i=0;i<30;i++){
     try{
       const r=await mapi(path,{method:method||'POST',body:JSON.stringify(body)});
       if(dropped.length)toast('저장됨 — 측정DB에 없는 컬럼은 제외: '+dropped.join(', '));
@@ -1935,7 +1936,7 @@ async function mapiSave(path,payload,method){
       if(!col)throw e;
       const hit=Array.isArray(body)?body.some(o=>col in o):(col in body);
       if(!hit)throw e;
-      if(MAPI_OPTIONAL_COLS.indexOf(col)<0){
+      if(MAPI_REQUIRED_COLS.indexOf(col)>=0){
         throw new Error('측정DB 테이블에 필수 컬럼 ['+col+'] 이 없습니다.\nSupabase SQL Editor 에서 pd_measure_schema.sql 을 실행하세요.');
       }
       dropped.push(col);
