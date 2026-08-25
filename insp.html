@@ -648,6 +648,21 @@ tr.irpt-sub>td{background:rgba(226,176,74,.035);padding:6px 8px}
   .ifm-row.v2 .f.item,.ifm-row.v2 .f.xs,.ifm-row.v2 .f.memo{grid-column:1/3}
   .ifm-row.v2 .rm{grid-column:1/3;justify-self:end;padding:2px 6px}
 }
+/* [수정] 치수측정 입력행 : 검사항목·검사방법·규격을 한 행에 배치하고 글자 확대 */
+.ifm-row.v2.wrow2{grid-template-columns:28px minmax(0,1fr)!important;gap:8px 10px!important;padding:12px 6px!important}
+.wrow2 .idx{grid-column:1!important;font-size:13px!important;font-weight:800;color:var(--ink);padding-top:16px!important;text-align:center!important}
+.wrow2 .wtop{grid-column:2!important;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,1fr);gap:10px}
+.wrow2 .wtop .f,.wrow2 .f.xs,.wrow2 .f.jd,.wrow2 .f.memo{grid-column:auto!important}
+.wrow2 .f.xs,.wrow2 .f.jd,.wrow2 .f.memo{grid-column:2!important}
+.wrow2 .f label{font-size:12px!important;color:var(--sub)!important;letter-spacing:0}
+.wrow2 .f .ro{font-size:15px!important;font-weight:800!important;padding:10px 12px!important;line-height:1.35}
+.wrow2 .f .ro.mono{font-size:15px!important;font-weight:700!important}
+.wrow2 .f.xs .xw input{font-size:14px!important;font-weight:700;padding:11px 4px!important;min-width:58px}
+.wrow2 .f.jd select,.wrow2 .f.memo input{font-size:13.5px!important;padding:10px 11px!important}
+@media(max-width:760px){
+  .wrow2 .wtop{grid-template-columns:1fr!important}
+  .wrow2 .f .ro{font-size:14px!important}
+}
 /* 검사성적: 공정 저장항목 + 측정값을 합친 성적서 배치 */
 .inspplan{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:0 0 14px;overflow:hidden}
 .inspplan-hd{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line2);background:rgba(226,176,74,.04)}
@@ -1903,16 +1918,26 @@ function _missingCol(msg){
   const m=/Could not find the '([^']+)' column/.exec(String(msg||''));
   return m?m[1]:null;
 }
+/* 자동 생략해도 성적서 내용에 영향이 없는 부가 컬럼만 허용.
+   도면(sketch·marks)·항목(items) 같은 핵심 컬럼은 절대 생략하지 않고 오류를 그대로 알린다. */
+const MAPI_OPTIONAL_COLS=['author','worker','created_by','updated_at','updated_by','kind','memo'];
 async function mapiSave(path,payload,method){
   let body=Array.isArray(payload)?payload.map(o=>Object.assign({},o)):Object.assign({},payload);
-  for(let i=0;i<6;i++){
+  const dropped=[];
+  for(let i=0;i<8;i++){
     try{
-      return await mapi(path,{method:method||'POST',body:JSON.stringify(body)});
+      const r=await mapi(path,{method:method||'POST',body:JSON.stringify(body)});
+      if(dropped.length)toast('저장됨 — 측정DB에 없는 컬럼은 제외: '+dropped.join(', '));
+      return r;
     }catch(e){
       const col=_missingCol(e&&e.message);
       if(!col)throw e;
       const hit=Array.isArray(body)?body.some(o=>col in o):(col in body);
       if(!hit)throw e;
+      if(MAPI_OPTIONAL_COLS.indexOf(col)<0){
+        throw new Error('측정DB 테이블에 필수 컬럼 ['+col+'] 이 없습니다.\nSupabase SQL Editor 에서 pd_measure_schema.sql 을 실행하세요.');
+      }
+      dropped.push(col);
       console.warn('[측정DB] 없는 컬럼 제외 후 재시도:',col);
       if(Array.isArray(body))body.forEach(o=>{delete o[col]});
       else delete body[col];
@@ -2738,13 +2763,15 @@ function drawWrite(){
 }
 function wRowHtml(r,i){
   const cls=r.judge==='NG'?'ng':(r.judge==='OK'?'ok':'');
-  return `<div class="ifm-row v2 ${cls}" id="ifr-${i}">
+  return `<div class="ifm-row v2 wrow2 ${cls}" id="ifr-${i}">
     <div class="idx">${i+1}</div>
-    <div class="f item"><label>검사 항목</label><div class="ro">${esc(r.item||'')}</div></div>
-    <div class="f"><label>검사방법 (측정기 No)</label><div class="ro">${esc(r.method||'-')}</div></div>
-    <div class="f"><label>규격 / 기준</label><div class="ro mono">${esc(r.spec||'-')}</div></div>
+    <div class="wtop">
+      <div class="f item"><label>검사 항목</label><div class="ro">${esc(r.item||'')}</div></div>
+      <div class="f"><label>검사방법 (측정기 No)</label><div class="ro">${esc(r.method||'-')}</div></div>
+      <div class="f"><label>규격 / 기준</label><div class="ro mono">${esc(r.spec||'-')}</div></div>
+    </div>
     <div class="f xs"><label>측 정 결 과 X1~X5</label>
-      <div class="xw">${INSP_X.map((k,x)=>`<input value="${esc(r[k]||'')}" placeholder="X${x+1}" inputmode="none" onfocus="kpOpen(this,'num')" oninput="setWX(${i},'${k}',this.value)">`).join('')}</div></div>
+      <div class="xw">${INSP_X.map((k,x)=>`<input value="${esc(r[k]||'')}" placeholder="X${x+1}" inputmode="decimal" autocomplete="off" onfocus="kpClose()" oninput="setWX(${i},'${k}',this.value)">`).join('')}</div></div>
     <div class="f jd"><label>판정</label><select id="ifj-${i}" onchange="setWJudge(${i},this.value)">${INSP_JUDGE.map(j=>`<option value="${j}"${r.judge===j?' selected':''}>${j||'미판정'}</option>`).join('')}</select></div>
     <div class="f memo"><label>비고</label><input value="${esc(r.memo||'')}" oninput="setWRow(${i},'memo',this.value)"></div>
   </div>`;
@@ -2961,12 +2988,15 @@ function inspPdfBody(hdr,rows){
 function inspPdfTitle(hdr){return hdr&&hdr.kind==='출하 검사'?'출 하 검 사 성 적 서':'검 사 성 적 서'}
 function fillSketch(hdr){
   const h=Object.assign({},hdr);
-  if((!h.sketch||!(h.marks||[]).length)&&h.form_id){
-    const f=formOf(h.form_id);
-    if(f){
-      if(!h.sketch)h.sketch=f.sketch||null;
-      if(!(h.marks||[]).length)h.marks=f.marks||[];
-    }
+  if(h.sketch&&(h.marks||[]).length)return h;
+  /* 성적서 레코드에 도면이 없으면 원본 양식에서 보완한다.
+     form_id 가 비어 있어도 공정코드·양식제목으로 역추적한다. */
+  let f=h.form_id?formOf(h.form_id):null;
+  if(!f&&h.form_title)f=FORMS.find(x=>String(x.title||'')===String(h.form_title));
+  if(!f&&h.op_code)f=FORMS.find(x=>String(x.op_code||'')===String(h.op_code)&&x.sketch);
+  if(f){
+    if(!h.sketch)h.sketch=f.sketch||null;
+    if(!(h.marks||[]).length)h.marks=f.marks||[];
   }
   return h;
 }
