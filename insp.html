@@ -162,6 +162,21 @@ main{width:100%;max-width:1020px;margin:0 auto;
 /* 공정 보드 */
 .psel{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 .psel select{padding:10px 12px;border:1.5px solid var(--line3);border-radius:10px;font-size:12px;font-family:inherit;background:var(--card2);color:var(--ink);min-width:280px}
+/* [추가] 금형·품번 부분일치 검색 */
+.mold-pick{position:relative;flex:1;min-width:220px;max-width:340px}
+.mold-pick input{width:100%;padding:10px 12px;border:1.5px solid var(--line3);border-radius:10px;
+  font-size:12px;font-family:inherit;background:var(--card2);color:var(--ink)}
+.mold-pick input:focus{outline:none;border-color:var(--goldbd,#8ab4d8)}
+.mold-list{display:none;position:absolute;z-index:60;top:calc(100% + 4px);left:0;right:0;
+  max-height:266px;overflow-y:auto;background:var(--card,#fff);border:1.5px solid var(--line3);
+  border-radius:10px;box-shadow:0 8px 22px rgba(24,45,64,.18)}
+.mold-list.on{display:block}
+.mold-list .mi{padding:9px 12px;font-size:12.5px;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--line2)}
+.mold-list .mi:last-child{border-bottom:0}
+.mold-list .mi:hover,.mold-list .mi.sel{background:#e8f1f9}
+.mold-list .mi b{color:#c0392b;font-weight:800}
+.mold-list .mi .sub{display:block;font-size:11px;color:var(--gray)}
+.mold-list .none{padding:11px 12px;font-size:12px;color:var(--gray)}
 
 .op{display:grid;grid-template-columns:64px 1fr;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
 .op.st-대기{border-color:rgba(240,160,75,.35)}
@@ -1651,6 +1666,11 @@ html.insp-embed .modal{zoom:1!important}
 <main>
   <section id="v-insp">
     <div class="psel" style="margin-bottom:10px">
+      <div class="mold-pick">
+        <input id="inspq" type="text" autocomplete="off" placeholder="금형 · 품번 검색 (일부만 입력)"
+          oninput="moldSuggest()" onfocus="moldSuggest()" onkeydown="moldKey(event)">
+        <div class="mold-list" id="inspqlist"></div>
+      </div>
       <select id="inspsel" onchange="onInspProj()"></select>
       <span id="insprate" style="font-weight:700;color:var(--blue)"></span>
     </div>
@@ -2297,6 +2317,7 @@ async function loadInsp(){
   const sel=document.getElementById('inspsel');const cur=sel.value;
   sel.innerHTML=QAPJ.map(qaOpt).join('')||'<option value="">등록된 금형 없음</option>';
   if(cur&&[...sel.options].some(o=>o.value===cur))sel.value=cur;
+  syncMoldQuery();
   if(!g('iw-date'))document.getElementById('iw-date').value=today();
   if(!g('iw-worker'))document.getElementById('iw-worker').value=USER||'';
   await renderInsp();
@@ -2313,7 +2334,54 @@ function inspTab(t){
   else {drawFoot();drawMeasureDbSettings();}
   try{if(window.parent&&window.parent!==window)window.parent.postMessage({type:'jp-measure-child-tab',tab:t},'*')}catch(e){}
 }
+/* ===== 금형·품번 부분일치 검색 ===== */
+let _mqIdx=-1, _mqHits=[];
+function moldSuggest(){
+  const q=(document.getElementById('inspq').value||'').trim().toLowerCase();
+  const box=document.getElementById('inspqlist');
+  _mqHits = !q ? QAPJ.slice(0,30)
+    : QAPJ.filter(x=>((x.mold_no||'')+' '+(x.item_no||'')).toLowerCase().includes(q)).slice(0,50);
+  _mqIdx=-1;
+  if(!_mqHits.length){ box.innerHTML='<div class="none">일치하는 금형·품번이 없습니다</div>'; box.classList.add('on'); return; }
+  const hl=t=>{ t=esc(t||''); if(!q)return t;
+    const i=t.toLowerCase().indexOf(q); return i<0?t:t.slice(0,i)+'<b>'+t.slice(i,i+q.length)+'</b>'+t.slice(i+q.length); };
+  box.innerHTML=_mqHits.map((x,i)=>
+    `<div class="mi" data-i="${i}" onmousedown="event.preventDefault();moldPick(${i})">${hl(x.mold_no)}
+      <span class="sub">${x.item_no?hl(x.item_no):'품번 없음'}</span></div>`).join('');
+  box.classList.add('on');
+}
+function moldPick(i){
+  const x=_mqHits[i]; if(!x)return;
+  const sel=document.getElementById('inspsel');
+  sel.value=String(x.id);
+  document.getElementById('inspq').value=x.mold_no+(x.item_no?' — '+x.item_no:'');
+  moldClose();
+  onInspProj();
+}
+function moldClose(){ const b=document.getElementById('inspqlist'); if(b)b.classList.remove('on'); }
+function moldKey(e){
+  const box=document.getElementById('inspqlist');
+  if(e.key==='Escape'){moldClose();return}
+  if(!box||!box.classList.contains('on')){ if(e.key==='ArrowDown')moldSuggest(); return; }
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    _mqIdx=Math.max(0,Math.min(_mqHits.length-1,_mqIdx+(e.key==='ArrowDown'?1:-1)));
+    [...box.querySelectorAll('.mi')].forEach((el,i)=>el.classList.toggle('sel',i===_mqIdx));
+    const cur=box.querySelector('.mi.sel'); if(cur)cur.scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'){
+    e.preventDefault();
+    moldPick(_mqIdx>=0?_mqIdx:0);
+  }
+}
+document.addEventListener('click',e=>{ if(!e.target.closest||!e.target.closest('.mold-pick'))moldClose(); });
+function syncMoldQuery(){
+  const sel=document.getElementById('inspsel'), q=document.getElementById('inspq');
+  if(!sel||!q)return;
+  const x=QAPJ.find(v=>String(v.id)===String(sel.value));
+  q.value=x?(x.mold_no+(x.item_no?' — '+x.item_no:'')):'';
+}
 async function onInspProj(){
+  syncMoldQuery();
   newForm();cancelWrite();
   await renderInsp();
 }
