@@ -1963,7 +1963,11 @@ async function mapiSave(path,payload,method){
   for(let i=0;i<40;i++){
     try{
       const r=await mapi(path,{method:method||'POST',body:JSON.stringify(body)});
-      if(dropped.length)toast('저장됨 — 측정DB에 없는 컬럼은 제외: '+dropped.join(', ')+'  · pd_measure_schema.sql 실행 권장');
+      if(dropped.length){
+        const crit=dropped.filter(c=>['sketch','marks','items'].indexOf(c)>=0);
+        if(crit.length)alert('⚠ 측정DB 테이블에 ['+crit.join(', ')+'] 컬럼이 없어 도면·항목 정보가 저장되지 않았습니다.\n\nSupabase SQL Editor 에서 아래를 실행하세요.\n\nalter table pd_measure_forms add column if not exists sketch text;\nalter table pd_measure_forms add column if not exists marks jsonb default \'[]\'::jsonb;');
+        else toast('저장됨 — 측정DB에 없는 컬럼은 제외: '+dropped.join(', '));
+      }
       return r;
     }catch(e){
       const col=_missingCol(e&&e.message);
@@ -2071,19 +2075,44 @@ function dlCSV(title,head,rows,fname){
   a.download=fname+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);
 }
 /* ---------- 이미지 ---------- */
-function shrinkBlob(file,max){return new Promise((res,rej)=>{
+const IMG_MAX_BYTES=50*1024;   /* 도면 업로드 상한 : 50KB */
+function loadImage(file){return new Promise((res,rej)=>{
   const img=new Image();
-  img.onload=()=>{
-    const M=max||1280,r=Math.min(1,M/Math.max(img.width,img.height));
-    const c=document.createElement('canvas');c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);
-    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-    c.toBlob(b=>b?res(b):rej(new Error('이미지 변환 실패')),'image/jpeg',.8);
-  };
-  img.onerror=()=>rej(new Error('이미지를 읽을 수 없습니다'));
-  img.src=URL.createObjectURL(file);
+  const url=URL.createObjectURL(file);
+  img.onload=()=>{URL.revokeObjectURL(url);res(img)};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('이미지를 읽을 수 없습니다'))};
+  img.src=url;
 })}
+function canvasBlob(img,maxSide,q){
+  const r=Math.min(1,maxSide/Math.max(img.width,img.height));
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(img.width*r));
+  c.height=Math.max(1,Math.round(img.height*r));
+  const cx=c.getContext('2d');
+  cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);
+  cx.drawImage(img,0,0,c.width,c.height);
+  return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('이미지 변환 실패')),'image/jpeg',q));
+}
+/* [수정] 도면은 50KB 이하가 되도록 해상도·품질을 단계적으로 낮춰 압축한다.
+   치수선·숫자 가독성을 위해 해상도를 먼저 유지하고 품질부터 낮춘다. */
+async function shrinkBlob(file,max){
+  const img=await loadImage(file);
+  const sides=[max||1600,1400,1200,1000,860,720,600];
+  const qs=[.82,.7,.6,.5,.42,.35,.3];
+  let best=null;
+  for(const side of sides){
+    for(const q of qs){
+      const b=await canvasBlob(img,side,q);
+      if(!best||b.size<best.size)best=b;
+      if(b.size<=IMG_MAX_BYTES)return b;
+    }
+  }
+  return best;   /* 50KB 이하로 못 줄이면 가장 작은 결과를 사용 */
+}
 async function uploadImg(file,folder){
   const blob=await shrinkBlob(file);
+  if(blob&&blob.size>IMG_MAX_BYTES)
+    console.warn('[도면] 50KB 이하로 압축하지 못했습니다:',Math.round(blob.size/1024)+'KB');
   const name=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
   const d=effMdb();
   const r=await fetch(d.url+"/storage/v1/object/"+d.bucket+"/"+name,{
@@ -2091,6 +2120,7 @@ async function uploadImg(file,folder){
     headers:{apikey:d.key,Authorization:"Bearer "+d.key,"Content-Type":"image/jpeg","x-upsert":"true"},
     body:blob});
   if(!r.ok){const t=await r.text();throw new Error('업로드 실패 ('+d.bucket+' 버킷을 확인하세요): '+t)}
+  toast('도면 업로드 완료 — '+Math.round(blob.size/1024)+'KB');
   return d.url+"/storage/v1/object/public/"+d.bucket+"/"+name;
 }
 async function deleteImg(url){
@@ -2164,6 +2194,12 @@ function qaPdf(docNo,title,moldLabel,filterLabel,bodyHtml,signs){
   .meta{width:100%;border-collapse:collapse;margin-top:4px}
   .meta th,.meta td{border:1px solid #888;padding:4px 6px;font-size:10.5px}
   .meta th{background:#eee;width:82px;white-space:nowrap}
+  /* [수정] 도면 영역 : A4 세로의 약 1/4 (인쇄영역 273mm 기준 66mm) 고정 */
+  .skbox{border:1px solid #888;background:#fff;height:66mm;padding:3mm;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box}
+  .skinner{position:relative;display:inline-block;max-width:100%;max-height:100%;line-height:0}
+  .skinner img{max-width:100%;max-height:60mm;width:auto;height:auto;display:block;object-fit:contain}
+  .sk-err{padding:16px 10px;color:#a03636;font-size:10px;line-height:1.5}
   .ft{margin-top:14px;font-size:9.5px;color:#444;display:flex;justify-content:space-between;
       border-top:1px solid #999;padding-top:4px}
   .ft span:nth-child(2){flex:1;text-align:center}
@@ -2590,6 +2626,29 @@ function kpNext(){
   if(nx){nx.focus();nx.scrollIntoView({block:'center',behavior:'smooth'})}
 }
 function skSrc(){return SKDATA||SKURL||null}
+/* [수정] Storage 업로드가 안 될 때를 위한 대체 : 이미지를 축소해 dataURL 로 만든다.
+   (measure-files 버킷이 없거나 권한이 없어도 도면이 저장되도록) */
+function shrinkToDataURL(file,maxW,quality){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onerror=()=>rej(new Error('이미지 읽기 실패'));
+    fr.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>rej(new Error('이미지 해석 실패'));
+      img.onload=()=>{
+        const w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+        const sc=Math.min(1,(maxW||1600)/w);
+        const cw=Math.max(1,Math.round(w*sc)), ch=Math.max(1,Math.round(h*sc));
+        const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
+        const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cw,ch);
+        cx.drawImage(img,0,0,cw,ch);
+        res(cv.toDataURL('image/jpeg',quality||0.72));
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
 function pickSketch(inp){
   SKFILE=inp.files[0]||null;SKDATA=null;
   if(!SKFILE){drawSketch();return}
@@ -2691,8 +2750,15 @@ async function saveForm(){
   if(SKFILE){
     try{toast('도면 업로드 중...');sketch=await uploadImg(SKFILE,'insp')}
     catch(e){
-      if(!confirm('도면 이미지 업로드에 실패했습니다.\n('+(String(e.message).includes('Bucket')?'Storage 버킷 measure-files 없음 — pd_measure_schema.sql 확인 필요':e.message)+')\n\n도면 없이 양식만 저장할까요?'))return;
-      sketch=SKURL;
+      console.warn('[도면] Storage 업로드 실패 → 이미지 축소 저장으로 대체',e);
+      try{
+        toast('Storage 업로드 실패 — 도면을 압축해 DB에 저장합니다');
+        const bl=await shrinkBlob(SKFILE,1600);
+        sketch=await new Promise((rs,rj)=>{const fr=new FileReader();fr.onload=()=>rs(fr.result);fr.onerror=()=>rj(new Error('변환 실패'));fr.readAsDataURL(bl)});
+      }catch(e2){
+        if(!confirm('도면 이미지를 저장할 수 없습니다.\n('+(e2.message||e.message)+')\n\n도면 없이 양식만 저장할까요?'))return;
+        sketch=SKURL;
+      }
     }
   }
   const body={project_id:pid,op_code:op,title:title,
@@ -3033,9 +3099,13 @@ function inspPdfBody(hdr,rows){
       return `<span style="position:absolute;left:${m.x}%;top:${m.y}%;transform:translate(-50%,-50%);width:${w}px;height:${w}px;border:1.4px solid #000;border-radius:50%;background:#ffd400;color:#000;font-size:${Math.round(w*.6)}px;font-weight:700;line-height:${w-2.6}px;text-align:center;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact">${m.n}</span>`;
     }).join('');
     b+=`<div class="sect">SKETCH</div>
-      <div style="border:1px solid #888;padding:6px;text-align:center;background:#fff">
-        <div style="position:relative;display:inline-block;max-width:100%">
-          <img src="${hdr.sketch}" style="max-width:100%;max-height:92mm;display:block">${mk}
+      <div class="skbox">
+        <div class="skinner">
+          <img src="${hdr.sketch}"
+            onerror="this.style.display='none';this.parentNode.querySelector('.sk-err').style.display='block'">
+          <div class="sk-err" style="display:none">
+            도면 이미지를 불러올 수 없습니다 — Storage 버킷/권한을 확인하거나 양식에서 도면을 다시 등록하세요
+          </div>${mk}
         </div></div>`;
   }
   const ng=rows.filter(r=>r.judge==='NG').length;
