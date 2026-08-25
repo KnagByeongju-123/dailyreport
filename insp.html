@@ -648,17 +648,29 @@ tr.irpt-sub>td{background:rgba(226,176,74,.035);padding:6px 8px}
   .ifm-row.v2 .f.item,.ifm-row.v2 .f.xs,.ifm-row.v2 .f.memo{grid-column:1/3}
   .ifm-row.v2 .rm{grid-column:1/3;justify-self:end;padding:2px 6px}
 }
-/* [수정] 치수측정 입력행 : 검사항목·검사방법·규격을 한 행에 배치하고 글자 확대 */
-.ifm-row.v2.wrow2{grid-template-columns:28px minmax(0,1fr)!important;gap:8px 10px!important;padding:12px 6px!important}
-.wrow2 .idx{grid-column:1!important;font-size:13px!important;font-weight:800;color:var(--ink);padding-top:16px!important;text-align:center!important}
-.wrow2 .wtop{grid-column:2!important;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,1fr);gap:10px}
+/* [수정] 치수측정 입력행 : 검사항목 1건을 한 행에 모두 배치 */
+.ifm-row.v2.wrow2{
+  grid-template-columns:26px minmax(96px,1.25fr) minmax(84px,1fr) minmax(84px,1fr)
+    minmax(292px,1.5fr) 88px minmax(88px,1fr)!important;
+  gap:6px 9px!important;padding:11px 6px!important;align-items:end}
+.wrow2 .idx{grid-column:1!important;font-size:13px!important;font-weight:800;color:var(--ink);padding:0 0 10px!important;text-align:center!important}
+.wrow2 .wtop{display:contents!important}
 .wrow2 .wtop .f,.wrow2 .f.xs,.wrow2 .f.jd,.wrow2 .f.memo{grid-column:auto!important}
-.wrow2 .f.xs,.wrow2 .f.jd,.wrow2 .f.memo{grid-column:2!important}
-.wrow2 .f label{font-size:12px!important;color:var(--sub)!important;letter-spacing:0}
-.wrow2 .f .ro{font-size:15px!important;font-weight:800!important;padding:10px 12px!important;line-height:1.35}
-.wrow2 .f .ro.mono{font-size:15px!important;font-weight:700!important}
-.wrow2 .f.xs .xw input{font-size:14px!important;font-weight:700;padding:11px 4px!important;min-width:58px}
-.wrow2 .f.jd select,.wrow2 .f.memo input{font-size:13.5px!important;padding:10px 11px!important}
+.wrow2 .f label{font-size:12px!important;font-weight:800!important;color:var(--sub)!important;letter-spacing:0}
+.wrow2 .f .ro{font-size:15px!important;font-weight:400!important;padding:10px 12px!important;line-height:1.35}
+.wrow2 .f .ro.mono{font-size:15px!important;font-weight:400!important}
+.wrow2 .f.xs .xw{gap:6px}
+.wrow2 .f.xs .xw input{font-size:13.5px!important;font-weight:400!important;padding:10px 3px!important;min-width:52px}
+.wrow2 .f.xs .xw input::placeholder{color:#c3ccd8!important;font-weight:400!important;opacity:1}
+.wrow2 .f.jd select,.wrow2 .f.memo input{font-size:13.5px!important;font-weight:400!important;padding:10px 11px!important}
+/* 좁은 화면 : 항목 / 측정값 / 판정·비고 를 단으로 접는다 */
+@media(max-width:1180px){
+  .ifm-row.v2.wrow2{grid-template-columns:26px minmax(0,1fr)!important;align-items:stretch!important}
+  .wrow2 .idx{padding:0 0 2px!important;text-align:left!important}
+  .wrow2 .wtop{display:grid!important;grid-column:2!important;
+    grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:9px}
+  .wrow2 .f.xs,.wrow2 .f.jd,.wrow2 .f.memo{grid-column:2!important}
+}
 @media(max-width:760px){
   .wrow2 .wtop{grid-template-columns:1fr!important}
   .wrow2 .f .ro{font-size:14px!important}
@@ -2208,7 +2220,7 @@ let MKSIZE=100;               /* 도면 번호 원 크기 (%) · 5% 단위 · 50
 const MK_MIN=50, MK_MAX=300, MK_STEP=5;
 function mkScale(m){ const v=parseInt((m&&m.s)||MKSIZE); return (v>=MK_MIN&&v<=MK_MAX?v:100)/100; }
 const INSP_JUDGE=['','OK','NG','조건부 OK'];
-const INSP_X=['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10'];
+const INSP_X=['x1','x2','x3','x4','x5'];   /* 측정값은 X1~X5 5개까지 */
 const FROWS_DEF=15;
 function anyX(r){return INSP_X.some(k=>r[k])}
 
@@ -2769,10 +2781,10 @@ function wRowHtml(r,i){
     <div class="idx">${i+1}</div>
     <div class="wtop">
       <div class="f item"><label>검사 항목</label><div class="ro">${esc(r.item||'')}</div></div>
-      <div class="f"><label>검사방법 (측정기 No)</label><div class="ro">${esc(r.method||'-')}</div></div>
       <div class="f"><label>규격 / 기준</label><div class="ro mono">${esc(r.spec||'-')}</div></div>
+      <div class="f"><label>검사방법 (측정기 No)</label><div class="ro">${esc(r.method||'-')}</div></div>
     </div>
-    <div class="f xs"><label>측 정 결 과 X1~X5</label>
+    <div class="f xs"><label>측 정 결 과 (X1~X5)</label>
       <div class="xw">${INSP_X.map((k,x)=>`<input value="${esc(r[k]||'')}" placeholder="X${x+1}" inputmode="decimal" autocomplete="off" onfocus="kpClose()" oninput="setWX(${i},'${k}',this.value)">`).join('')}</div></div>
     <div class="f jd"><label>판정</label><select id="ifj-${i}" onchange="setWJudge(${i},this.value)">${INSP_JUDGE.map(j=>`<option value="${j}"${r.judge===j?' selected':''}>${j||'미판정'}</option>`).join('')}</select></div>
     <div class="f memo"><label>비고</label><input value="${esc(r.memo||'')}" oninput="setWRow(${i},'memo',this.value)"></div>
