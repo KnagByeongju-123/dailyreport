@@ -1920,7 +1920,8 @@ function _missingCol(msg){
 }
 /* 자동 생략해도 성적서 내용에 영향이 없는 부가 컬럼만 허용.
    도면(sketch·marks)·항목(items) 같은 핵심 컬럼은 절대 생략하지 않고 오류를 그대로 알린다. */
-const MAPI_OPTIONAL_COLS=['author','worker','created_by','updated_at','updated_by','kind','memo'];
+const MAPI_OPTIONAL_COLS=['author','worker','created_by','updated_at','updated_by','kind','memo',
+  'item_cnt','ng_cnt','purpose','actual','form_title','detail','action'];
 async function mapiSave(path,payload,method){
   let body=Array.isArray(payload)?payload.map(o=>Object.assign({},o)):Object.assign({},payload);
   const dropped=[];
