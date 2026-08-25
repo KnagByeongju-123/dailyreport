@@ -153,6 +153,60 @@ body{background:#edf2f5;color:#34495b;font-family:"Malgun Gothic","맑은 고딕
 @media(max-width:1000px){:root{--left-w:220px;--brand-w:150px}.app-mark{font-size:21px}.l1-btn{min-width:72px;padding:0 10px}.l2-btn{width:62px;min-width:62px}}
 @media(max-width:760px){:root{--left-w:170px;--brand-w:112px;--top2-h:66px}.app-mark{font-size:18px;padding-left:8px}.l1-btn{min-width:66px;padding:0 8px;font-size:11px}.l2-btn{width:58px;min-width:58px}.l2-icon{height:29px;font-size:21px}.tree-item{padding-left:20px}.top-status{padding-right:6px}.top-status #clock{display:none}}
 
+/* ===== 모바일 : 좌측 메뉴를 햄버거 드로어로 ===== */
+.nav-toggle{display:none;flex-direction:column;justify-content:center;gap:4px;width:38px;height:100%;
+  padding:0 10px;border:0;border-right:1px solid #c3ced7;background:#fbfcfd;cursor:pointer}
+.nav-toggle span{display:block;width:18px;height:2px;background:#2f6eb0;border-radius:1px;transition:transform .22s,opacity .22s}
+body.nav-open .nav-toggle span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+body.nav-open .nav-toggle span:nth-child(2){opacity:0}
+body.nav-open .nav-toggle span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.nav-scrim{display:none}
+
+@media(max-width:860px){
+  :root{--left-w:0px;--brand-w:98px;--top1-h:44px;--top2-h:58px}
+  .nav-toggle{display:flex}
+  .app-mark{font-size:17px;padding-left:8px}
+  .l1-menu{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .l1-menu::-webkit-scrollbar{display:none}
+  .l1-btn{min-width:auto;padding:0 11px;font-size:11.5px;white-space:nowrap}
+  .top-status{padding:0 8px;font-size:10px}
+  .top-status #clock,.top-status .top-link-btn{display:none}
+  .l2-menu{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .l2-menu::-webkit-scrollbar{display:none}
+  .l2-btn{min-width:60px;width:60px;padding:6px 4px 4px}
+  .l2-icon{width:26px;height:26px;font-size:21px}
+  .l2-label{font-size:10.5px}
+
+  /* 드로어 */
+  .left-panel{position:fixed;top:0;left:0;bottom:0;z-index:120;
+    width:min(78vw,282px);max-width:282px;
+    transform:translateX(-100%);transition:transform .24s ease;
+    box-shadow:2px 0 14px rgba(24,45,64,.22);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  body.nav-open .left-panel{transform:translateX(0)}
+  .left-head{position:sticky;top:0;z-index:2;height:44px;font-size:13px}
+  .tree-caption{height:34px;font-size:13px}
+  .tree-item{height:40px;padding-left:26px;font-size:13px}
+  .tree-item::before{top:11px}
+
+  .nav-scrim{display:block;position:fixed;inset:0;z-index:110;
+    background:rgba(23,42,58,.42);opacity:0;pointer-events:none;transition:opacity .24s}
+  body.nav-open .nav-scrim{opacity:1;pointer-events:auto}
+  body.nav-open{overflow:hidden}
+
+  .workspace,.bottom-status{left:0}
+  .tabbar{overflow-x:auto;scrollbar-width:none}
+  .tabbar::-webkit-scrollbar{display:none}
+  .tab{min-width:96px;max-width:150px;font-size:11.5px}
+  .bottom-status{font-size:10px}
+  .bottom-status span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52vw}
+}
+@media(max-width:480px){
+  :root{--brand-w:82px}
+  .app-mark{font-size:15px}
+  .l2-btn{min-width:54px;width:54px}
+  .left-panel{width:84vw}
+}
+
 </style>
 
 <style id="integrated-frame-scale-style">
@@ -196,6 +250,7 @@ body{background:#edf2f5;color:#34495b;font-family:"Malgun Gothic","맑은 고딕
   </div>
 </div>
 <header class="top-level-1">
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="메뉴 열기" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="app-mark">Pro_mes</div>
   <nav class="l1-menu" id="l1Menu"></nav>
   <div class="top-status"><span class="status-dot"></span><span>MES Connected</span><span class="user-login-status" id="userLoginStatus"></span><button class="top-link-btn" id="passwordChangeBtn" type="button">비밀번호 변경</button><button class="top-link-btn logout-link" id="logoutBtn" type="button" title="로그아웃">로그아웃</button><span id="clock"></span></div>
@@ -203,7 +258,8 @@ body{background:#edf2f5;color:#34495b;font-family:"Malgun Gothic","맑은 고딕
 <section class="top-level-2">
   <div class="l2-title">업무메뉴</div><nav class="l2-menu" id="l2Menu"></nav>
 </section>
-<aside class="left-panel">
+<div class="nav-scrim" id="navScrim" hidden></div>
+<aside class="left-panel" id="leftPanel">
   <div class="left-head"><span id="leftTitle">생산실행</span><span class="tiny">MENU</span></div>
   <div class="tree" id="treeMenu"></div>
 </aside>
@@ -229,6 +285,29 @@ body{background:#edf2f5;color:#34495b;font-family:"Malgun Gothic","맑은 고딕
 </main>
 <div class="bottom-status"><span>시스템: Pro_mes · 프레스 생산관리 Rev.7.84 · 통합본</span><span style="margin-left:18px" id="activeStatus">화면: 생산작업</span><span class="right">Ready</span></div>
 <script>
+/* ===== 모바일 햄버거 드로어 ===== */
+(function(){
+  const MQ=window.matchMedia('(max-width:860px)');
+  const btn=document.getElementById('navToggle');
+  const scrim=document.getElementById('navScrim');
+  function setNav(open){
+    document.body.classList.toggle('nav-open',open);
+    if(btn)btn.setAttribute('aria-expanded',open?'true':'false');
+    if(scrim)scrim.hidden=!open;
+  }
+  window.closeNav=()=>setNav(false);
+  if(btn)btn.addEventListener('click',()=>setNav(!document.body.classList.contains('nav-open')));
+  if(scrim)scrim.addEventListener('click',()=>setNav(false));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')setNav(false)});
+  /* 트리 메뉴 선택 시 자동으로 닫기 */
+  document.addEventListener('click',e=>{
+    if(!MQ.matches)return;
+    if(e.target.closest && e.target.closest('.tree-item'))setNav(false);
+  });
+  /* 데스크톱 폭으로 돌아오면 상태 해제 */
+  const onMQ=()=>{if(!MQ.matches)setNav(false)};
+  MQ.addEventListener?MQ.addEventListener('change',onMQ):MQ.addListener(onMQ);
+})();
 const loginIntro=document.getElementById('loginIntro');
 const loginForm=document.getElementById('loginForm');
 const loginName=document.getElementById('loginName');
