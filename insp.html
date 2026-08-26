@@ -183,6 +183,20 @@ main{width:100%;max-width:1020px;margin:0 auto;
 .mold-list .mi .sub{display:block;font-size:11px;color:var(--gray)}
 .mold-list .none{padding:11px 12px;font-size:12px;color:var(--gray)}
 
+/* [추가] 현재 생산중 금형 품번 바로가기 버튼 */
+.nowmold{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px}
+.nowmold .nm-lb{font-size:11.5px;font-weight:800;color:var(--gray);padding:2px 0}
+.nowmold .nm-none{font-size:11.5px;color:var(--gray)}
+.nowmold .nm-b{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1.5px solid #8ab4d8;
+  border-radius:999px;background:#eef5fb;color:#1b4f7a;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;line-height:1.2}
+.nowmold .nm-b:hover{background:#dcebf7;border-color:#4f8cc9}
+.nowmold .nm-b.on{background:#1b4f7a;border-color:#1b4f7a;color:#fff}
+.nowmold .nm-b.off{border-color:#d8c08a;background:#fdf6e6;color:#8a6a1b}
+.nowmold .nm-b .nm-mc{font-size:10.5px;font-weight:700;opacity:.75}
+.nowmold .nm-rf{padding:5px 8px;border:1.5px solid var(--line3);border-radius:999px;background:var(--card2);
+  color:var(--gray);font-size:11px;font-family:inherit;cursor:pointer}
+.nowmold .nm-rf:hover{color:var(--ink)}
+
 .op{display:grid;grid-template-columns:64px 1fr;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
 .op.st-대기{border-color:rgba(240,160,75,.35)}
 .op.st-대기 .opcode{background:rgba(240,160,75,.1);border-right-color:rgba(240,160,75,.3)}
@@ -1680,6 +1694,7 @@ html.insp-embed .modal{zoom:1!important}
       <input type="hidden" id="inspsel">
       <span id="insprate" style="font-weight:700;color:var(--blue)"></span>
     </div>
+    <div class="nowmold" id="nowMoldBar"></div>
 
     <div class="itabs">
       <button class="itab on" id="itab-make" onclick="inspTab('make')">📝 양식작성</button>
@@ -2325,6 +2340,7 @@ async function loadInsp(){
   sel.value=(cur&&QAPJ.some(x=>String(x.id)===String(cur))) ? cur
             : (QAPJ.length?String(QAPJ[0].id):'');
   syncMoldQuery();
+  loadNowMolds();
   if(!g('iw-date'))document.getElementById('iw-date').value=today();
   if(!g('iw-worker'))document.getElementById('iw-worker').value=USER||'';
   await renderInsp();
@@ -2391,6 +2407,51 @@ function syncMoldQuery(){
   const x=QAPJ.find(v=>String(v.id)===String(sel.value));
   q.value=x?(x.mold_no+(x.item_no?' — '+x.item_no:'')):'';
   const w=q.closest('.mold-pick'); if(w)w.classList.toggle('has-val',!!q.value);
+  try{ if(NOWMOLD.length)renderNowMolds(); }catch(e){}
+}
+/* ===== [추가] 현재 생산중인 금형 품번 바로가기 ===== */
+let NOWMOLD=[];
+function nowMoldMatch(mold,item){
+  return QAPJ.find(p=>mold&&String(p.mold_no||'').trim()===String(mold).trim())
+      || QAPJ.find(p=>item&&String(p.item_no||'').trim()===String(item).trim())
+      || null;
+}
+async function loadNowMolds(){
+  const bar=document.getElementById('nowMoldBar'); if(!bar)return;
+  bar.innerHTML='<span class="nm-lb">🏭 생산중</span><span class="nm-none">조회 중…</span>';
+  try{
+    const rows=await api('/pd_work_log?select=machine_code,mold_no,item_no,status,work_date&work_date=eq.'+today()+'&order=id.desc&limit=200')||[];
+    const seen=new Set(); NOWMOLD=[];
+    rows.forEach(r=>{
+      if(String(r.status||'')!=='working')return;
+      const mold=(r.mold_no||'').trim(), item=(r.item_no||'').trim();
+      if(!mold&&!item)return;
+      const k=mold+'|'+item; if(seen.has(k))return; seen.add(k);
+      NOWMOLD.push({mold,item,mc:(r.machine_code||'').trim()});
+    });
+  }catch(e){NOWMOLD=[]}
+  renderNowMolds();
+}
+function renderNowMolds(){
+  const bar=document.getElementById('nowMoldBar'); if(!bar)return;
+  const rf='<button type="button" class="nm-rf" onclick="loadNowMolds()" title="새로고침">🔄</button>';
+  if(!NOWMOLD.length){bar.innerHTML='<span class="nm-lb">🏭 생산중</span><span class="nm-none">현재 가동중인 호기가 없습니다</span>'+rf;return}
+  const cur=document.getElementById('inspsel').value;
+  bar.innerHTML='<span class="nm-lb">🏭 생산중</span>'+NOWMOLD.map((x,i)=>{
+    const p=nowMoldMatch(x.mold,x.item);
+    const on=p&&String(p.id)===String(cur);
+    const cls='nm-b'+(p?(on?' on':''):' off');
+    const tip=p?(x.mc+' · '+x.mold+(x.item?' · '+x.item:'')):'금형정보 미등록 — '+(x.mold||x.item);
+    return `<button type="button" class="${cls}" onclick="pickNowMold(${i})" title="${esc(tip)}">${esc(x.item||x.mold)}<span class="nm-mc">${esc(x.mc)}</span></button>`;
+  }).join('')+rf;
+}
+function pickNowMold(i){
+  const x=NOWMOLD[i]; if(!x)return;
+  const p=nowMoldMatch(x.mold,x.item);
+  if(!p){alert('금형정보(pd_mold)에 등록되지 않았습니다 — '+(x.mold||'')+(x.item?' / '+x.item:''));return}
+  document.getElementById('inspsel').value=String(p.id);
+  moldClose();
+  onInspProj();
 }
 function moldClear(){
   const q=document.getElementById('inspq'), sel=document.getElementById('inspsel');
