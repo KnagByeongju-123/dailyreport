@@ -163,9 +163,14 @@ main{width:100%;max-width:1020px;margin:0 auto;
 .psel{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 .psel select{padding:10px 12px;border:1.5px solid var(--line3);border-radius:10px;font-size:12px;font-family:inherit;background:var(--card2);color:var(--ink);min-width:280px}
 /* [추가] 금형·품번 부분일치 검색 */
-.mold-pick{position:relative;flex:1;min-width:220px;max-width:340px}
-.mold-pick input{width:100%;padding:10px 12px;border:1.5px solid var(--line3);border-radius:10px;
+.mold-pick{position:relative;flex:1;min-width:240px;max-width:560px}
+.mold-pick input{width:100%;padding:10px 30px 10px 12px;border:1.5px solid var(--line3);border-radius:10px;
   font-size:12px;font-family:inherit;background:var(--card2);color:var(--ink)}
+.mold-clear{position:absolute;top:50%;right:7px;transform:translateY(-50%);width:20px;height:20px;
+  display:none;align-items:center;justify-content:center;padding:0;border:0;border-radius:50%;
+  background:#e6ecf2;color:#5b6b7c;font-size:11px;line-height:1;cursor:pointer;font-family:inherit}
+.mold-clear:hover{background:#d3dde6;color:#26343f}
+.mold-pick.has-val .mold-clear{display:flex}
 .mold-pick input:focus{outline:none;border-color:var(--goldbd,#8ab4d8)}
 .mold-list{display:none;position:absolute;z-index:60;top:calc(100% + 4px);left:0;right:0;
   max-height:266px;overflow-y:auto;background:var(--card,#fff);border:1.5px solid var(--line3);
@@ -1667,11 +1672,12 @@ html.insp-embed .modal{zoom:1!important}
   <section id="v-insp">
     <div class="psel" style="margin-bottom:10px">
       <div class="mold-pick">
-        <input id="inspq" type="text" autocomplete="off" placeholder="금형 · 품번 검색 (일부만 입력)"
+        <input id="inspq" type="text" autocomplete="off" placeholder="🔎 금형 · 품번 검색 (일부만 입력)"
           oninput="moldSuggest()" onfocus="moldSuggest()" onkeydown="moldKey(event)">
+        <button type="button" class="mold-clear" id="inspqClear" title="지우기" onclick="moldClear()">✕</button>
         <div class="mold-list" id="inspqlist"></div>
       </div>
-      <select id="inspsel" onchange="onInspProj()"></select>
+      <input type="hidden" id="inspsel">
       <span id="insprate" style="font-weight:700;color:var(--blue)"></span>
     </div>
 
@@ -2315,8 +2321,9 @@ function anyX(r){return INSP_X.some(k=>r[k])}
 async function loadInsp(){
   await loadQaProjects();
   const sel=document.getElementById('inspsel');const cur=sel.value;
-  sel.innerHTML=QAPJ.map(qaOpt).join('')||'<option value="">등록된 금형 없음</option>';
-  if(cur&&[...sel.options].some(o=>o.value===cur))sel.value=cur;
+  /* [변경] 드롭다운 제거 — 검색으로만 선택, 값은 hidden 에 보관 */
+  sel.value=(cur&&QAPJ.some(x=>String(x.id)===String(cur))) ? cur
+            : (QAPJ.length?String(QAPJ[0].id):'');
   syncMoldQuery();
   if(!g('iw-date'))document.getElementById('iw-date').value=today();
   if(!g('iw-worker'))document.getElementById('iw-worker').value=USER||'';
@@ -2342,6 +2349,8 @@ function moldSuggest(){
   _mqHits = !q ? QAPJ.slice(0,30)
     : QAPJ.filter(x=>((x.mold_no||'')+' '+(x.item_no||'')).toLowerCase().includes(q)).slice(0,50);
   _mqIdx=-1;
+  const wrap=document.getElementById('inspq').closest('.mold-pick');
+  if(wrap)wrap.classList.toggle('has-val',!!q);
   if(!_mqHits.length){ box.innerHTML='<div class="none">일치하는 금형·품번이 없습니다</div>'; box.classList.add('on'); return; }
   const hl=t=>{ t=esc(t||''); if(!q)return t;
     const i=t.toLowerCase().indexOf(q); return i<0?t:t.slice(0,i)+'<b>'+t.slice(i,i+q.length)+'</b>'+t.slice(i+q.length); };
@@ -2354,7 +2363,9 @@ function moldPick(i){
   const x=_mqHits[i]; if(!x)return;
   const sel=document.getElementById('inspsel');
   sel.value=String(x.id);
-  document.getElementById('inspq').value=x.mold_no+(x.item_no?' — '+x.item_no:'');
+  const q=document.getElementById('inspq');
+  q.value=x.mold_no+(x.item_no?' — '+x.item_no:'');
+  const w=q.closest('.mold-pick'); if(w)w.classList.add('has-val');
   moldClose();
   onInspProj();
 }
@@ -2379,6 +2390,14 @@ function syncMoldQuery(){
   if(!sel||!q)return;
   const x=QAPJ.find(v=>String(v.id)===String(sel.value));
   q.value=x?(x.mold_no+(x.item_no?' — '+x.item_no:'')):'';
+  const w=q.closest('.mold-pick'); if(w)w.classList.toggle('has-val',!!q.value);
+}
+function moldClear(){
+  const q=document.getElementById('inspq'), sel=document.getElementById('inspsel');
+  if(q){q.value='';const w=q.closest('.mold-pick');if(w)w.classList.remove('has-val');q.focus()}
+  if(sel)sel.value='';
+  moldSuggest();
+  onInspProj();
 }
 async function onInspProj(){
   syncMoldQuery();
